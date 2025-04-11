@@ -1,0 +1,52 @@
+modules = ["java"]
+
+[nix]
+channel = "stable-24_05"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "JavaFX Bookshop Application"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "java-app"
+
+[[workflows.workflow]]
+name = "JavaFX Bookshop Application"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd src && javac -d ../bin -cp \".:../lib/*\" main/java/com/bookshop/Main.java && cd .. && java -cp \"bin:lib/*\" com.bookshop.Main"
+waitForPort = 5000
+
+[[workflows.workflow]]
+name = "java-app"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "java -cp .:./lib/* com.bookshop.Main"
+
+[deployment]
+run = ["sh", "-c", "cd src && javac -d ../bin -cp \".:../lib/*\" main/java/com/bookshop/Main.java && cd .. && java -cp \"bin:lib/*\" com.bookshop.Main"]

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1000.0" styleClass="main-container" stylesheets="@../styles/styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bookshop.controllers.CustomerDashboardController">
+   <top>
+      <VBox BorderPane.alignment="CENTER">
+         <children>
+            <HBox alignment="CENTER_LEFT" spacing="20.0">
+               <padding>
+                  <Insets bottom="10.0" left="20.0" right="20.0" top="20.0" />
+               </padding>
+               <children>
+                  <Label styleClass="header-label" text="Online Bookshop">
+                     <font>
+                        <Font name="System Bold" size="24.0" />
+                     </font>
+                  </Label>
+                  <Separator orientation="VERTICAL" />
+                  <Label fx:id="welcomeLabel" text="Welcome, User">
+                     <font>
+                        <Font size="16.0" />
+                     </font>
+                  </Label>
+                  <HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+                     <children>
+                        <Label text="Cart:" />
+                        <Label fx:id="cartItemCountLabel" styleClass="cart-count" text="0 items" />
+                        <Button fx:id="viewCartButton" mnemonicParsing="false" onAction="#handleViewCartButton" styleClass="secondary-button" text="View Cart" />
+                        <Button fx:id="viewOrdersButton" mnemonicParsing="false" onAction="#handleViewOrdersButton" styleClass="secondary-button" text="My Orders" />
+                        <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#handleLogoutButton" styleClass="warning-button" text="Logout" />
+                     </children>
+                  </HBox>
+               </children>
+            </HBox>
+            <Separator />
+         </children>
+      </VBox>
+   </top>
+   <center>
+      <VBox spacing="10.0" BorderPane.alignment="CENTER">
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding>
+         <children>
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label text="Search Books:" />
+                  <TextField fx:id="searchField" promptText="Search by title or author" HBox.hgrow="ALWAYS" />
+                  <Button mnemonicParsing="false" onAction="#handleSearchButton" text="Search" />
+                  <Separator orientation="VERTICAL" />
+                  <Label text="Category:" />
+                  <ComboBox fx:id="categoryComboBox" prefWidth="150.0" promptText="Select Category" />
+                  <Separator orientation="VERTICAL" />
+                  <Label text="Sort by:" />
+                  <ComboBox fx:id="sortByComboBox" prefWidth="150.0" promptText="Sort by" />
+               </children>
+            </HBox>
+            <TableView fx:id="booksTableView" onMouseClicked="#handleBookTableClick" VBox.vgrow="ALWAYS">
+              <columns>
+                <TableColumn fx:id="titleColumn" prefWidth="250.0" text="Title" />
+                <TableColumn fx:id="authorColumn" prefWidth="150.0" text="Author" />
+                <TableColumn fx:id="publisherColumn" prefWidth="150.0" text="Publisher" />
+                <TableColumn fx:id="priceColumn" prefWidth="100.0" text="Price" />
+                <TableColumn fx:id="categoryColumn" prefWidth="150.0" text="Category" />
+                <TableColumn fx:id="ratingColumn" prefWidth="100.0" text="Rating" />
+              </columns>
+            </TableView>
+            <HBox alignment="CENTER_RIGHT" spacing="10.0">
+               <children>
+                  <Label text="Double-click on a book to view details" />
+                  <Separator orientation="VERTICAL" />
+                  <Button mnemonicParsing="false" onAction="#handleAddToCartButton" styleClass="primary-button" text="Add to Cart" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </center>
+</BorderPane>
