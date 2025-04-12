@@ -29,6 +29,7 @@ com/bookshop/strategies/discount/RegularLoyaltyDiscount.class
 com/bookshop/controllers/AdminDashboardController.class
 com/bookshop/services/AuthService.class
 com/bookshop/services/CreditCardPayment.class
+com/bookshop/services/OrderService.class
 com/bookshop/controllers/EditBookController.class
 com/bookshop/models/User$Role.class
 com/bookshop/services/RegularMemberDiscount.class
@@ -41,5 +42,6 @@ com/bookshop/observers/CartObserver.class
 com/bookshop/services/CartService.class
 com/bookshop/models/Review.class
 com/bookshop/services/UserService.class
+com/bookshop/HeadlessMain.class
 com/bookshop/services/DiscountStrategy.class
 com/bookshop/Main.class

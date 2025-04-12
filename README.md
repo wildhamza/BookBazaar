@@ -8,11 +8,30 @@
   - **Administrators**: Manage inventory, view customer orders, moderate reviews
 - **Technologies used**: 
   - Java 17
-  - JavaFX
-  - FXML
-  - PostgreSQL
-  - BCrypt for password hashing
-  - Maven
+  - JavaFX and FXML (for UI construction)
+  - PostgreSQL (for persistent data storage)
+  - BCrypt (for secure password hashing)
+  - Maven (for dependency management and build automation)
+  - JUnit 5 and Mockito (for testing)
+
+### 1.1 Theoretical Background
+
+The application employs several key software engineering principles and paradigms:
+
+#### Object-Oriented Programming (OOP)
+The entire application is built on OOP principles, leveraging:
+- **Encapsulation**: Data and methods are encapsulated within classes with appropriate access modifiers.
+- **Inheritance**: Utilized for extending functionality in related classes.
+- **Polymorphism**: Employed through interfaces and method overriding, particularly in the discount and payment system.
+- **Abstraction**: Complex implementations are abstracted behind clean interfaces.
+
+#### Model-View-Controller (MVC) Architecture
+MVC separates the application into three interconnected components:
+- **Model**: Represents the data and business logic (Book, User, Order classes).
+- **View**: The user interface that displays data (FXML files, JavaFX components).
+- **Controller**: Mediates between Model and View (Controller classes that respond to user input).
+
+This separation of concerns allows for better code organization, maintenance, and testing by decoupling the business logic from the presentation layer.
 
 ## 2. Architecture
 
@@ -682,17 +701,34 @@ stop
 
 ## 6. Database Design
 
+### Theoretical Foundation of the Database Schema
+
+The database design follows the **Entity-Relationship (ER) model**, a conceptual representation of data that visually illustrates the relationships between entities in a system. Our schema implements several database design principles:
+
+1. **Normalization** - The database schema is normalized (primarily to 3NF) to:
+   - Eliminate data redundancy
+   - Reduce data anomalies
+   - Ensure data integrity
+
+2. **Referential Integrity** - Enforced through foreign key constraints that ensure relationships between tables remain consistent. For example, the `book_id` in `reviews` must reference a valid id in the `books` table.
+
+3. **ACID Properties** - PostgreSQL's transaction system ensures our operations are:
+   - **Atomic**: Transactions are all-or-nothing operations
+   - **Consistent**: Data meets all validation rules
+   - **Isolated**: Transactions don't interfere with each other
+   - **Durable**: Completed transactions persist even during system failures
+
 ### Tables Schema
 
 #### users
 | Column | Type | Description |
 |--------|------|-------------|
-| id | INTEGER | Primary key |
+| id | SERIAL | Primary key |
 | username | VARCHAR(50) | Unique username |
 | password_hash | VARCHAR(255) | BCrypt hashed password |
 | full_name | VARCHAR(100) | User's full name |
 | email | VARCHAR(100) | User's email address |
-| address | VARCHAR(255) | Shipping address |
+| address | TEXT | Shipping address |
 | phone_number | VARCHAR(20) | Contact phone number |
 | role | VARCHAR(20) | User role (ADMIN or CUSTOMER) |
 | order_count | INTEGER | Number of orders placed (for loyalty) |
@@ -700,8 +736,8 @@ stop
 #### books
 | Column | Type | Description |
 |--------|------|-------------|
-| id | INTEGER | Primary key |
-| title | VARCHAR(100) | Book title |
+| id | SERIAL | Primary key |
+| title | VARCHAR(255) | Book title |
 | author | VARCHAR(100) | Book author |
 | isbn | VARCHAR(20) | ISBN number |
 | publisher | VARCHAR(100) | Publisher name |
@@ -709,22 +745,22 @@ stop
 | description | TEXT | Book description |
 | price | DECIMAL(10,2) | Book price |
 | stock_quantity | INTEGER | Available quantity |
-| image_url | VARCHAR(255) | Book cover image URL |
+| image_url | TEXT | Book cover image URL |
 
 #### reviews
 | Column | Type | Description |
 |--------|------|-------------|
-| id | INTEGER | Primary key |
+| id | SERIAL | Primary key |
 | book_id | INTEGER | Foreign key to books |
 | user_id | INTEGER | Foreign key to users |
 | rating | INTEGER | Rating (1-5) |
 | comment | TEXT | Review text |
-| date_created | TIMESTAMP | Review submission date |
+| review_date | TIMESTAMP | Review submission date |
 
 #### cart_items
 | Column | Type | Description |
 |--------|------|-------------|
-| id | INTEGER | Primary key |
+| id | SERIAL | Primary key |
 | user_id | INTEGER | Foreign key to users |
 | book_id | INTEGER | Foreign key to books |
 | quantity | INTEGER | Quantity in cart |
@@ -732,17 +768,19 @@ stop
 #### orders
 | Column | Type | Description |
 |--------|------|-------------|
-| id | INTEGER | Primary key |
+| id | SERIAL | Primary key |
 | user_id | INTEGER | Foreign key to users |
 | order_date | TIMESTAMP | Date of order |
 | total_amount | DECIMAL(10,2) | Total order amount |
 | status | VARCHAR(20) | Order status |
 | payment_method | VARCHAR(50) | Payment method used |
+| shipping_address | TEXT | Delivery address |
+| discount_applied | DECIMAL(5,2) | Discount amount applied |
 
 #### order_items
 | Column | Type | Description |
 |--------|------|-------------|
-| id | INTEGER | Primary key |
+| id | SERIAL | Primary key |
 | order_id | INTEGER | Foreign key to orders |
 | book_id | INTEGER | Foreign key to books |
 | quantity | INTEGER | Quantity ordered |
@@ -760,14 +798,35 @@ stop
 
 ## 7. Testing
 
-Unit testing is implemented using JUnit 5 to ensure the correctness of core functionalities.
+### Theoretical Approach to Testing
+
+The application employs a multi-layered testing strategy based on software testing principles:
+
+#### Test-Driven Development (TDD)
+Our development process follows TDD principles:
+1. **Write failing tests**: Create tests that define expected functionality
+2. **Write code to pass tests**: Implement the minimum code needed to pass tests
+3. **Refactor**: Improve code while maintaining test compliance
+
+#### Testing Pyramid
+The testing strategy follows the testing pyramid concept:
+- **Unit Tests**: Numerous small, fast tests at the lowest level (classes, methods)
+- **Integration Tests**: Testing interactions between components
+- **System Tests**: Testing the application as a whole
+
+#### Mocking
+The application uses Mockito to create mock objects that simulate dependencies, allowing for:
+- Isolation of the component under test
+- Testing of components with external dependencies
+- Verification of interaction between components
 
 ### Areas Tested
 
-- **Model Classes**: Validating business logic within models
-- **Service Layer**: Testing service methods with mock repositories
-- **Data Access**: Verifying database operations with test database
-- **Discount Logic**: Confirming discount calculations are accurate
+- **Model Classes**: Validating business logic within domain models (Book, User, Order)
+- **Service Layer**: Testing business logic with mocked repositories
+- **Data Access**: Verifying database operations with test database connections
+- **Discount Logic**: Confirming discount calculations across different user loyalty tiers
+- **Security Functions**: Testing password hashing and authorization logic
 
 ### Sample Test Code
 
@@ -853,9 +912,32 @@ public void testCalculateDiscountedPrice() {
 
 ## 8. Security
 
-### Password Hashing
+### Theoretical Security Principles
 
-The application uses BCrypt for secure password hashing and verification:
+The application implements several key information security principles and best practices:
+
+#### CIA Triad
+The fundamental principles of information security:
+- **Confidentiality**: Ensuring sensitive data is accessible only to authorized individuals
+- **Integrity**: Maintaining data accuracy and reliability throughout its lifecycle
+- **Availability**: Ensuring information is available when needed by authorized users
+
+#### Defense in Depth
+The application employs multiple layers of security controls:
+- **Database Layer**: Parameterized queries to prevent SQL injection
+- **Service Layer**: Authorization checks before performing sensitive operations
+- **Presentation Layer**: Input validation to prevent XSS and other injection attacks
+
+#### Principle of Least Privilege
+Users are granted the minimum levels of access needed to perform their functions:
+- Admin users: Full access to manage the system
+- Customer users: Limited access to personal data and purchasing functions
+- Guest users: Read-only access to public information
+
+### Password Security and Authentication
+
+#### Password Hashing with BCrypt
+The application uses BCrypt for secure credential management:
 
 ```java
 // Hashing a password during user registration
@@ -865,18 +947,26 @@ String hashedPassword = BCrypt.hashpw(plainPassword, BCrypt.gensalt());
 boolean passwordMatches = BCrypt.checkpw(inputPassword, storedHashedPassword);
 ```
 
-Benefits of BCrypt include:
-- Built-in salt generation
-- Adaptive complexity to resist brute-force attacks
-- Industry-standard security
+BCrypt implements multiple security features:
+- **Salting**: Automatically generates and stores unique salts with each hash
+- **Key Stretching**: Configurable work factor to slow down brute-force attacks
+- **Adaptive Complexity**: Can be adjusted as computing power increases
 
-### Role-Based Access Control
+#### Secure Session Management
+Sessions are managed securely through the SessionManager singleton:
+- Creation upon successful authentication
+- Timeout for inactive sessions
+- Immediate invalidation upon logout
 
-Access controls are implemented throughout the application:
+### Role-Based Access Control (RBAC)
 
-1. **UI Level**: Different views and controls are shown based on user role
-2. **Controller Level**: Methods validate user permissions before executing actions
-3. **Service Level**: Operations verify user authorization before processing
+RBAC is implemented across multiple application layers:
+
+#### UI Layer Security
+Different interface components are displayed based on user role:
+- Admin users see inventory management and user administration controls
+- Customers see shopping cart and order history
+- All access control is enforced server-side to prevent manipulation
 
 ```java
 // Example of role-based access control in a controller

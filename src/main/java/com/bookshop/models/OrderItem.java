@@ -3,7 +3,7 @@ package com.bookshop.models;
 import java.math.BigDecimal;
 
 /**
- * Model class representing an item in an order.
+ * Model class representing an item within an order.
  */
 public class OrderItem {
     
@@ -12,8 +12,9 @@ public class OrderItem {
     private int bookId;
     private int quantity;
     private BigDecimal price;
+    private Book book; // For convenience in UI display
     
-    // Additional fields for convenience (not stored in order_items table)
+    // Additional fields for UI display
     private String bookTitle;
     private String bookAuthor;
     
@@ -21,31 +22,27 @@ public class OrderItem {
      * Default constructor.
      */
     public OrderItem() {
+        this.quantity = 1;
+        this.price = BigDecimal.ZERO;
     }
     
     /**
-     * Constructor with all fields.
+     * Constructor with basic order item information.
      * 
-     * @param id The order item ID
      * @param orderId The order ID
      * @param bookId The book ID
      * @param quantity The quantity
-     * @param price The price
-     * @param bookTitle The book title
-     * @param bookAuthor The book author
+     * @param price The price at time of order
      */
-    public OrderItem(int id, int orderId, int bookId, int quantity, BigDecimal price, String bookTitle, String bookAuthor) {
-        this.id = id;
+    public OrderItem(int orderId, int bookId, int quantity, BigDecimal price) {
         this.orderId = orderId;
         this.bookId = bookId;
         this.quantity = quantity;
         this.price = price;
-        this.bookTitle = bookTitle;
-        this.bookAuthor = bookAuthor;
     }
     
     /**
-     * Gets the order item ID.
+     * Get the order item ID.
      * 
      * @return The order item ID
      */
@@ -54,7 +51,7 @@ public class OrderItem {
     }
     
     /**
-     * Sets the order item ID.
+     * Set the order item ID.
      * 
      * @param id The order item ID
      */
@@ -63,7 +60,7 @@ public class OrderItem {
     }
     
     /**
-     * Gets the order ID.
+     * Get the order ID.
      * 
      * @return The order ID
      */
@@ -72,7 +69,7 @@ public class OrderItem {
     }
     
     /**
-     * Sets the order ID.
+     * Set the order ID.
      * 
      * @param orderId The order ID
      */
@@ -81,7 +78,7 @@ public class OrderItem {
     }
     
     /**
-     * Gets the book ID.
+     * Get the book ID.
      * 
      * @return The book ID
      */
@@ -90,7 +87,7 @@ public class OrderItem {
     }
     
     /**
-     * Sets the book ID.
+     * Set the book ID.
      * 
      * @param bookId The book ID
      */
@@ -99,7 +96,7 @@ public class OrderItem {
     }
     
     /**
-     * Gets the quantity.
+     * Get the quantity.
      * 
      * @return The quantity
      */
@@ -108,7 +105,7 @@ public class OrderItem {
     }
     
     /**
-     * Sets the quantity.
+     * Set the quantity.
      * 
      * @param quantity The quantity
      */
@@ -117,7 +114,7 @@ public class OrderItem {
     }
     
     /**
-     * Gets the price.
+     * Get the price.
      * 
      * @return The price
      */
@@ -126,7 +123,7 @@ public class OrderItem {
     }
     
     /**
-     * Sets the price.
+     * Set the price.
      * 
      * @param price The price
      */
@@ -135,16 +132,46 @@ public class OrderItem {
     }
     
     /**
-     * Gets the book title.
+     * Get the book object.
+     * 
+     * @return The book
+     */
+    public Book getBook() {
+        return book;
+    }
+    
+    /**
+     * Set the book object.
+     * 
+     * @param book The book
+     */
+    public void setBook(Book book) {
+        this.book = book;
+    }
+    
+    /**
+     * Calculate the subtotal for this order item.
+     * 
+     * @return The subtotal
+     */
+    public BigDecimal getSubtotal() {
+        return price.multiply(new BigDecimal(quantity));
+    }
+    
+    /**
+     * Get the book title.
      * 
      * @return The book title
      */
     public String getBookTitle() {
+        if (book != null) {
+            return book.getTitle();
+        }
         return bookTitle;
     }
     
     /**
-     * Sets the book title.
+     * Set the book title for display purposes.
      * 
      * @param bookTitle The book title
      */
@@ -153,34 +180,23 @@ public class OrderItem {
     }
     
     /**
-     * Gets the book author.
+     * Get the book author.
      * 
      * @return The book author
      */
     public String getBookAuthor() {
+        if (book != null) {
+            return book.getAuthor();
+        }
         return bookAuthor;
     }
     
     /**
-     * Sets the book author.
+     * Set the book author for display purposes.
      * 
      * @param bookAuthor The book author
      */
     public void setBookAuthor(String bookAuthor) {
         this.bookAuthor = bookAuthor;
-    }
-    
-    /**
-     * Gets the subtotal for this order item.
-     * 
-     * @return The subtotal
-     */
-    public BigDecimal getSubtotal() {
-        return price.multiply(new BigDecimal(quantity));
-    }
-    
-    @Override
-    public String toString() {
-        return bookTitle + " (" + quantity + " @ $" + price + ")";
     }
 }

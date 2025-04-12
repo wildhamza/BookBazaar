@@ -7,7 +7,10 @@ import java.util.Map;
 
 /**
  * Singleton class to manage database connections.
+ * Note: This class is deprecated in favor of com.bookshop.utils.DatabaseConnection.
+ * It is kept for backward compatibility with any existing code.
  */
+@Deprecated
 public class DatabaseConnection {
     
     private static DatabaseConnection instance;
@@ -25,14 +28,21 @@ public class DatabaseConnection {
         // Load database configuration from environment variables
         Map<String, String> env = System.getenv();
         
-        this.url = env.getOrDefault("DATABASE_URL", "jdbc:postgresql://localhost:5432/bookshop");
+        // Default to PostgreSQL configuration
+        String dbHost = env.getOrDefault("PGHOST", "localhost");
+        String dbPort = env.getOrDefault("PGPORT", "5432");
+        String dbName = env.getOrDefault("PGDATABASE", "bookshop");
+        
+        this.url = env.getOrDefault("DATABASE_URL", "jdbc:postgresql://" + dbHost + ":" + dbPort + "/" + dbName);
         this.user = env.getOrDefault("PGUSER", "postgres");
         this.password = env.getOrDefault("PGPASSWORD", "password");
         
-        // Extract proper JDBC URL if using the full Postgres URL format
+        // Extract proper JDBC URL if using the PostgreSQL URL format
         if (this.url.startsWith("postgres://")) {
             this.url = this.url.replace("postgres://", "jdbc:postgresql://");
         }
+        
+        System.out.println("Note: Using deprecated DatabaseConnection class. Consider migrating to com.bookshop.utils.DatabaseConnection");
     }
     
     /**
@@ -56,7 +66,7 @@ public class DatabaseConnection {
     public Connection getConnection() throws SQLException {
         if (connection == null || connection.isClosed()) {
             try {
-                // Load the JDBC driver
+                // Load the PostgreSQL JDBC driver
                 Class.forName("org.postgresql.Driver");
                 
                 // Create the connection
@@ -64,7 +74,7 @@ public class DatabaseConnection {
                 
                 // Use connection.setAutoCommit(false) if manual transaction management is needed
                 
-                System.out.println("Database connection established");
+                System.out.println("PostgreSQL database connection established");
             } catch (ClassNotFoundException e) {
                 throw new SQLException("PostgreSQL JDBC driver not found", e);
             }
@@ -79,9 +89,9 @@ public class DatabaseConnection {
         if (connection != null) {
             try {
                 connection.close();
-                System.out.println("Database connection closed");
+                System.out.println("PostgreSQL database connection closed");
             } catch (SQLException e) {
-                System.err.println("Error closing database connection: " + e.getMessage());
+                System.err.println("Error closing PostgreSQL database connection: " + e.getMessage());
             } finally {
                 connection = null;
             }

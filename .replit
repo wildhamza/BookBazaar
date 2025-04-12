@@ -31,8 +31,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "mvn javafx:run"
-waitForPort = 5000
+args = "mvn clean compile exec:java -Dexec.mainClass=\"com.bookshop.HeadlessMain\""
 
 [[workflows.workflow]]
 name = "Bookshop Console App"
