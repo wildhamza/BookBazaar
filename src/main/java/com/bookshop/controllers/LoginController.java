@@ -88,6 +88,10 @@ public class LoginController {
         try {
             // Load the registration view
             Parent root = FXMLLoader.load(getClass().getResource("/views/register.fxml"));
+            // If for some reason the resource can't be found in /views/, try the /fxml/ directory
+            if (root == null) {
+                root = FXMLLoader.load(getClass().getResource("/fxml/register.fxml"));
+            }
             Scene scene = new Scene(root);
             
             Stage stage = (Stage) usernameField.getScene().getWindow();
@@ -106,6 +110,10 @@ public class LoginController {
         try {
             // Load the admin dashboard view
             Parent root = FXMLLoader.load(getClass().getResource("/views/admin_dashboard.fxml"));
+            // If for some reason the resource can't be found in /views/, try the /fxml/ directory
+            if (root == null) {
+                root = FXMLLoader.load(getClass().getResource("/fxml/admin_dashboard.fxml"));
+            }
             Scene scene = new Scene(root);
             
             Stage stage = (Stage) usernameField.getScene().getWindow();

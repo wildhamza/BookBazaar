@@ -16,8 +16,8 @@
 /home/runner/workspace/src/main/java/com/bookshop/services/PremiumMemberDiscount.java
 /home/runner/workspace/src/main/java/com/bookshop/models/User.java
 /home/runner/workspace/src/main/java/com/bookshop/models/Book.java
-/home/runner/workspace/src/main/java/com/bookshop/services/BookService.java
 /home/runner/workspace/src/main/java/com/bookshop/services/ReviewService.java
+/home/runner/workspace/src/main/java/com/bookshop/services/BookService.java
 /home/runner/workspace/src/main/java/com/bookshop/services/CreditCardPayment.java
 /home/runner/workspace/src/main/java/com/bookshop/services/NoDiscount.java
 /home/runner/workspace/src/main/java/com/bookshop/controllers/BookDetailsController.java
@@ -28,6 +28,7 @@
 /home/runner/workspace/src/main/java/com/bookshop/utils/ViewNavigator.java
 /home/runner/workspace/src/main/java/com/bookshop/utils/SessionManager.java
 /home/runner/workspace/src/main/java/com/bookshop/utils/PasswordHasher.java
+/home/runner/workspace/src/main/java/com/bookshop/ConsoleMain.java
 /home/runner/workspace/src/main/java/com/bookshop/models/Order.java
 /home/runner/workspace/src/main/java/com/bookshop/services/CartService.java
 /home/runner/workspace/src/main/java/com/bookshop/services/UserService.java

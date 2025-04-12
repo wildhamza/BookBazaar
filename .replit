@@ -17,7 +17,7 @@ args = "JavaFX Bookshop Application"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "java-app"
+args = "Bookshop Console App"
 
 [[workflows.workflow]]
 name = "JavaFX Bookshop Application"
@@ -31,11 +31,11 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "mvn clean javafx:run"
+args = "mvn javafx:run"
 waitForPort = 5000
 
 [[workflows.workflow]]
-name = "java-app"
+name = "Bookshop Console App"
 author = "agent"
 
 [workflows.workflow.metadata]
@@ -46,7 +46,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "java -cp .:./lib/* com.bookshop.Main"
+args = "mvn clean compile exec:java -Dexec.mainClass=\"com.bookshop.ConsoleMain\""
 
 [deployment]
 run = ["sh", "-c", "mvn clean javafx:run"]

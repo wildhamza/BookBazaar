@@ -4,7 +4,7 @@ import com.bookshop.models.Book;
 import com.bookshop.models.User;
 
 /**
- * Utility class for managing the current user session.
+ * Singleton class to manage the current user session.
  * Implements the Singleton design pattern.
  */
 public class SessionManager {
@@ -12,17 +12,16 @@ public class SessionManager {
     private static SessionManager instance;
     private User currentUser;
     private Book currentBook;
-    private User selectedCustomer; // For editing/viewing book details
     
     /**
-     * Private constructor for Singleton pattern.
+     * Private constructor to prevent direct instantiation.
      */
     private SessionManager() {
-        // Private constructor to prevent instantiation
+        // Private constructor
     }
     
     /**
-     * Gets the singleton instance of SessionManager.
+     * Get the singleton instance.
      * 
      * @return The singleton instance
      */
@@ -34,7 +33,7 @@ public class SessionManager {
     }
     
     /**
-     * Gets the current user.
+     * Get the current user.
      * 
      * @return The current user, or null if no user is logged in
      */
@@ -43,7 +42,7 @@ public class SessionManager {
     }
     
     /**
-     * Sets the current user.
+     * Set the current user.
      * 
      * @param user The user to set as current
      */
@@ -52,16 +51,16 @@ public class SessionManager {
     }
     
     /**
-     * Gets the current book (for edit/view).
+     * Get the current book (for editing or viewing details).
      * 
-     * @return The current book, or null if none is set
+     * @return The current book
      */
     public Book getCurrentBook() {
         return currentBook;
     }
     
     /**
-     * Sets the current book (for edit/view).
+     * Set the current book (for editing or viewing details).
      * 
      * @param book The book to set as current
      */
@@ -70,14 +69,29 @@ public class SessionManager {
     }
     
     /**
-     * Clears the current book.
+     * Alias for getCurrentBook.
      */
-    public void clearCurrentBook() {
-        this.currentBook = null;
+    public Book getSelectedBook() {
+        return currentBook;
     }
     
     /**
-     * Checks if a user is logged in.
+     * Clear the current session.
+     */
+    public void clearSession() {
+        currentUser = null;
+        currentBook = null;
+    }
+    
+    /**
+     * Logout the current user.
+     */
+    public void logout() {
+        clearSession();
+    }
+    
+    /**
+     * Check if a user is logged in.
      * 
      * @return true if a user is logged in, false otherwise
      */
@@ -86,47 +100,11 @@ public class SessionManager {
     }
     
     /**
-     * Checks if the current user is an admin.
+     * Check if the current user is an admin.
      * 
      * @return true if the current user is an admin, false otherwise
      */
     public boolean isAdmin() {
-        return isLoggedIn() && currentUser.isAdmin();
-    }
-    
-    /**
-     * Gets the selected customer (for admin operations).
-     * 
-     * @return The selected customer, or null if none is set
-     */
-    public User getSelectedCustomer() {
-        return selectedCustomer;
-    }
-    
-    /**
-     * Sets the selected customer (for admin operations).
-     * 
-     * @param customer The customer to set as selected
-     */
-    public void setSelectedCustomer(User customer) {
-        this.selectedCustomer = customer;
-    }
-    
-    /**
-     * Alias for getCurrentBook for backward compatibility.
-     * 
-     * @return The current book
-     */
-    public Book getSelectedBook() {
-        return currentBook;
-    }
-    
-    /**
-     * Logs out the current user.
-     */
-    public void logout() {
-        this.currentUser = null;
-        this.currentBook = null;
-        this.selectedCustomer = null;
+        return isLoggedIn() && "admin".equals(currentUser.getRole());
     }
 }

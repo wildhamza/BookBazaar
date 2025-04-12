@@ -11,6 +11,7 @@ com/bookshop/services/ReviewService.class
 com/bookshop/controllers/LoginController.class
 com/bookshop/utils/SessionManager.class
 com/bookshop/controllers/ShoppingCartController$1.class
+com/bookshop/ConsoleMain.class
 com/bookshop/db/DatabaseConnection.class
 com/bookshop/utils/DatabaseConnection.class
 com/bookshop/models/Book.class

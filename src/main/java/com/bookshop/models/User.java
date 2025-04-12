@@ -1,148 +1,171 @@
 package com.bookshop.models;
 
 /**
- * Model class representing a user in the system.
+ * Model class for users.
  */
 public class User {
     
-    // User roles
-    public enum Role {
-        CUSTOMER,
-        ADMIN
+    /**
+     * User roles.
+     */
+    public static class Role {
+        public static final String ADMIN = "admin";
+        public static final String CUSTOMER = "customer";
     }
     
     private int id;
     private String username;
-    private String passwordHash;
+    private String password;
+    private String passwordHash; // For storing hashed password
+    private String email;
     private String firstName;
     private String lastName;
-    private String email;
-    private String address;
+    private String fullName; // Computed field
     private String phoneNumber;
-    private boolean isAdmin;
-    private int orderCount;  // Used for loyalty program
-    private String loyaltyStatus;  // "Standard", "Regular", "Premium"
-    private Role role;
+    private String address;
+    private String role; // "admin" or "customer"
+    private int orderCount; // Used for discount eligibility
     
     /**
      * Default constructor.
      */
     public User() {
-        this.loyaltyStatus = "Standard"; // Default loyalty status
-        this.role = Role.CUSTOMER; // Default role
+        // Default constructor
     }
     
     /**
-     * Constructor with all fields.
+     * Parameterized constructor.
+     * 
+     * @param id The user ID
+     * @param username The username
+     * @param password The hashed password
+     * @param email The email address
+     * @param firstName The first name
+     * @param lastName The last name
+     * @param role The role ("admin" or "customer")
      */
-    public User(int id, String username, String passwordHash, String firstName, String lastName, 
-                String email, String address, String phoneNumber, boolean isAdmin, int orderCount, Role role) {
+    public User(int id, String username, String password, String email, 
+            String firstName, String lastName, String role) {
         this.id = id;
         this.username = username;
-        this.passwordHash = passwordHash;
+        this.password = password;
+        this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.email = email;
-        this.address = address;
-        this.phoneNumber = phoneNumber;
-        this.isAdmin = isAdmin;
-        this.orderCount = orderCount;
         this.role = role;
-        updateLoyaltyStatus();
+        this.orderCount = 0;
     }
-
+    
     /**
-     * Gets the user ID.
+     * Get the user ID.
      * 
      * @return The user ID
      */
     public int getId() {
         return id;
     }
-
+    
     /**
-     * Sets the user ID.
+     * Set the user ID.
      * 
-     * @param id The user ID
+     * @param id The user ID to set
      */
     public void setId(int id) {
         this.id = id;
     }
-
+    
     /**
-     * Gets the username.
+     * Get the username.
      * 
      * @return The username
      */
     public String getUsername() {
         return username;
     }
-
+    
     /**
-     * Sets the username.
+     * Set the username.
      * 
-     * @param username The username
+     * @param username The username to set
      */
     public void setUsername(String username) {
         this.username = username;
     }
-
+    
     /**
-     * Gets the password hash.
+     * Get the password (hashed).
      * 
-     * @return The password hash
+     * @return The password
      */
-    public String getPasswordHash() {
-        return passwordHash;
+    public String getPassword() {
+        return password;
     }
-
+    
     /**
-     * Sets the password hash.
+     * Set the password (should be hashed).
      * 
-     * @param passwordHash The password hash
+     * @param password The password to set
      */
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
+    public void setPassword(String password) {
+        this.password = password;
     }
-
+    
     /**
-     * Gets the first name.
+     * Get the email address.
+     * 
+     * @return The email address
+     */
+    public String getEmail() {
+        return email;
+    }
+    
+    /**
+     * Set the email address.
+     * 
+     * @param email The email address to set
+     */
+    public void setEmail(String email) {
+        this.email = email;
+    }
+    
+    /**
+     * Get the first name.
      * 
      * @return The first name
      */
     public String getFirstName() {
         return firstName;
     }
-
+    
     /**
-     * Sets the first name.
+     * Set the first name.
      * 
-     * @param firstName The first name
+     * @param firstName The first name to set
      */
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
-
+    
     /**
-     * Gets the last name.
+     * Get the last name.
      * 
      * @return The last name
      */
     public String getLastName() {
         return lastName;
     }
-
+    
     /**
-     * Sets the last name.
+     * Set the last name.
      * 
-     * @param lastName The last name
+     * @param lastName The last name to set
      */
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
     
     /**
-     * Gets the full name (first name + last name).
+     * Get the full name (first name + last name).
      * 
      * @return The full name
      */
@@ -151,120 +174,34 @@ public class User {
     }
     
     /**
-     * Sets the full name by parsing it into first name and last name.
+     * Get the role.
      * 
-     * @param fullName The full name (format: "First Last")
+     * @return The role
      */
-    public void setFullName(String fullName) {
-        if (fullName == null || fullName.isEmpty()) {
-            this.firstName = "";
-            this.lastName = "";
-            return;
-        }
-        
-        String[] parts = fullName.trim().split("\\s+", 2);
-        this.firstName = parts[0];
-        this.lastName = parts.length > 1 ? parts[1] : "";
-    }
-
-    /**
-     * Gets the email.
-     * 
-     * @return The email
-     */
-    public String getEmail() {
-        return email;
-    }
-
-    /**
-     * Sets the email.
-     * 
-     * @param email The email
-     */
-    public void setEmail(String email) {
-        this.email = email;
-    }
-    
-    /**
-     * Gets the address.
-     * 
-     * @return The address
-     */
-    public String getAddress() {
-        return address;
-    }
-    
-    /**
-     * Sets the address.
-     * 
-     * @param address The address
-     */
-    public void setAddress(String address) {
-        this.address = address;
-    }
-    
-    /**
-     * Gets the phone number.
-     * 
-     * @return The phone number
-     */
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-    
-    /**
-     * Sets the phone number.
-     * 
-     * @param phoneNumber The phone number
-     */
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    /**
-     * Gets the user role.
-     * 
-     * @return The user role
-     */
-    public Role getRole() {
+    public String getRole() {
         return role;
     }
     
     /**
-     * Sets the user role.
+     * Set the role.
      * 
-     * @param role The user role
+     * @param role The role to set
      */
-    public void setRole(Role role) {
+    public void setRole(String role) {
         this.role = role;
-        this.isAdmin = (role == Role.ADMIN);
     }
-
+    
     /**
-     * Checks if the user is an admin.
+     * Check if the user is an admin.
      * 
      * @return true if the user is an admin, false otherwise
      */
     public boolean isAdmin() {
-        return isAdmin;
-    }
-
-    /**
-     * Sets whether the user is an admin.
-     * 
-     * @param isAdmin Whether the user is an admin
-     */
-    public void setAdmin(boolean isAdmin) {
-        this.isAdmin = isAdmin;
-        if (isAdmin) {
-            this.role = Role.ADMIN;
-        } else {
-            this.role = Role.CUSTOMER;
-        }
+        return "admin".equals(role);
     }
     
     /**
-     * Gets the order count.
+     * Get the order count.
      * 
      * @return The order count
      */
@@ -273,77 +210,122 @@ public class User {
     }
     
     /**
-     * Sets the order count.
+     * Set the order count.
      * 
-     * @param orderCount The order count
+     * @param orderCount The order count to set
      */
     public void setOrderCount(int orderCount) {
         this.orderCount = orderCount;
-        updateLoyaltyStatus();
     }
     
     /**
-     * Increments the order count by 1.
+     * Increment the order count.
      */
     public void incrementOrderCount() {
         this.orderCount++;
-        updateLoyaltyStatus();
     }
     
     /**
-     * Gets the loyalty status.
+     * Check if the user is eligible for regular member discount (5+ orders).
      * 
-     * @return The loyalty status
+     * @return true if the user is eligible, false otherwise
      */
-    public String getLoyaltyStatus() {
-        return loyaltyStatus;
-    }
-    
-    /**
-     * Checks if the user is a regular loyalty member (5+ orders).
-     * 
-     * @return true if the user is a regular loyalty member, false otherwise
-     */
-    public boolean isRegularLoyaltyMember() {
+    public boolean isRegularMember() {
         return orderCount >= 5;
     }
     
     /**
-     * Checks if the user is a premium loyalty member (10+ orders).
+     * Check if the user is eligible for premium member discount (10+ orders).
      * 
-     * @return true if the user is a premium loyalty member, false otherwise
+     * @return true if the user is eligible, false otherwise
      */
-    public boolean isPremiumLoyaltyMember() {
+    public boolean isPremiumMember() {
         return orderCount >= 10;
     }
     
     /**
-     * Alias for isPremiumLoyaltyMember to maintain compatibility.
-     * 
-     * @return true if the user is a premium member, false otherwise
+     * Alias for isPremiumMember()
      */
-    public boolean isPremiumMember() {
-        return isPremiumLoyaltyMember();
+    public boolean isPremiumLoyaltyMember() {
+        return isPremiumMember();
     }
     
     /**
-     * Updates the loyalty status based on the order count.
+     * Alias for isRegularMember()
      */
-    private void updateLoyaltyStatus() {
-        if (orderCount >= 10) {
-            loyaltyStatus = "Premium";
-        } else if (orderCount >= 5) {
-            loyaltyStatus = "Regular";
+    public boolean isRegularLoyaltyMember() {
+        return isRegularMember();
+    }
+    
+    /**
+     * Set the full name directly.
+     */
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+        
+        // Try to split the full name into first and last name
+        if (fullName != null && fullName.contains(" ")) {
+            String[] parts = fullName.split(" ", 2);
+            this.firstName = parts[0];
+            this.lastName = parts[1];
         } else {
-            loyaltyStatus = "Standard";
+            this.firstName = fullName;
+            this.lastName = "";
         }
     }
     
-    @Override
-    public String toString() {
-        return "User [id=" + id + ", username=" + username + ", firstName=" + firstName + ", lastName=" + lastName
-                + ", email=" + email + ", address=" + address + ", phoneNumber=" + phoneNumber 
-                + ", role=" + role + ", isAdmin=" + isAdmin + ", orderCount=" + orderCount 
-                + ", loyaltyStatus=" + loyaltyStatus + "]";
+    /**
+     * Get the user's loyalty status as a string.
+     */
+    public String getLoyaltyStatus() {
+        if (isPremiumLoyaltyMember()) {
+            return "Premium Member";
+        } else if (isRegularLoyaltyMember()) {
+            return "Regular Member";
+        } else {
+            return "Standard Customer";
+        }
+    }
+    
+    /**
+     * Get the password hash.
+     */
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+    
+    /**
+     * Set the password hash.
+     */
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+    
+    /**
+     * Get the phone number.
+     */
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+    
+    /**
+     * Set the phone number.
+     */
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+    
+    /**
+     * Get the address.
+     */
+    public String getAddress() {
+        return address;
+    }
+    
+    /**
+     * Set the address.
+     */
+    public void setAddress(String address) {
+        this.address = address;
     }
 }

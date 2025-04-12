@@ -3,7 +3,7 @@ package com.bookshop.models;
 import java.math.BigDecimal;
 
 /**
- * Model class representing an item in a user's shopping cart.
+ * Model class for cart items.
  */
 public class CartItem {
     
@@ -11,41 +11,57 @@ public class CartItem {
     private int userId;
     private int bookId;
     private int quantity;
-    
-    // Additional properties for convenience (not stored in the cart_items table)
-    private String bookTitle;
-    private String bookAuthor;
-    private BigDecimal bookPrice;
+    private String title;
+    private String author;
+    private BigDecimal price;
+    private Book book;
     
     /**
      * Default constructor.
      */
     public CartItem() {
+        // Default constructor
+        this.price = BigDecimal.ZERO;
     }
     
     /**
-     * Constructor with all fields.
+     * Constructor with all database fields.
      * 
      * @param id The cart item ID
      * @param userId The user ID
      * @param bookId The book ID
      * @param quantity The quantity
-     * @param bookTitle The book title
-     * @param bookAuthor The book author
-     * @param bookPrice The book price
+     * @param title The book title
+     * @param author The book author
+     * @param price The book price
      */
-    public CartItem(int id, int userId, int bookId, int quantity, String bookTitle, String bookAuthor, BigDecimal bookPrice) {
+    public CartItem(int id, int userId, int bookId, int quantity, String title, String author, BigDecimal price) {
         this.id = id;
         this.userId = userId;
         this.bookId = bookId;
         this.quantity = quantity;
-        this.bookTitle = bookTitle;
-        this.bookAuthor = bookAuthor;
-        this.bookPrice = bookPrice;
+        this.title = title;
+        this.author = author;
+        this.price = price;
     }
     
     /**
-     * Gets the cart item ID.
+     * Constructor with book object.
+     * 
+     * @param book The book
+     * @param quantity The quantity
+     */
+    public CartItem(Book book, int quantity) {
+        this.book = book;
+        this.bookId = book.getId();
+        this.quantity = quantity;
+        this.title = book.getTitle();
+        this.author = book.getAuthor();
+        this.price = book.getPrice();
+    }
+    
+    /**
+     * Get the cart item ID.
      * 
      * @return The cart item ID
      */
@@ -54,16 +70,16 @@ public class CartItem {
     }
     
     /**
-     * Sets the cart item ID.
+     * Set the cart item ID.
      * 
-     * @param id The cart item ID
+     * @param id The cart item ID to set
      */
     public void setId(int id) {
         this.id = id;
     }
     
     /**
-     * Gets the user ID.
+     * Get the user ID.
      * 
      * @return The user ID
      */
@@ -72,16 +88,16 @@ public class CartItem {
     }
     
     /**
-     * Sets the user ID.
+     * Set the user ID.
      * 
-     * @param userId The user ID
+     * @param userId The user ID to set
      */
     public void setUserId(int userId) {
         this.userId = userId;
     }
     
     /**
-     * Gets the book ID.
+     * Get the book ID.
      * 
      * @return The book ID
      */
@@ -90,16 +106,16 @@ public class CartItem {
     }
     
     /**
-     * Sets the book ID.
+     * Set the book ID.
      * 
-     * @param bookId The book ID
+     * @param bookId The book ID to set
      */
     public void setBookId(int bookId) {
         this.bookId = bookId;
     }
     
     /**
-     * Gets the quantity.
+     * Get the quantity.
      * 
      * @return The quantity
      */
@@ -108,79 +124,137 @@ public class CartItem {
     }
     
     /**
-     * Sets the quantity.
+     * Set the quantity.
      * 
-     * @param quantity The quantity
+     * @param quantity The quantity to set
      */
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
     
     /**
-     * Gets the book title.
+     * Get the book title.
      * 
      * @return The book title
      */
-    public String getBookTitle() {
-        return bookTitle;
+    public String getTitle() {
+        return title;
     }
     
     /**
-     * Sets the book title.
+     * Set the book title.
      * 
-     * @param bookTitle The book title
+     * @param title The book title to set
      */
-    public void setBookTitle(String bookTitle) {
-        this.bookTitle = bookTitle;
+    public void setTitle(String title) {
+        this.title = title;
     }
     
     /**
-     * Gets the book author.
+     * Get the book author.
      * 
      * @return The book author
      */
-    public String getBookAuthor() {
-        return bookAuthor;
+    public String getAuthor() {
+        return author;
     }
     
     /**
-     * Sets the book author.
+     * Set the book author.
      * 
-     * @param bookAuthor The book author
+     * @param author The book author to set
      */
-    public void setBookAuthor(String bookAuthor) {
-        this.bookAuthor = bookAuthor;
+    public void setAuthor(String author) {
+        this.author = author;
     }
     
     /**
-     * Gets the book price.
+     * Get the book price.
      * 
      * @return The book price
      */
-    public BigDecimal getBookPrice() {
-        return bookPrice;
+    public BigDecimal getPrice() {
+        return price;
     }
     
     /**
-     * Sets the book price.
+     * Set the book price.
      * 
-     * @param bookPrice The book price
+     * @param price The book price to set
      */
-    public void setBookPrice(BigDecimal bookPrice) {
-        this.bookPrice = bookPrice;
+    public void setPrice(BigDecimal price) {
+        this.price = price;
     }
     
     /**
-     * Gets the subtotal (price * quantity).
+     * Get the book.
+     * 
+     * @return The book
+     */
+    public Book getBook() {
+        return book;
+    }
+    
+    /**
+     * Set the book.
+     * 
+     * @param book The book to set
+     */
+    public void setBook(Book book) {
+        this.book = book;
+        if (book != null) {
+            this.bookId = book.getId();
+            this.title = book.getTitle();
+            this.author = book.getAuthor();
+            this.price = book.getPrice();
+        }
+    }
+    
+    /**
+     * Calculate the subtotal.
      * 
      * @return The subtotal
      */
     public BigDecimal getSubtotal() {
-        return bookPrice.multiply(new BigDecimal(quantity));
+        return price.multiply(new BigDecimal(quantity));
     }
     
-    @Override
-    public String toString() {
-        return bookTitle + " (" + quantity + " @ $" + bookPrice + ")";
+    /**
+     * Get a string representation of the subtotal.
+     * 
+     * @return The subtotal as a string
+     */
+    public String getSubtotalString() {
+        return "$" + getSubtotal().toString();
+    }
+    
+    /**
+     * Get the book title.
+     * Alias for getTitle().
+     * 
+     * @return The book title
+     */
+    public String getBookTitle() {
+        return title;
+    }
+    
+    /**
+     * Get the book author.
+     * Alias for getAuthor().
+     * 
+     * @return The book author
+     */
+    public String getBookAuthor() {
+        return author;
+    }
+    
+    /**
+     * Get the book price.
+     * Alias for getPrice().
+     * 
+     * @return The book price
+     */
+    public BigDecimal getBookPrice() {
+        return price;
     }
 }
