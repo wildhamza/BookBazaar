@@ -1,0 +1,108 @@
+Please generate a fully formatted, detailed technical report in Markdown (.md) format for a JavaFX Bookshop desktop application, covering everything listed below.
+
+📁 Output Format
+File type: README.md
+
+Sections: Use #, ##, ### headers
+
+Include all code snippets (Java + PlantUML) inside fenced blocks
+
+Include inline bullet points, tables (if applicable), and line breaks where appropriate
+
+Use clean, readable Markdown syntax
+
+📋 Report Structure
+markdown
+Copy
+Edit
+# JavaFX Bookshop Application
+
+## 1. Introduction
+- Purpose of the application
+- Target users: Admins and Customers
+- Technologies used: Java, JavaFX, FXML, MySQL/SQLite, JUnit
+
+## 2. Architecture
+- Explain MVC structure
+- Project folder layout
+- Design pattern layering: Model, Service, Controller, View, Repository
+
+## 3. Features
+- User login/registration
+- Book listing/search/sort
+- Role-based book detail view (with double-click)
+- Review system (add/view/delete based on role)
+- Cart & checkout flow
+- Discount/loyalty logic
+- Secure password hashing
+- Scene navigation
+- Admin dashboard (book & user management)
+
+## 4. Design Patterns Used
+### GoF Patterns
+- Singleton
+- Factory
+- Strategy
+- Observer (if implemented)
+- MVC
+
+### Non-Traditional Patterns
+- Repository
+- Service Layer
+- Scene Manager
+
+## 5. UML Diagrams
+
+### Class Diagram
+\```plantuml
+@startuml
+// (AI should generate class diagram PlantUML code)
+@enduml
+\```
+
+### Use Case Diagram
+\```plantuml
+@startuml
+// (AI should generate use case diagram)
+@enduml
+\```
+
+### Sequence Diagram – Purchase Flow
+\```plantuml
+@startuml
+// (AI should generate sequence diagram)
+@enduml
+\```
+
+### Activity Diagram – Role-Based Book Detail View
+\```plantuml
+@startuml
+// (AI should generate activity diagram)
+@enduml
+\```
+
+## 6. Database Design
+- List of tables: users, books, reviews, orders, order_items
+- Field types and relationships
+
+## 7. Testing
+- Unit tests (JUnit)
+- What was tested
+- Sample test code blocks
+
+## 8. Security
+- Password hashing implementation
+- Role-based access controls
+
+## 9. Conclusion
+- Summary
+- Improvements/future scope
+This should result in a fully detailed README.md project report, ready for academic or professional submission, with code, patterns, logic, and diagrams all integrated.
+
+
+
+
+
+
+
+
