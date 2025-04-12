@@ -17,8 +17,18 @@ public class UserService {
     
     private Connection conn;
     
+    /**
+     * Constructor that initializes the database connection.
+     * 
+     * @throws SQLException If a database error occurs
+     */
     public UserService() {
-        conn = DatabaseConnection.getInstance().getConnection();
+        try {
+            conn = DatabaseConnection.getInstance().getConnection();
+        } catch (SQLException e) {
+            System.err.println("Error connecting to database: " + e.getMessage());
+            throw new RuntimeException("Database connection failed", e);
+        }
     }
     
     /**

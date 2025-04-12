@@ -3,91 +3,42 @@ package com.bookshop.db;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 /**
- * Singleton pattern implementation for database connection.
- * Manages a single connection instance throughout the application.
+ * Singleton class to manage database connections.
  */
 public class DatabaseConnection {
+    
     private static DatabaseConnection instance;
     private Connection connection;
     
-    private static final String DEFAULT_URL = "jdbc:postgresql://localhost:5432/bookshop";
-    
-    // Private constructor to prevent instantiation
-    private DatabaseConnection() {
-        try {
-            String dbUrl = System.getenv("DATABASE_URL");
-            String dbUser = System.getenv("PGUSER");
-            String dbPassword = System.getenv("PGPASSWORD");
-            String dbHost = System.getenv("PGHOST");
-            String dbPort = System.getenv("PGPORT");
-            String dbName = System.getenv("PGDATABASE");
-            
-            // Use environment variables if available, otherwise use default
-            if (dbUrl == null && dbHost != null && dbPort != null && dbName != null) {
-                dbUrl = "jdbc:postgresql://" + dbHost + ":" + dbPort + "/" + dbName;
-            } else if (dbUrl == null) {
-                dbUrl = DEFAULT_URL;
-            }
-            
-            // Connect to database
-            if (dbUser != null && dbPassword != null) {
-                connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
-            } else {
-                connection = DriverManager.getConnection(dbUrl);
-            }
-            
-            System.out.println("Database connection established successfully");
-            
-            // Initialize database if needed
-            initializeDatabase();
-            
-        } catch (SQLException e) {
-            System.err.println("Database connection error: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
+    // Database configuration
+    private String url;
+    private String user;
+    private String password;
     
     /**
-     * Initialize database tables if they don't exist
+     * Private constructor to enforce Singleton pattern.
      */
-    private void initializeDatabase() {
-        try {
-            // Read SQL script from resources
-            InputStream is = getClass().getClassLoader().getResourceAsStream("db/init_database.sql");
-            if (is == null) {
-                System.err.println("Could not find init_database.sql");
-                return;
-            }
-            
-            String sql = new BufferedReader(
-                new InputStreamReader(is, StandardCharsets.UTF_8))
-                .lines()
-                .collect(Collectors.joining("\n"));
-            
-            // Execute SQL script
-            Statement stmt = connection.createStatement();
-            stmt.execute(sql);
-            stmt.close();
-            
-            System.out.println("Database initialized successfully");
-        } catch (SQLException e) {
-            System.err.println("Database initialization error: " + e.getMessage());
-            e.printStackTrace();
+    private DatabaseConnection() {
+        // Load database configuration from environment variables
+        Map<String, String> env = System.getenv();
+        
+        this.url = env.getOrDefault("DATABASE_URL", "jdbc:postgresql://localhost:5432/bookshop");
+        this.user = env.getOrDefault("PGUSER", "postgres");
+        this.password = env.getOrDefault("PGPASSWORD", "password");
+        
+        // Extract proper JDBC URL if using the full Postgres URL format
+        if (this.url.startsWith("postgres://")) {
+            this.url = this.url.replace("postgres://", "jdbc:postgresql://");
         }
     }
     
     /**
-     * Gets the single instance of DatabaseConnection.
+     * Get the singleton instance of the database connection.
      * 
-     * @return The DatabaseConnection instance
+     * @return The singleton instance
      */
     public static synchronized DatabaseConnection getInstance() {
         if (instance == null) {
@@ -97,26 +48,43 @@ public class DatabaseConnection {
     }
     
     /**
-     * Gets the database connection.
+     * Get a connection to the database.
      * 
-     * @return The active Connection object
+     * @return The database connection
+     * @throws SQLException If a database access error occurs
      */
-    public Connection getConnection() {
+    public Connection getConnection() throws SQLException {
+        if (connection == null || connection.isClosed()) {
+            try {
+                // Load the JDBC driver
+                Class.forName("org.postgresql.Driver");
+                
+                // Create the connection
+                connection = DriverManager.getConnection(url, user, password);
+                
+                // Use connection.setAutoCommit(false) if manual transaction management is needed
+                
+                System.out.println("Database connection established");
+            } catch (ClassNotFoundException e) {
+                throw new SQLException("PostgreSQL JDBC driver not found", e);
+            }
+        }
         return connection;
     }
     
     /**
-     * Closes the database connection.
+     * Close the database connection.
      */
     public void close() {
-        try {
-            if (connection != null && !connection.isClosed()) {
+        if (connection != null) {
+            try {
                 connection.close();
                 System.out.println("Database connection closed");
+            } catch (SQLException e) {
+                System.err.println("Error closing database connection: " + e.getMessage());
+            } finally {
+                connection = null;
             }
-        } catch (SQLException e) {
-            System.err.println("Error closing database connection: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 }

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="800.0" styleClass="main-container" stylesheets="@../styles/styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bookshop.controllers.RegisterController">
+   <top>
+      <VBox alignment="CENTER" spacing="10.0" BorderPane.alignment="CENTER">
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="40.0" />
+         </padding>
+         <children>
+            <Label styleClass="header-label" text="Online Bookshop">
+               <font>
+                  <Font name="System Bold" size="36.0" />
+               </font>
+            </Label>
+            <Label text="Create a new account">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Label>
+         </children>
+      </VBox>
+   </top>
+   <center>
+      <VBox alignment="CENTER" spacing="20.0" BorderPane.alignment="CENTER">
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding>
+         <children>
+            <GridPane hgap="10.0" vgap="15.0">
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="200.0" minWidth="200.0" prefWidth="200.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="300.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Label text="Username:" GridPane.halignment="RIGHT" />
+                  <Label text="Password:" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                  <Label text="Confirm Password:" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+                  <Label text="Full Name:" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
+                  <Label text="Email:" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
+                  <Label text="Address:" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
+                  <Label text="Phone Number:" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
+                  <TextField fx:id="usernameField" promptText="Choose a username" GridPane.columnIndex="1" />
+                  <PasswordField fx:id="passwordField" promptText="Choose a password" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <PasswordField fx:id="confirmPasswordField" promptText="Confirm your password" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <TextField fx:id="fullNameField" promptText="Enter your full name" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <TextField fx:id="emailField" promptText="Enter your email address" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                  <TextField fx:id="addressField" promptText="Enter your shipping address" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                  <TextField fx:id="phoneField" promptText="Enter your phone number" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+               </children>
+            </GridPane>
+            <Label fx:id="errorMessageLabel" styleClass="error-label" text="Error message goes here" />
+            <Button fx:id="registerButton" defaultButton="true" mnemonicParsing="false" onAction="#handleRegisterButton" styleClass="primary-button" text="Register">
+               <padding>
+                  <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+               </padding>
+            </Button>
+            <HBox alignment="CENTER" spacing="10.0">
+               <children>
+                  <Label text="Already have an account?" />
+                  <Hyperlink fx:id="loginLink" onAction="#handleLoginLink" text="Log in instead" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </center>
+   <bottom>
+      <VBox alignment="CENTER" BorderPane.alignment="CENTER">
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding>
+         <children>
+            <Label text="© 2023 Online Bookshop. All rights reserved." textFill="#666666" />
+         </children>
+      </VBox>
+   </bottom>
+</BorderPane>

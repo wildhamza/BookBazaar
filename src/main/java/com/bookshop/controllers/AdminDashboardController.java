@@ -1,317 +1,180 @@
 package com.bookshop.controllers;
 
 import com.bookshop.models.Book;
+import com.bookshop.models.Order;
 import com.bookshop.models.User;
 import com.bookshop.services.BookService;
-import com.bookshop.services.UserService;
-import com.bookshop.utils.BookFactory;
 import com.bookshop.utils.SessionManager;
 import com.bookshop.utils.ViewNavigator;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.VBox;
-import javafx.util.Callback;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 
-import java.math.BigDecimal;
-import java.net.URL;
+import java.sql.SQLException;
 import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
 
 /**
  * Controller for the admin dashboard view.
  */
-public class AdminDashboardController implements Initializable {
+public class AdminDashboardController {
     
-    @FXML private Label welcomeLabel;
-    @FXML private TabPane mainTabPane;
+    @FXML
+    private Label welcomeLabel;
     
-    // Books Tab
-    @FXML private Tab booksTab;
-    @FXML private TextField bookSearchField;
-    @FXML private TableView<Book> booksTableView;
-    @FXML private TableColumn<Book, String> titleColumn;
-    @FXML private TableColumn<Book, String> authorColumn;
-    @FXML private TableColumn<Book, String> publisherColumn;
-    @FXML private TableColumn<Book, BigDecimal> priceColumn;
-    @FXML private TableColumn<Book, String> categoryColumn;
-    @FXML private TableColumn<Book, Integer> stockColumn;
-    @FXML private TableColumn<Book, Void> actionColumn;
+    @FXML
+    private Button logoutButton;
     
-    // Customers Tab
-    @FXML private Tab customersTab;
-    @FXML private TextField customerSearchField;
-    @FXML private TableView<User> customersTableView;
-    @FXML private TableColumn<User, String> usernameColumn;
-    @FXML private TableColumn<User, String> fullNameColumn;
-    @FXML private TableColumn<User, String> emailColumn;
-    @FXML private TableColumn<User, String> addressColumn;
-    @FXML private TableColumn<User, String> phoneColumn;
-    @FXML private TableColumn<User, Void> customerActionColumn;
+    @FXML
+    private ListView<Book> bookListView;
+    
+    @FXML
+    private ListView<Order> orderListView;
+    
+    @FXML
+    private Button addBookButton;
+    
+    @FXML
+    private Button editBookButton;
+    
+    @FXML
+    private Button deleteBookButton;
+    
+    @FXML
+    private Label statusLabel;
     
     private BookService bookService;
-    private UserService userService;
-    private ObservableList<Book> bookList;
-    private ObservableList<User> customerList;
+    private User currentUser;
     
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        // Check if user is logged in as admin
-        User currentUser = SessionManager.getInstance().getCurrentUser();
+    /**
+     * Initializes the controller.
+     */
+    @FXML
+    public void initialize() {
+        bookService = new BookService();
+        currentUser = SessionManager.getInstance().getCurrentUser();
+        
         if (currentUser == null || !currentUser.isAdmin()) {
+            // If not logged in as admin, redirect to login page
             ViewNavigator.getInstance().navigateTo("login.fxml");
             return;
         }
         
-        welcomeLabel.setText("Welcome, Admin " + currentUser.getFullName());
+        // Set the welcome message
+        welcomeLabel.setText("Welcome, " + currentUser.getFullName());
         
-        // Initialize services
-        bookService = new BookService();
-        userService = new UserService();
+        // Load books
+        loadBooks();
         
-        // Setup Books Tab
-        initializeBooksTab();
-        
-        // Setup Customers Tab
-        initializeCustomersTab();
-        
-        // Load data for first tab
-        loadAllBooks();
+        // Load orders
+        loadOrders();
     }
     
-    private void initializeBooksTab() {
-        titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
-        authorColumn.setCellValueFactory(new PropertyValueFactory<>("author"));
-        publisherColumn.setCellValueFactory(new PropertyValueFactory<>("publisher"));
-        priceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
-        categoryColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
-        stockColumn.setCellValueFactory(new PropertyValueFactory<>("stockQuantity"));
-        
-        // Action column with Edit and Delete buttons
-        actionColumn.setCellFactory(createBookActionColumnCellFactory());
+    /**
+     * Loads books from the database.
+     */
+    private void loadBooks() {
+        try {
+            List<Book> books = bookService.getAllBooks();
+            bookListView.getItems().clear();
+            bookListView.getItems().addAll(books);
+        } catch (SQLException e) {
+            statusLabel.setText("Error loading books: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
-    private void initializeCustomersTab() {
-        usernameColumn.setCellValueFactory(new PropertyValueFactory<>("username"));
-        fullNameColumn.setCellValueFactory(new PropertyValueFactory<>("fullName"));
-        emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
-        addressColumn.setCellValueFactory(new PropertyValueFactory<>("address"));
-        phoneColumn.setCellValueFactory(new PropertyValueFactory<>("phoneNumber"));
+    /**
+     * Loads all orders from the database.
+     */
+    private void loadOrders() {
+        // Implementation would load all orders from the database
+        // This is a placeholder implementation
+    }
+    
+    /**
+     * Handles the add book button action.
+     * 
+     * @param event The action event
+     */
+    @FXML
+    public void handleAddBook(ActionEvent event) {
+        ViewNavigator.getInstance().navigateTo("edit_book.fxml");
+    }
+    
+    /**
+     * Handles the edit book button action.
+     * 
+     * @param event The action event
+     */
+    @FXML
+    public void handleEditBook(ActionEvent event) {
+        Book selectedBook = bookListView.getSelectionModel().getSelectedItem();
         
-        // Action column with View Orders button
-        customerActionColumn.setCellFactory(createCustomerActionColumnCellFactory());
+        if (selectedBook == null) {
+            Alert alert = new Alert(AlertType.WARNING);
+            alert.setTitle("No Selection");
+            alert.setHeaderText("No Book Selected");
+            alert.setContentText("Please select a book to edit.");
+            alert.showAndWait();
+            return;
+        }
         
-        // Tab selection listener to load data when tab is selected
-        mainTabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
-            if (newTab == customersTab) {
-                loadAllCustomers();
+        // Store the selected book in the session for the edit view
+        SessionManager.getInstance().setCurrentBook(selectedBook);
+        ViewNavigator.getInstance().navigateTo("edit_book.fxml");
+    }
+    
+    /**
+     * Handles the delete book button action.
+     * 
+     * @param event The action event
+     */
+    @FXML
+    public void handleDeleteBook(ActionEvent event) {
+        Book selectedBook = bookListView.getSelectionModel().getSelectedItem();
+        
+        if (selectedBook == null) {
+            Alert alert = new Alert(AlertType.WARNING);
+            alert.setTitle("No Selection");
+            alert.setHeaderText("No Book Selected");
+            alert.setContentText("Please select a book to delete.");
+            alert.showAndWait();
+            return;
+        }
+        
+        // Confirm deletion
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle("Confirm Deletion");
+        alert.setHeaderText("Delete Book");
+        alert.setContentText("Are you sure you want to delete the book: " + selectedBook.getTitle() + "?");
+        
+        alert.showAndWait().ifPresent(response -> {
+            if (response == javafx.scene.control.ButtonType.OK) {
+                try {
+                    bookService.deleteBook(selectedBook.getId());
+                    loadBooks(); // Refresh the list
+                    statusLabel.setText("Book deleted successfully.");
+                } catch (SQLException e) {
+                    statusLabel.setText("Error deleting book: " + e.getMessage());
+                    e.printStackTrace();
+                }
             }
         });
     }
     
-    private Callback<TableColumn<Book, Void>, TableCell<Book, Void>> createBookActionColumnCellFactory() {
-        return new Callback<>() {
-            @Override
-            public TableCell<Book, Void> call(final TableColumn<Book, Void> param) {
-                return new TableCell<>() {
-                    private final Button editBtn = new Button("Edit");
-                    private final Button deleteBtn = new Button("Delete");
-                    private final Button stockBtn = new Button("Stock");
-                    private final VBox box = new VBox(5, editBtn, deleteBtn, stockBtn);
-                    
-                    {
-                        editBtn.setMaxWidth(Double.MAX_VALUE);
-                        deleteBtn.setMaxWidth(Double.MAX_VALUE);
-                        stockBtn.setMaxWidth(Double.MAX_VALUE);
-                        
-                        editBtn.setOnAction((ActionEvent event) -> {
-                            Book book = getTableView().getItems().get(getIndex());
-                            handleEditBook(book);
-                        });
-                        
-                        deleteBtn.setOnAction((ActionEvent event) -> {
-                            Book book = getTableView().getItems().get(getIndex());
-                            handleDeleteBook(book);
-                        });
-                        
-                        stockBtn.setOnAction((ActionEvent event) -> {
-                            Book book = getTableView().getItems().get(getIndex());
-                            handleUpdateStock(book);
-                        });
-                    }
-                    
-                    @Override
-                    public void updateItem(Void item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (empty) {
-                            setGraphic(null);
-                        } else {
-                            setGraphic(box);
-                        }
-                    }
-                };
-            }
-        };
-    }
-    
-    private Callback<TableColumn<User, Void>, TableCell<User, Void>> createCustomerActionColumnCellFactory() {
-        return new Callback<>() {
-            @Override
-            public TableCell<User, Void> call(final TableColumn<User, Void> param) {
-                return new TableCell<>() {
-                    private final Button viewOrdersBtn = new Button("View Orders");
-                    
-                    {
-                        viewOrdersBtn.setOnAction((ActionEvent event) -> {
-                            User customer = getTableView().getItems().get(getIndex());
-                            handleViewCustomerOrders(customer);
-                        });
-                    }
-                    
-                    @Override
-                    public void updateItem(Void item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (empty) {
-                            setGraphic(null);
-                        } else {
-                            setGraphic(viewOrdersBtn);
-                        }
-                    }
-                };
-            }
-        };
-    }
-    
-    private void loadAllBooks() {
-        try {
-            List<Book> books = bookService.getAllBooks();
-            bookList = FXCollections.observableArrayList(books);
-            booksTableView.setItems(bookList);
-        } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Failed to load books: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-    
-    private void loadAllCustomers() {
-        try {
-            List<User> customers = userService.getAllCustomers();
-            customerList = FXCollections.observableArrayList(customers);
-            customersTableView.setItems(customerList);
-        } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Failed to load customers: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-    
+    /**
+     * Handles the logout button action.
+     * 
+     * @param event The action event
+     */
     @FXML
-    private void handleAddNewBook(ActionEvent event) {
-        // Clear any selected book
-        SessionManager.getInstance().setSelectedBook(null);
-        ViewNavigator.getInstance().navigateTo("edit_book.fxml");
-    }
-    
-    @FXML
-    private void handleBookSearch(ActionEvent event) {
-        try {
-            String searchTerm = bookSearchField.getText().trim();
-            List<Book> searchResults = bookService.searchBooks(searchTerm, "", "title", true);
-            bookList = FXCollections.observableArrayList(searchResults);
-            booksTableView.setItems(bookList);
-        } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Search failed: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-    
-    @FXML
-    private void handleCustomerSearch(ActionEvent event) {
-        try {
-            String searchTerm = customerSearchField.getText().trim();
-            List<User> searchResults = userService.searchCustomers(searchTerm);
-            customerList = FXCollections.observableArrayList(searchResults);
-            customersTableView.setItems(customerList);
-        } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Search failed: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-    
-    @FXML
-    private void handleLogout(ActionEvent event) {
-        SessionManager.getInstance().clearSession();
+    public void handleLogout(ActionEvent event) {
+        SessionManager.getInstance().logout();
         ViewNavigator.getInstance().navigateTo("login.fxml");
-    }
-    
-    private void handleEditBook(Book book) {
-        SessionManager.getInstance().setSelectedBook(book);
-        ViewNavigator.getInstance().navigateTo("edit_book.fxml");
-    }
-    
-    private void handleDeleteBook(Book book) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Confirm Delete");
-        alert.setHeaderText("Delete Book");
-        alert.setContentText("Are you sure you want to delete '" + book.getTitle() + "'?");
-        
-        Optional<ButtonType> result = alert.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK) {
-            try {
-                bookService.deleteBook(book.getId());
-                bookList.remove(book);
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Book deleted successfully");
-            } catch (Exception e) {
-                showAlert(Alert.AlertType.ERROR, "Error", "Failed to delete book: " + e.getMessage());
-                e.printStackTrace();
-            }
-        }
-    }
-    
-    private void handleUpdateStock(Book book) {
-        TextInputDialog dialog = new TextInputDialog(String.valueOf(book.getStockQuantity()));
-        dialog.setTitle("Update Stock");
-        dialog.setHeaderText("Update Stock Quantity for '" + book.getTitle() + "'");
-        dialog.setContentText("Enter new stock quantity:");
-        
-        Optional<String> result = dialog.showAndWait();
-        if (result.isPresent()) {
-            try {
-                int newStock = Integer.parseInt(result.get());
-                if (newStock < 0) {
-                    throw new IllegalArgumentException("Stock cannot be negative");
-                }
-                
-                book.setStockQuantity(newStock);
-                bookService.updateBook(book);
-                
-                // Refresh table
-                loadAllBooks();
-                
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Stock updated successfully");
-            } catch (NumberFormatException e) {
-                showAlert(Alert.AlertType.ERROR, "Error", "Please enter a valid number");
-            } catch (Exception e) {
-                showAlert(Alert.AlertType.ERROR, "Error", "Failed to update stock: " + e.getMessage());
-                e.printStackTrace();
-            }
-        }
-    }
-    
-    private void handleViewCustomerOrders(User customer) {
-        SessionManager.getInstance().setSelectedCustomer(customer);
-        ViewNavigator.getInstance().navigateTo("customer_orders.fxml");
-    }
-    
-    private void showAlert(Alert.AlertType type, String title, String message) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 }

@@ -8,23 +8,25 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 /**
- * Singleton pattern implementation for navigating between views.
- * Manages scene switching in the application.
+ * Utility class for managing view navigation.
+ * Implements the Singleton design pattern.
  */
 public class ViewNavigator {
+    
     private static ViewNavigator instance;
     private Stage stage;
     
-    private static final String FXML_PATH = "/fxml/";
-    
-    // Private constructor
+    /**
+     * Private constructor for Singleton pattern.
+     */
     private ViewNavigator() {
+        // Private constructor to prevent instantiation
     }
     
     /**
-     * Gets the single instance of ViewNavigator.
+     * Gets the singleton instance of ViewNavigator.
      * 
-     * @return The ViewNavigator instance
+     * @return The singleton instance
      */
     public static synchronized ViewNavigator getInstance() {
         if (instance == null) {
@@ -34,64 +36,57 @@ public class ViewNavigator {
     }
     
     /**
-     * Sets the primary stage for the application.
+     * Sets the primary stage.
      * 
-     * @param stage The primary Stage
+     * @param stage The primary stage
      */
     public void setStage(Stage stage) {
         this.stage = stage;
     }
     
     /**
-     * Navigates to the specified FXML view.
+     * Gets the primary stage.
      * 
-     * @param fxmlFileName The name of the FXML file to load
-     */
-    public void navigateTo(String fxmlFileName) {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource(FXML_PATH + fxmlFileName));
-            Scene scene = new Scene(root);
-            
-            // Apply global stylesheet if needed
-            scene.getStylesheets().add(getClass().getResource("/styles/styles.css").toExternalForm());
-            
-            stage.setScene(scene);
-        } catch (IOException e) {
-            System.err.println("Error loading view: " + fxmlFileName);
-            e.printStackTrace();
-        }
-    }
-    
-    /**
-     * Navigates to the specified FXML view with a controller factory.
-     * Useful when you need to pass parameters to the controller.
-     * 
-     * @param fxmlFileName The name of the FXML file to load
-     * @param controllerFactory The controller factory
-     */
-    public void navigateTo(String fxmlFileName, javafx.util.Callback<Class<?>, Object> controllerFactory) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML_PATH + fxmlFileName));
-            loader.setControllerFactory(controllerFactory);
-            Parent root = loader.load();
-            Scene scene = new Scene(root);
-            
-            // Apply global stylesheet if needed
-            scene.getStylesheets().add(getClass().getResource("/styles/styles.css").toExternalForm());
-            
-            stage.setScene(scene);
-        } catch (IOException e) {
-            System.err.println("Error loading view: " + fxmlFileName);
-            e.printStackTrace();
-        }
-    }
-    
-    /**
-     * Gets the current stage.
-     * 
-     * @return The current Stage
+     * @return The primary stage
      */
     public Stage getStage() {
         return stage;
+    }
+    
+    /**
+     * Navigates to the specified view.
+     * 
+     * @param fxmlPath The path to the FXML file
+     */
+    public void navigateTo(String fxmlPath) {
+        try {
+            // Build the full path to the FXML file
+            String fullPath = "/views/" + fxmlPath;
+            
+            // Load the FXML file
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fullPath));
+            Parent root = loader.load();
+            
+            // Create a new scene
+            Scene scene = new Scene(root);
+            
+            // Set the scene to the stage
+            stage.setScene(scene);
+            
+            // Show the stage
+            stage.show();
+        } catch (IOException e) {
+            System.err.println("Error loading view: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Closes the application.
+     */
+    public void closeApplication() {
+        if (stage != null) {
+            stage.close();
+        }
     }
 }

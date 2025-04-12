@@ -3,24 +3,69 @@ package com.bookshop.services;
 import com.bookshop.models.Book;
 import com.bookshop.models.CartItem;
 import com.bookshop.observers.CartObserver;
-import com.bookshop.observers.Subject;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Service for shopping cart operations.
- * Implements Observer pattern to notify observers about cart changes.
+ * Service for handling shopping cart operations.
+ * Implements the Observer and Singleton design patterns.
  */
-public class CartService implements Subject {
+public class CartService {
     
+    private static CartService instance;
     private List<CartItem> cartItems;
     private List<CartObserver> observers;
     
-    public CartService() {
-        cartItems = new ArrayList<>();
-        observers = new ArrayList<>();
+    /**
+     * Private constructor for Singleton pattern.
+     */
+    private CartService() {
+        this.cartItems = new ArrayList<>();
+        this.observers = new ArrayList<>();
+    }
+    
+    /**
+     * Gets the singleton instance of the CartService.
+     * 
+     * @return The singleton instance
+     */
+    public static synchronized CartService getInstance() {
+        if (instance == null) {
+            instance = new CartService();
+        }
+        return instance;
+    }
+    
+    /**
+     * Adds an observer to be notified of cart updates.
+     * 
+     * @param observer The observer to add
+     */
+    public void addObserver(CartObserver observer) {
+        if (observer != null && !observers.contains(observer)) {
+            observers.add(observer);
+        }
+    }
+    
+    /**
+     * Removes an observer.
+     * 
+     * @param observer The observer to remove
+     */
+    public void removeObserver(CartObserver observer) {
+        observers.remove(observer);
+    }
+    
+    /**
+     * Notifies all observers of a cart update.
+     */
+    private void notifyObservers() {
+        for (CartObserver observer : observers) {
+            observer.update();
+        }
     }
     
     /**
@@ -29,7 +74,7 @@ public class CartService implements Subject {
      * @return A list of cart items
      */
     public List<CartItem> getCartItems() {
-        return new ArrayList<>(cartItems); // Return a copy to prevent direct modification
+        return new ArrayList<>(cartItems); // Return a copy to prevent external modification
     }
     
     /**
@@ -40,76 +85,51 @@ public class CartService implements Subject {
      */
     public void addToCart(Book book, int quantity) {
         if (book == null || quantity <= 0) {
-            throw new IllegalArgumentException("Invalid book or quantity");
+            return;
         }
         
         // Check if the book is already in the cart
         for (CartItem item : cartItems) {
             if (item.getBook().getId() == book.getId()) {
-                // Update quantity instead of adding a new item
-                int newQuantity = item.getQuantity() + quantity;
-                if (newQuantity <= book.getStockQuantity()) {
-                    item.setQuantity(newQuantity);
-                    notifyObservers();
-                    return;
-                } else {
-                    throw new IllegalArgumentException("Not enough stock available");
-                }
+                // Update the quantity
+                item.setQuantity(item.getQuantity() + quantity);
+                notifyObservers();
+                return;
             }
         }
         
-        // Book not in cart, add as new item
-        if (quantity <= book.getStockQuantity()) {
-            CartItem newItem = new CartItem(book, quantity);
-            cartItems.add(newItem);
-            notifyObservers();
-        } else {
-            throw new IllegalArgumentException("Not enough stock available");
-        }
-    }
-    
-    /**
-     * Updates the quantity of a cart item.
-     * 
-     * @param book The book to update
-     * @param quantity The new quantity
-     */
-    public void updateCartItemQuantity(Book book, int quantity) {
-        if (book == null || quantity <= 0) {
-            throw new IllegalArgumentException("Invalid book or quantity");
-        }
-        
-        for (CartItem item : cartItems) {
-            if (item.getBook().getId() == book.getId()) {
-                if (quantity <= book.getStockQuantity()) {
-                    item.setQuantity(quantity);
-                    notifyObservers();
-                    return;
-                } else {
-                    throw new IllegalArgumentException("Not enough stock available");
-                }
-            }
-        }
-        
-        throw new IllegalArgumentException("Book not found in cart");
-    }
-    
-    /**
-     * Removes a book from the cart.
-     * 
-     * @param book The book to remove
-     */
-    public void removeFromCart(Book book) {
-        if (book == null) {
-            throw new IllegalArgumentException("Invalid book");
-        }
-        
-        cartItems.removeIf(item -> item.getBook().getId() == book.getId());
+        // Add a new cart item
+        cartItems.add(new CartItem(book, quantity));
         notifyObservers();
     }
     
     /**
-     * Clears all items from the cart.
+     * Updates the quantity of an item in the cart.
+     * 
+     * @param index The index of the item to update
+     * @param quantity The new quantity
+     */
+    public void updateCartItemQuantity(int index, int quantity) {
+        if (index >= 0 && index < cartItems.size() && quantity > 0) {
+            cartItems.get(index).setQuantity(quantity);
+            notifyObservers();
+        }
+    }
+    
+    /**
+     * Removes an item from the cart.
+     * 
+     * @param index The index of the item to remove
+     */
+    public void removeFromCart(int index) {
+        if (index >= 0 && index < cartItems.size()) {
+            cartItems.remove(index);
+            notifyObservers();
+        }
+    }
+    
+    /**
+     * Clears the cart.
      */
     public void clearCart() {
         cartItems.clear();
@@ -117,58 +137,41 @@ public class CartService implements Subject {
     }
     
     /**
-     * Calculates the total cost of all items in the cart.
+     * Calculates the total price of all items in the cart.
      * 
-     * @return The total cost
+     * @return The total price
      */
     public BigDecimal calculateTotal() {
         BigDecimal total = BigDecimal.ZERO;
+        
         for (CartItem item : cartItems) {
             total = total.add(item.getSubtotal());
         }
-        return total;
+        
+        return total.setScale(2, RoundingMode.HALF_UP);
     }
     
     /**
      * Gets the number of items in the cart.
      * 
-     * @return The total number of items
+     * @return The number of items
      */
-    public int getCartItemCount() {
-        return cartItems.size();
-    }
-    
-    /**
-     * Gets the total quantity of all items in the cart.
-     * 
-     * @return The total quantity
-     */
-    public int getCartQuantityCount() {
+    public int getItemCount() {
         int count = 0;
+        
         for (CartItem item : cartItems) {
             count += item.getQuantity();
         }
+        
         return count;
     }
     
-    // Observer pattern methods
-    
-    @Override
-    public void addObserver(CartObserver observer) {
-        if (!observers.contains(observer)) {
-            observers.add(observer);
-        }
-    }
-    
-    @Override
-    public void removeObserver(CartObserver observer) {
-        observers.remove(observer);
-    }
-    
-    @Override
-    public void notifyObservers() {
-        for (CartObserver observer : observers) {
-            observer.update();
-        }
+    /**
+     * Checks if the cart is empty.
+     * 
+     * @return true if the cart is empty, false otherwise
+     */
+    public boolean isEmpty() {
+        return cartItems.isEmpty();
     }
 }
