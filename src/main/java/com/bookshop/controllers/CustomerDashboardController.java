@@ -70,6 +70,19 @@ public class CustomerDashboardController {
         
         // Load orders
         loadOrders();
+        
+        // Set up double-click handler for book list
+        bookListView.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) {
+                Book selectedBook = bookListView.getSelectionModel().getSelectedItem();
+                if (selectedBook != null) {
+                    // Store the selected book in the session
+                    SessionManager.getInstance().setCurrentBook(selectedBook);
+                    // Navigate to book details view
+                    ViewNavigator.getInstance().navigateTo("book_details.fxml");
+                }
+            }
+        });
     }
     
     /**

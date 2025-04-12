@@ -300,6 +300,33 @@ public class User {
     }
     
     /**
+     * Checks if the user is a regular loyalty member (5+ orders).
+     * 
+     * @return true if the user is a regular loyalty member, false otherwise
+     */
+    public boolean isRegularLoyaltyMember() {
+        return orderCount >= 5;
+    }
+    
+    /**
+     * Checks if the user is a premium loyalty member (10+ orders).
+     * 
+     * @return true if the user is a premium loyalty member, false otherwise
+     */
+    public boolean isPremiumLoyaltyMember() {
+        return orderCount >= 10;
+    }
+    
+    /**
+     * Alias for isPremiumLoyaltyMember to maintain compatibility.
+     * 
+     * @return true if the user is a premium member, false otherwise
+     */
+    public boolean isPremiumMember() {
+        return isPremiumLoyaltyMember();
+    }
+    
+    /**
      * Updates the loyalty status based on the order count.
      */
     private void updateLoyaltyStatus() {

@@ -4,23 +4,32 @@ import com.bookshop.models.User;
 import java.math.BigDecimal;
 
 /**
- * Interface for the Strategy pattern for applying different discount strategies.
+ * Interface defining a discount strategy.
+ * This is an implementation of the Strategy design pattern.
  */
 public interface DiscountStrategy {
     
     /**
-     * Calculate the discount amount to apply.
+     * Calculates a discount amount for a purchase.
      * 
-     * @param user The user to calculate discount for
-     * @param originalAmount The original amount before discount
-     * @return The discount amount to be subtracted from the original amount
+     * @param user The user making the purchase
+     * @param amount The total purchase amount before discount
+     * @return The discount amount
      */
-    BigDecimal calculateDiscount(User user, BigDecimal originalAmount);
+    BigDecimal calculateDiscount(User user, BigDecimal amount);
     
     /**
-     * Get a description of the discount.
+     * Determines if the discount is applicable to a user.
      * 
-     * @return A description of the discount for display purposes
+     * @param user The user to check
+     * @return true if the discount is applicable, false otherwise
+     */
+    boolean isApplicable(User user);
+    
+    /**
+     * Gets a description of the discount.
+     * 
+     * @return The discount description
      */
     String getDescription();
 }

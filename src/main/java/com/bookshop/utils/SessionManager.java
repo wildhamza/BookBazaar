@@ -11,7 +11,8 @@ public class SessionManager {
     
     private static SessionManager instance;
     private User currentUser;
-    private Book currentBook; // For editing/viewing book details
+    private Book currentBook;
+    private User selectedCustomer; // For editing/viewing book details
     
     /**
      * Private constructor for Singleton pattern.
@@ -94,10 +95,38 @@ public class SessionManager {
     }
     
     /**
+     * Gets the selected customer (for admin operations).
+     * 
+     * @return The selected customer, or null if none is set
+     */
+    public User getSelectedCustomer() {
+        return selectedCustomer;
+    }
+    
+    /**
+     * Sets the selected customer (for admin operations).
+     * 
+     * @param customer The customer to set as selected
+     */
+    public void setSelectedCustomer(User customer) {
+        this.selectedCustomer = customer;
+    }
+    
+    /**
+     * Alias for getCurrentBook for backward compatibility.
+     * 
+     * @return The current book
+     */
+    public Book getSelectedBook() {
+        return currentBook;
+    }
+    
+    /**
      * Logs out the current user.
      */
     public void logout() {
         this.currentUser = null;
         this.currentBook = null;
+        this.selectedCustomer = null;
     }
 }

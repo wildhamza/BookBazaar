@@ -16,6 +16,10 @@ public class Book {
     private String category;
     private String description;
     private String imageUrl;
+    private String publisher;
+    private int stockQuantity;
+    private double averageRating;
+    private int reviewCount;
     
     /**
      * Default constructor.
@@ -209,6 +213,78 @@ public class Book {
      */
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+    
+    /**
+     * Gets the book publisher.
+     * 
+     * @return The book publisher
+     */
+    public String getPublisher() {
+        return publisher;
+    }
+    
+    /**
+     * Sets the book publisher.
+     * 
+     * @param publisher The book publisher
+     */
+    public void setPublisher(String publisher) {
+        this.publisher = publisher;
+    }
+    
+    /**
+     * Gets the book stock quantity.
+     * 
+     * @return The book stock quantity
+     */
+    public int getStockQuantity() {
+        return stockQuantity;
+    }
+    
+    /**
+     * Sets the book stock quantity.
+     * 
+     * @param stockQuantity The book stock quantity
+     */
+    public void setStockQuantity(int stockQuantity) {
+        this.stockQuantity = stockQuantity;
+    }
+    
+    /**
+     * Gets the book average rating.
+     * 
+     * @return The book average rating
+     */
+    public double getAverageRating() {
+        return averageRating;
+    }
+    
+    /**
+     * Sets the book average rating.
+     * 
+     * @param averageRating The book average rating
+     */
+    public void setAverageRating(double averageRating) {
+        this.averageRating = averageRating;
+    }
+    
+    /**
+     * Gets the book review count.
+     * 
+     * @return The book review count
+     */
+    public int getReviewCount() {
+        return reviewCount;
+    }
+    
+    /**
+     * Sets the book review count.
+     * 
+     * @param reviewCount The book review count
+     */
+    public void setReviewCount(int reviewCount) {
+        this.reviewCount = reviewCount;
     }
     
     /**

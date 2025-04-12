@@ -18,14 +18,13 @@ import java.util.List;
  */
 public class CartServiceTest {
     
-    private CartService cartService;
+    private MockCartService cartService;
     private Book testBook;
     private TestCartObserver testObserver;
     
     @BeforeEach
     void setUp() {
-        cartService = CartService.getInstance();
-        cartService.clearCart(); // Start with a clean cart
+        cartService = new MockCartService();
         
         // Create a test book
         testBook = new Book();

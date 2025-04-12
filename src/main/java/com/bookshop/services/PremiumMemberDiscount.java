@@ -2,30 +2,52 @@ package com.bookshop.services;
 
 import com.bookshop.models.User;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 /**
- * Concrete implementation of DiscountStrategy for premium members.
- * Premium members (with 10 or more orders) receive a 15% discount.
+ * Premium member discount strategy - applies a 20% discount for premium loyalty members.
+ * A premium loyalty member is a user with at least 10 previous orders.
+ * This is a concrete implementation of the DiscountStrategy interface.
  */
 public class PremiumMemberDiscount implements DiscountStrategy {
     
-    // The discount percentage (15%)
-    private static final BigDecimal DISCOUNT_PERCENTAGE = new BigDecimal("0.15");
+    private static final BigDecimal DISCOUNT_PERCENTAGE = new BigDecimal("0.20"); // 20% discount
+    private static final int MIN_ORDER_COUNT = 10;
     
+    /**
+     * Calculates a discount amount for a purchase.
+     * Premium members get a 20% discount.
+     * 
+     * @param user The user making the purchase
+     * @param amount The total purchase amount before discount
+     * @return The discount amount
+     */
     @Override
-    public BigDecimal calculateDiscount(User user, BigDecimal originalAmount) {
-        // Apply discount if user is a premium member
-        if (!user.isAdmin() && user.isPremiumMember()) {
-            return originalAmount.multiply(DISCOUNT_PERCENTAGE).setScale(2, RoundingMode.HALF_UP);
+    public BigDecimal calculateDiscount(User user, BigDecimal amount) {
+        if (!isApplicable(user)) {
+            return BigDecimal.ZERO;
         }
-        
-        // No discount
-        return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        return amount.multiply(DISCOUNT_PERCENTAGE);
     }
     
+    /**
+     * Determines if the discount is applicable to a user.
+     * Premium member discount applies to users with at least 10 previous orders.
+     * 
+     * @param user The user to check
+     * @return true if the discount is applicable, false otherwise
+     */
+    @Override
+    public boolean isApplicable(User user) {
+        return user != null && user.getOrderCount() >= MIN_ORDER_COUNT;
+    }
+    
+    /**
+     * Gets a description of the discount.
+     * 
+     * @return The discount description
+     */
     @Override
     public String getDescription() {
-        return "Premium Member Discount (15% off for premium members)";
+        return "20% Premium Member Discount (10+ orders)";
     }
 }

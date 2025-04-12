@@ -86,9 +86,18 @@ public class RegisterController implements Initializable {
         }
         
         try {
+            // Parse the full name into first and last name
+            String firstName = "";
+            String lastName = "";
+            if (fullName != null && !fullName.isEmpty()) {
+                String[] nameParts = fullName.trim().split("\\s+", 2);
+                firstName = nameParts[0];
+                lastName = nameParts.length > 1 ? nameParts[1] : "";
+            }
+            
             // Register user
             User newUser = authService.registerCustomer(
-                username, password, fullName, email, address, phone
+                username, password, firstName, lastName, email, phone, address
             );
             
             // Show success message

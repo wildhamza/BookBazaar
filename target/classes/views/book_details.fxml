@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bookshop.controllers.BookDetailsController">
+   <children>
+      <VBox layoutX="14.0" layoutY="14.0" prefHeight="572.0" prefWidth="772.0" spacing="10.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
+         <children>
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label text="Book Details">
+                     <font>
+                        <Font name="System Bold" size="24.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="statusLabel" textFill="#e10000">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+               </children>
+            </HBox>
+            <Separator prefHeight="4.0" prefWidth="772.0" />
+            <HBox spacing="20.0">
+               <children>
+                  <VBox prefHeight="300.0" prefWidth="480.0" spacing="10.0">
+                     <children>
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                           <children>
+                              <Label prefWidth="100.0" text="Title:">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="titleLabel" prefHeight="20.0" prefWidth="360.0" text="Book Title">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" layoutX="10.0" layoutY="10.0" spacing="10.0">
+                           <children>
+                              <Label prefWidth="100.0" text="Author:">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="authorLabel" prefHeight="20.0" prefWidth="360.0" text="Author Name">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" layoutX="10.0" layoutY="40.0" spacing="10.0">
+                           <children>
+                              <Label prefWidth="100.0" text="ISBN:">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="isbnLabel" prefHeight="20.0" prefWidth="360.0" text="ISBN Number">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" layoutX="10.0" layoutY="70.0" spacing="10.0">
+                           <children>
+                              <Label prefWidth="100.0" text="Price:">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="priceLabel" prefHeight="20.0" prefWidth="360.0" text="$Price">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" layoutX="10.0" layoutY="100.0" spacing="10.0">
+                           <children>
+                              <Label prefWidth="100.0" text="Category:">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="categoryLabel" prefHeight="20.0" prefWidth="360.0" text="Category">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" layoutX="10.0" layoutY="130.0" spacing="10.0">
+                           <children>
+                              <Label prefWidth="100.0" text="Stock:">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="stockLabel" prefHeight="20.0" prefWidth="360.0" text="In Stock">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" layoutX="10.0" layoutY="160.0" spacing="10.0">
+                           <children>
+                              <Label prefWidth="100.0" text="Rating:">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="ratingLabel" prefHeight="20.0" prefWidth="360.0" text="Average Rating">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <Label text="Description:">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Label>
+                        <TextArea fx:id="descriptionTextArea" editable="false" prefHeight="100.0" prefWidth="480.0" wrapText="true" />
+                     </children>
+                  </VBox>
+                  <VBox alignment="TOP_CENTER" prefHeight="300.0" prefWidth="272.0" spacing="15.0">
+                     <children>
+                        <Label fx:id="imageUrlLabel" text="Image URL" visible="false" />
+                        <Label fx:id="bookImageLabel" alignment="CENTER" prefHeight="200.0" prefWidth="200.0" style="-fx-border-color: #cccccc; -fx-border-width: 1px;" text="Book Cover Image" textAlignment="CENTER" />
+                        <HBox fx:id="customerActionBox" alignment="CENTER" spacing="10.0" visible="false">
+                           <children>
+                              <Label text="Quantity:" />
+                              <Spinner fx:id="quantitySpinner" initialValue="1" max="100" min="1" prefHeight="26.0" prefWidth="70.0" />
+                              <Button fx:id="addToCartButton" mnemonicParsing="false" onAction="#handleAddToCart" prefHeight="30.0" prefWidth="120.0" text="Add to Cart" />
+                           </children>
+                        </HBox>
+                        <HBox fx:id="adminActionBox" alignment="CENTER" spacing="10.0" visible="false">
+                           <children>
+                              <Button fx:id="editBookButton" mnemonicParsing="false" onAction="#handleEditBook" prefHeight="30.0" prefWidth="120.0" text="Edit Book" />
+                              <Button fx:id="deleteBookButton" mnemonicParsing="false" onAction="#handleDeleteBook" prefHeight="30.0" prefWidth="120.0" text="Delete Book" />
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+            <VBox spacing="10.0">
+               <children>
+                  <Label text="Reviews">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                  </Label>
+                  <Separator prefWidth="200.0" />
+                  <TableView fx:id="reviewsTableView" prefHeight="150.0" prefWidth="772.0">
+                     <columns>
+                        <TableColumn fx:id="reviewUserColumn" prefWidth="150.0" text="User" />
+                        <TableColumn fx:id="reviewDateColumn" prefWidth="120.0" text="Date" />
+                        <TableColumn fx:id="reviewRatingColumn" prefWidth="80.0" text="Rating" />
+                        <TableColumn fx:id="reviewContentColumn" prefWidth="421.0" text="Review" />
+                     </columns>
+                  </TableView>
+                  <HBox fx:id="addReviewBox" alignment="CENTER_LEFT" spacing="10.0" visible="false">
+                     <children>
+                        <TextField fx:id="reviewTextField" promptText="Write your review..." HBox.hgrow="ALWAYS" />
+                        <Label text="Rating:" />
+                        <Spinner fx:id="ratingSpinner" initialValue="5" max="5" min="1" prefHeight="26.0" prefWidth="60.0" />
+                        <Button fx:id="addReviewButton" mnemonicParsing="false" onAction="#handleAddReview" text="Add Review" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+            <HBox alignment="CENTER" spacing="20.0">
+               <children>
+                  <Button fx:id="backButton" mnemonicParsing="false" onAction="#handleBack" prefHeight="30.0" prefWidth="120.0" text="Back" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>

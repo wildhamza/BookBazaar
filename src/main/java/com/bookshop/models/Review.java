@@ -6,104 +6,195 @@ import java.time.LocalDateTime;
  * Model class representing a book review.
  */
 public class Review {
+    
     private int id;
-    private int bookId;
     private int userId;
-    private String username; // For display purposes
-    private int rating; // 1-5 stars
-    private String comment;
-    private LocalDateTime createdAt;
+    private int bookId;
+    private int rating;
+    private String content;
+    private LocalDateTime reviewDate;
     
-    // Default constructor
+    // Additional fields for display purposes
+    private String username;
+    private String bookTitle;
+    
+    /**
+     * Default constructor.
+     */
     public Review() {
+        this.reviewDate = LocalDateTime.now();
     }
     
-    // Constructor with all fields
-    public Review(int id, int bookId, int userId, String username, int rating, 
-                  String comment, LocalDateTime createdAt) {
+    /**
+     * Constructor with all fields.
+     * 
+     * @param id The review ID
+     * @param userId The user ID
+     * @param bookId The book ID
+     * @param rating The rating (1-5)
+     * @param content The review content
+     * @param reviewDate The review date
+     * @param username The username
+     * @param bookTitle The book title
+     */
+    public Review(int id, int userId, int bookId, int rating, String content, 
+                 LocalDateTime reviewDate, String username, String bookTitle) {
         this.id = id;
-        this.bookId = bookId;
         this.userId = userId;
-        this.username = username;
+        this.bookId = bookId;
         this.rating = rating;
-        this.comment = comment;
-        this.createdAt = createdAt;
+        this.content = content;
+        this.reviewDate = reviewDate;
+        this.username = username;
+        this.bookTitle = bookTitle;
     }
-
-    // Getters and setters
+    
+    /**
+     * Gets the review ID.
+     * 
+     * @return The review ID
+     */
     public int getId() {
         return id;
     }
-
+    
+    /**
+     * Sets the review ID.
+     * 
+     * @param id The review ID
+     */
     public void setId(int id) {
         this.id = id;
     }
-
-    public int getBookId() {
-        return bookId;
-    }
-
-    public void setBookId(int bookId) {
-        this.bookId = bookId;
-    }
-
+    
+    /**
+     * Gets the user ID.
+     * 
+     * @return The user ID
+     */
     public int getUserId() {
         return userId;
     }
-
+    
+    /**
+     * Sets the user ID.
+     * 
+     * @param userId The user ID
+     */
     public void setUserId(int userId) {
         this.userId = userId;
     }
-
-    public String getUsername() {
-        return username;
+    
+    /**
+     * Gets the book ID.
+     * 
+     * @return The book ID
+     */
+    public int getBookId() {
+        return bookId;
     }
-
-    public void setUsername(String username) {
-        this.username = username;
+    
+    /**
+     * Sets the book ID.
+     * 
+     * @param bookId The book ID
+     */
+    public void setBookId(int bookId) {
+        this.bookId = bookId;
     }
-
+    
+    /**
+     * Gets the rating.
+     * 
+     * @return The rating
+     */
     public int getRating() {
         return rating;
     }
-
+    
+    /**
+     * Sets the rating.
+     * 
+     * @param rating The rating
+     */
     public void setRating(int rating) {
-        if (rating < 1) rating = 1;
-        if (rating > 5) rating = 5;
         this.rating = rating;
     }
-
-    public String getComment() {
-        return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    
+    /**
+     * Gets the review content.
+     * 
+     * @return The review content
+     */
+    public String getContent() {
+        return content;
     }
     
-    // Helper methods for display
-    public String getFormattedDate() {
-        // Format: YYYY-MM-DD HH:MM
-        return createdAt.toString().substring(0, 16).replace('T', ' ');
+    /**
+     * Sets the review content.
+     * 
+     * @param content The review content
+     */
+    public void setContent(String content) {
+        this.content = content;
     }
     
-    public String getStarsDisplay() {
-        StringBuilder stars = new StringBuilder();
-        for (int i = 0; i < 5; i++) {
-            if (i < rating) {
-                stars.append("★"); // Filled star
-            } else {
-                stars.append("☆"); // Empty star
-            }
-        }
-        return stars.toString();
+    /**
+     * Gets the review date.
+     * 
+     * @return The review date
+     */
+    public LocalDateTime getReviewDate() {
+        return reviewDate;
+    }
+    
+    /**
+     * Sets the review date.
+     * 
+     * @param reviewDate The review date
+     */
+    public void setReviewDate(LocalDateTime reviewDate) {
+        this.reviewDate = reviewDate;
+    }
+    
+    /**
+     * Gets the username.
+     * 
+     * @return The username
+     */
+    public String getUsername() {
+        return username;
+    }
+    
+    /**
+     * Sets the username.
+     * 
+     * @param username The username
+     */
+    public void setUsername(String username) {
+        this.username = username;
+    }
+    
+    /**
+     * Gets the book title.
+     * 
+     * @return The book title
+     */
+    public String getBookTitle() {
+        return bookTitle;
+    }
+    
+    /**
+     * Sets the book title.
+     * 
+     * @param bookTitle The book title
+     */
+    public void setBookTitle(String bookTitle) {
+        this.bookTitle = bookTitle;
+    }
+    
+    @Override
+    public String toString() {
+        return username + " rated " + rating + " stars: " + content;
     }
 }

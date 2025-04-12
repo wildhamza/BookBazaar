@@ -1,256 +1,326 @@
 package com.bookshop.controllers;
 
 import com.bookshop.models.CartItem;
+import com.bookshop.models.Order;
 import com.bookshop.models.User;
 import com.bookshop.services.CartService;
 import com.bookshop.services.PaymentStrategy;
 import com.bookshop.services.PurchaseService;
-import com.bookshop.services.CreditCardPayment;
-import com.bookshop.services.PayPalPayment;
 import com.bookshop.utils.SessionManager;
 import com.bookshop.utils.ViewNavigator;
+
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.math.BigDecimal;
-import java.net.URL;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.sql.SQLException;
+import java.text.NumberFormat;
 
 /**
  * Controller for the shopping cart view.
  */
-public class ShoppingCartController implements Initializable {
+public class ShoppingCartController {
     
     @FXML private TableView<CartItem> cartTableView;
     @FXML private TableColumn<CartItem, String> titleColumn;
     @FXML private TableColumn<CartItem, String> authorColumn;
-    @FXML private TableColumn<CartItem, BigDecimal> priceColumn;
+    @FXML private TableColumn<CartItem, String> priceColumn;
     @FXML private TableColumn<CartItem, Integer> quantityColumn;
-    @FXML private TableColumn<CartItem, BigDecimal> subtotalColumn;
-    @FXML private Label totalAmountLabel;
-    @FXML private ComboBox<String> paymentMethodComboBox;
+    @FXML private TableColumn<CartItem, String> subtotalColumn;
+    @FXML private Label totalLabel;
     @FXML private Button checkoutButton;
-    @FXML private Button continueShoppingButton;
+    @FXML private Button increaseQuantityButton;
+    @FXML private Button decreaseQuantityButton;
+    @FXML private Button removeItemButton;
     @FXML private Button clearCartButton;
+    @FXML private Button backToShopButton;
+    @FXML private Label statusLabel;
+    @FXML private ComboBox<String> paymentMethodComboBox;
     
     private CartService cartService;
     private PurchaseService purchaseService;
+    private User currentUser;
     private ObservableList<CartItem> cartItems;
     
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        // Check if user is logged in
-        User currentUser = SessionManager.getInstance().getCurrentUser();
+    /**
+     * Initializes the controller.
+     */
+    @FXML
+    public void initialize() {
+        cartService = new CartService();
+        purchaseService = new PurchaseService();
+        currentUser = SessionManager.getInstance().getCurrentUser();
+        
         if (currentUser == null) {
+            // If not logged in, redirect to login page
             ViewNavigator.getInstance().navigateTo("login.fxml");
             return;
         }
         
-        // Initialize services
-        cartService = new CartService();
-        purchaseService = new PurchaseService();
-        
         // Setup table columns
-        initializeTableColumns();
+        titleColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getBookTitle()));
+        authorColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getBookAuthor()));
+        priceColumn.setCellValueFactory(cellData -> {
+            NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
+            return new SimpleStringProperty(currencyFormat.format(cellData.getValue().getBookPrice()));
+        });
+        quantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+        subtotalColumn.setCellValueFactory(cellData -> {
+            NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
+            return new SimpleStringProperty(currencyFormat.format(cellData.getValue().getSubtotal()));
+        });
         
-        // Setup payment methods
-        initializePaymentMethods();
+        // Setup payment method combo box
+        paymentMethodComboBox.getItems().addAll("Credit Card", "PayPal", "Bank Transfer");
+        paymentMethodComboBox.getSelectionModel().selectFirst();
         
         // Load cart items
         loadCartItems();
+        
+        // Setup button states based on selection
+        cartTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            boolean hasSelection = newSelection != null;
+            increaseQuantityButton.setDisable(!hasSelection);
+            decreaseQuantityButton.setDisable(!hasSelection);
+            removeItemButton.setDisable(!hasSelection);
+        });
     }
     
-    private void initializeTableColumns() {
-        titleColumn.setCellValueFactory(cellData -> {
-            return javafx.beans.binding.Bindings.createStringBinding(
-                () -> cellData.getValue().getBook().getTitle()
-            );
-        });
-        
-        authorColumn.setCellValueFactory(cellData -> {
-            return javafx.beans.binding.Bindings.createStringBinding(
-                () -> cellData.getValue().getBook().getAuthor()
-            );
-        });
-        
-        priceColumn.setCellValueFactory(cellData -> {
-            return javafx.beans.binding.Bindings.createObjectBinding(
-                () -> cellData.getValue().getBook().getPrice()
-            );
-        });
-        
-        quantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-        subtotalColumn.setCellValueFactory(new PropertyValueFactory<>("subtotal"));
-        
-        // Add column for increase/decrease/remove buttons
-        TableColumn<CartItem, Void> actionColumn = new TableColumn<>("Actions");
-        actionColumn.setCellFactory(param -> new TableCell<>() {
-            private final Button increaseBtn = new Button("+");
-            private final Button decreaseBtn = new Button("-");
-            private final Button removeBtn = new Button("Remove");
-            
-            {
-                increaseBtn.setOnAction(event -> {
-                    CartItem item = getTableView().getItems().get(getIndex());
-                    int stock = item.getBook().getStockQuantity();
-                    if (item.getQuantity() < stock) {
-                        item.incrementQuantity();
-                        updateCart();
-                    } else {
-                        showAlert("Cannot add more. Only " + stock + " available in stock.");
-                    }
-                });
-                
-                decreaseBtn.setOnAction(event -> {
-                    CartItem item = getTableView().getItems().get(getIndex());
-                    item.decrementQuantity();
-                    updateCart();
-                });
-                
-                removeBtn.setOnAction(event -> {
-                    CartItem item = getTableView().getItems().get(getIndex());
-                    cartService.removeFromCart(item.getBook());
-                    loadCartItems();
-                });
-            }
-            
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                } else {
-                    javafx.scene.layout.HBox hbox = new javafx.scene.layout.HBox(5);
-                    hbox.getChildren().addAll(decreaseBtn, increaseBtn, removeBtn);
-                    setGraphic(hbox);
-                }
-            }
-        });
-        
-        cartTableView.getColumns().add(actionColumn);
-    }
-    
-    private void initializePaymentMethods() {
-        ObservableList<String> paymentMethods = FXCollections.observableArrayList(
-            "Credit Card", "PayPal"
-        );
-        paymentMethodComboBox.setItems(paymentMethods);
-        paymentMethodComboBox.setValue("Credit Card");
-    }
-    
+    /**
+     * Loads cart items from the database.
+     */
     private void loadCartItems() {
-        cartItems = FXCollections.observableArrayList(cartService.getCartItems());
-        cartTableView.setItems(cartItems);
-        
-        updateTotalAmount();
-        
-        // Enable/disable checkout button based on cart state
-        checkoutButton.setDisable(cartItems.isEmpty());
-        clearCartButton.setDisable(cartItems.isEmpty());
-    }
-    
-    private void updateCart() {
-        for (CartItem item : cartItems) {
-            cartService.updateCartItemQuantity(item.getBook(), item.getQuantity());
-        }
-        
-        updateTotalAmount();
-    }
-    
-    private void updateTotalAmount() {
-        BigDecimal total = cartService.calculateTotal();
-        totalAmountLabel.setText("Total: $" + total);
-    }
-    
-    @FXML
-    private void handleCheckout(ActionEvent event) {
-        if (cartItems.isEmpty()) {
-            showAlert("Your cart is empty");
-            return;
-        }
-        
-        // Confirm checkout
-        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmAlert.setTitle("Confirm Checkout");
-        confirmAlert.setHeaderText("Proceed with checkout?");
-        confirmAlert.setContentText("Total amount: $" + cartService.calculateTotal());
-        
-        Optional<ButtonType> result = confirmAlert.showAndWait();
-        if (result.get() != ButtonType.OK) {
-            return;
-        }
-        
-        // Select payment strategy based on selected payment method
-        PaymentStrategy paymentStrategy;
-        String paymentMethod = paymentMethodComboBox.getValue();
-        
-        if ("PayPal".equals(paymentMethod)) {
-            paymentStrategy = new PayPalPayment();
-        } else {
-            paymentStrategy = new CreditCardPayment();
-        }
-        
         try {
-            User currentUser = SessionManager.getInstance().getCurrentUser();
+            cartItems = FXCollections.observableArrayList(cartService.getCartItems(currentUser.getId()));
+            cartTableView.setItems(cartItems);
             
-            // Process the payment and create the order
-            boolean success = purchaseService.processPurchase(cartItems, currentUser, paymentStrategy);
+            // Update the total amount
+            updateTotal();
             
-            if (success) {
-                // Clear the cart after successful purchase
-                cartService.clearCart();
-                
-                // Show success message
-                Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
-                successAlert.setTitle("Purchase Complete");
-                successAlert.setHeaderText("Thank you for your purchase!");
-                successAlert.setContentText("Your order has been placed successfully.");
-                successAlert.showAndWait();
-                
-                // Navigate to customer dashboard
-                ViewNavigator.getInstance().navigateTo("customer_dashboard.fxml");
-            }
-        } catch (Exception e) {
-            showAlert("Error processing purchase: " + e.getMessage());
+            // Update UI state based on cart content
+            boolean hasItems = !cartItems.isEmpty();
+            checkoutButton.setDisable(!hasItems);
+            clearCartButton.setDisable(!hasItems);
+            
+        } catch (SQLException e) {
+            statusLabel.setText("Error loading cart: " + e.getMessage());
             e.printStackTrace();
         }
     }
     
-    @FXML
-    private void handleClearCart(ActionEvent event) {
-        if (cartItems.isEmpty()) {
-            return;
+    /**
+     * Updates the total display.
+     */
+    private void updateTotal() {
+        try {
+            BigDecimal total = cartService.calculateTotal(currentUser.getId());
+            NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
+            totalLabel.setText("Total: " + currencyFormat.format(total));
+        } catch (SQLException e) {
+            statusLabel.setText("Error calculating total: " + e.getMessage());
+            e.printStackTrace();
         }
-        
+    }
+    
+    /**
+     * Handles the increase quantity button action.
+     * 
+     * @param event The action event
+     */
+    @FXML
+    public void handleIncreaseQuantity(ActionEvent event) {
+        CartItem selectedItem = cartTableView.getSelectionModel().getSelectedItem();
+        if (selectedItem != null) {
+            try {
+                int newQuantity = selectedItem.getQuantity() + 1;
+                boolean success = cartService.updateCartItemQuantity(selectedItem.getId(), newQuantity);
+                
+                if (success) {
+                    selectedItem.setQuantity(newQuantity);
+                    cartTableView.refresh();
+                    updateTotal();
+                } else {
+                    statusLabel.setText("Could not increase quantity. Check book availability.");
+                }
+            } catch (SQLException e) {
+                statusLabel.setText("Error updating quantity: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    /**
+     * Handles the decrease quantity button action.
+     * 
+     * @param event The action event
+     */
+    @FXML
+    public void handleDecreaseQuantity(ActionEvent event) {
+        CartItem selectedItem = cartTableView.getSelectionModel().getSelectedItem();
+        if (selectedItem != null && selectedItem.getQuantity() > 1) {
+            try {
+                int newQuantity = selectedItem.getQuantity() - 1;
+                boolean success = cartService.updateCartItemQuantity(selectedItem.getId(), newQuantity);
+                
+                if (success) {
+                    selectedItem.setQuantity(newQuantity);
+                    cartTableView.refresh();
+                    updateTotal();
+                } else {
+                    statusLabel.setText("Could not decrease quantity.");
+                }
+            } catch (SQLException e) {
+                statusLabel.setText("Error updating quantity: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    /**
+     * Handles the remove item button action.
+     * 
+     * @param event The action event
+     */
+    @FXML
+    public void handleRemoveItem(ActionEvent event) {
+        CartItem selectedItem = cartTableView.getSelectionModel().getSelectedItem();
+        if (selectedItem != null) {
+            try {
+                boolean success = cartService.removeFromCart(selectedItem.getId());
+                
+                if (success) {
+                    cartItems.remove(selectedItem);
+                    updateTotal();
+                    
+                    // Update UI state based on cart content
+                    boolean hasItems = !cartItems.isEmpty();
+                    checkoutButton.setDisable(!hasItems);
+                    clearCartButton.setDisable(!hasItems);
+                } else {
+                    statusLabel.setText("Could not remove item from cart.");
+                }
+            } catch (SQLException e) {
+                statusLabel.setText("Error removing item: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    /**
+     * Handles the clear cart button action.
+     * 
+     * @param event The action event
+     */
+    @FXML
+    public void handleClearCart(ActionEvent event) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Clear Cart");
         alert.setHeaderText("Clear Shopping Cart");
         alert.setContentText("Are you sure you want to remove all items from your cart?");
         
-        Optional<ButtonType> result = alert.showAndWait();
-        if (result.get() == ButtonType.OK) {
-            cartService.clearCart();
-            loadCartItems();
+        alert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                try {
+                    boolean success = cartService.clearCart(currentUser.getId());
+                    
+                    if (success) {
+                        cartItems.clear();
+                        updateTotal();
+                        
+                        // Update UI state
+                        checkoutButton.setDisable(true);
+                        clearCartButton.setDisable(true);
+                        
+                        statusLabel.setText("Cart cleared successfully.");
+                    } else {
+                        statusLabel.setText("Failed to clear cart.");
+                    }
+                } catch (SQLException e) {
+                    statusLabel.setText("Error clearing cart: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+    
+    /**
+     * Handles the checkout button action.
+     * 
+     * @param event The action event
+     */
+    @FXML
+    public void handleCheckout(ActionEvent event) {
+        if (cartItems.isEmpty()) {
+            statusLabel.setText("Your cart is empty. Add some books first.");
+            return;
+        }
+        
+        if (paymentMethodComboBox.getValue() == null) {
+            statusLabel.setText("Please select a payment method.");
+            return;
+        }
+        
+        try {
+            // Create appropriate payment strategy based on selection
+            PaymentStrategy paymentStrategy = createPaymentStrategy(paymentMethodComboBox.getValue());
+            
+            // Process the purchase
+            Order order = purchaseService.processPurchase(cartItems, currentUser, paymentStrategy);
+            
+            if (order != null) {
+                // Clear the cart after successful purchase
+                cartService.clearCart(currentUser.getId());
+                
+                // Show success message
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Order Placed");
+                alert.setHeaderText("Order Successfully Placed");
+                alert.setContentText("Your order has been successfully placed. Order ID: " + order.getId());
+                
+                // When user closes the alert, navigate to order history
+                alert.showAndWait().ifPresent(response -> {
+                    ViewNavigator.getInstance().navigateTo("customer_orders.fxml");
+                });
+            } else {
+                statusLabel.setText("Failed to process your order. Please try again.");
+            }
+            
+        } catch (SQLException e) {
+            statusLabel.setText("Error processing checkout: " + e.getMessage());
+            e.printStackTrace();
         }
     }
     
-    @FXML
-    private void handleContinueShopping(ActionEvent event) {
-        ViewNavigator.getInstance().navigateTo("customer_dashboard.fxml");
+    /**
+     * Creates a payment strategy based on the selected payment method.
+     * 
+     * @param paymentMethod The selected payment method
+     * @return The payment strategy
+     */
+    private PaymentStrategy createPaymentStrategy(String paymentMethod) {
+        // This would be implemented with actual payment strategies
+        // For now, we'll use a dummy implementation that always succeeds
+        return new PaymentStrategy() {
+            @Override
+            public boolean processPayment(User user, BigDecimal amount) {
+                // In a real application, this would process the actual payment
+                return true;
+            }
+        };
     }
     
-    private void showAlert(String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Information");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+    /**
+     * Handles the back to shop button action.
+     * 
+     * @param event The action event
+     */
+    @FXML
+    public void handleBackToShop(ActionEvent event) {
+        ViewNavigator.getInstance().navigateTo("customer_dashboard.fxml");
     }
 }

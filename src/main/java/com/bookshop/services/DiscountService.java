@@ -1,7 +1,6 @@
 package com.bookshop.services;
 
 import com.bookshop.models.User;
-import com.bookshop.strategies.discount.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -23,8 +22,9 @@ public class DiscountService {
         discountStrategies = new ArrayList<>();
         
         // Add available discount strategies
-        discountStrategies.add(new RegularLoyaltyDiscount());
-        discountStrategies.add(new PremiumLoyaltyDiscount());
+        discountStrategies.add(new RegularMemberDiscount());
+        discountStrategies.add(new PremiumMemberDiscount());
+        discountStrategies.add(new NoDiscount());
         
         // Additional discount strategies can be added here
         // e.g., discountStrategies.add(new HolidayDiscount());
@@ -47,7 +47,8 @@ public class DiscountService {
         // Try each discount strategy and find the one that gives the best discount
         for (DiscountStrategy strategy : discountStrategies) {
             if (strategy.isApplicable(user)) {
-                BigDecimal discountedAmount = strategy.applyDiscount(amount);
+                BigDecimal discountAmount = strategy.calculateDiscount(user, amount);
+                BigDecimal discountedAmount = amount.subtract(discountAmount);
                 
                 // If this strategy gives a better discount (lower amount), use it
                 if (discountedAmount.compareTo(bestDiscountedAmount) < 0) {

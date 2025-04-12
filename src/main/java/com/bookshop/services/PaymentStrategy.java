@@ -4,7 +4,8 @@ import com.bookshop.models.User;
 import java.math.BigDecimal;
 
 /**
- * Strategy pattern interface for payment processing.
+ * Interface defining a payment strategy.
+ * This is an implementation of the Strategy design pattern.
  */
 public interface PaymentStrategy {
     
@@ -16,11 +17,4 @@ public interface PaymentStrategy {
      * @return true if the payment was successful, false otherwise
      */
     boolean processPayment(User user, BigDecimal amount);
-    
-    /**
-     * Gets the payment method type.
-     * 
-     * @return The payment method type (e.g., "Credit Card", "PayPal")
-     */
-    String getType();
 }

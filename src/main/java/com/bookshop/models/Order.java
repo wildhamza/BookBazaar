@@ -118,6 +118,15 @@ public class Order {
         return items;
     }
     
+    /**
+     * Alias for getItems() for compatibility.
+     * 
+     * @return The list of order items
+     */
+    public List<OrderItem> getOrderItems() {
+        return getItems();
+    }
+    
     public void setItems(List<OrderItem> items) {
         this.items = items;
     }

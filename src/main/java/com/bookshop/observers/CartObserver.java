@@ -2,12 +2,12 @@ package com.bookshop.observers;
 
 /**
  * Observer interface for cart updates.
- * Implements the Observer design pattern.
+ * Implements the Observer pattern.
  */
 public interface CartObserver {
     
     /**
-     * Called when the observed cart is updated.
+     * Called when the cart is updated.
      */
     void update();
 }
