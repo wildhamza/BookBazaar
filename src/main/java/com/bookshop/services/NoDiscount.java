@@ -4,8 +4,8 @@ import com.bookshop.models.User;
 import java.math.BigDecimal;
 
 /**
- * No discount strategy - a baseline implementation that applies no discount.
- * This is a concrete implementation of the DiscountStrategy interface.
+ * Implementation of the Discount Strategy pattern for users with no discount.
+ * Returns zero discount amount regardless of input.
  */
 public class NoDiscount implements DiscountStrategy {
     
@@ -30,7 +30,7 @@ public class NoDiscount implements DiscountStrategy {
      */
     @Override
     public boolean isApplicable(User user) {
-        return true;
+        return true; // This is the fallback strategy
     }
     
     /**
@@ -40,6 +40,6 @@ public class NoDiscount implements DiscountStrategy {
      */
     @Override
     public String getDescription() {
-        return "No discount applied";
+        return "No Discount";
     }
 }

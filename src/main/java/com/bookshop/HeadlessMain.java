@@ -179,9 +179,9 @@ public class HeadlessMain {
         BigDecimal originalPrice = new BigDecimal("100.00");
         
         // Test discount calculations
-        BigDecimal standardPrice = discountService.applyBestDiscount(standardUser, originalPrice);
-        BigDecimal regularPrice = discountService.applyBestDiscount(regularUser, originalPrice);
-        BigDecimal premiumPrice = discountService.applyBestDiscount(premiumUser, originalPrice);
+        BigDecimal standardPrice = discountService.calculateDiscountedPrice(originalPrice, standardUser);
+        BigDecimal regularPrice = discountService.calculateDiscountedPrice(originalPrice, regularUser);
+        BigDecimal premiumPrice = discountService.calculateDiscountedPrice(originalPrice, premiumUser);
         
         System.out.println("Discount test for $100.00 book:");
         System.out.println("- Standard user price (0% discount): $" + standardPrice);

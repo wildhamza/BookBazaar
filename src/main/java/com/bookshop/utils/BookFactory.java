@@ -1,6 +1,7 @@
 package com.bookshop.utils;
 
 import com.bookshop.models.Book;
+import com.bookshop.models.BookDTO;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
@@ -96,5 +97,51 @@ public class BookFactory {
         book.setStockQuantity(stockQuantity);
         
         return book;
+    }
+    
+    /**
+     * Creates a Book object from a BookDTO.
+     * This method is useful for converting between the DTO and domain model layers.
+     * 
+     * @param dto The BookDTO to convert
+     * @return A new Book object populated with data from the DTO
+     */
+    public static Book createBookFromDTO(BookDTO dto) {
+        Book book = new Book();
+        book.setId(dto.getId());
+        book.setTitle(dto.getTitle());
+        book.setAuthor(dto.getAuthor());
+        book.setIsbn(dto.getIsbn());
+        book.setPublisher(dto.getPublisher());
+        book.setCategory(dto.getCategory());
+        book.setDescription(dto.getDescription());
+        book.setPrice(dto.getPrice());
+        book.setStockQuantity(dto.getStockQuantity());
+        book.setPublicationDate(dto.getPublicationDate());
+        book.setImageUrl(dto.getImageUrl());
+        return book;
+    }
+    
+    /**
+     * Creates a BookDTO from a Book domain object.
+     * This method is useful for converting between the domain model and DTO layers.
+     * 
+     * @param book The Book to convert
+     * @return A new BookDTO populated with data from the Book
+     */
+    public static BookDTO createDTOFromBook(Book book) {
+        BookDTO dto = new BookDTO();
+        dto.setId(book.getId());
+        dto.setTitle(book.getTitle());
+        dto.setAuthor(book.getAuthor());
+        dto.setIsbn(book.getIsbn());
+        dto.setPublisher(book.getPublisher());
+        dto.setCategory(book.getCategory());
+        dto.setDescription(book.getDescription());
+        dto.setPrice(book.getPrice());
+        dto.setStockQuantity(book.getStockQuantity());
+        dto.setPublicationDate(book.getPublicationDate());
+        dto.setImageUrl(book.getImageUrl());
+        return dto;
     }
 }

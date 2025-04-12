@@ -8,6 +8,8 @@ public interface CartObserver {
     
     /**
      * Called when the cart is updated.
+     * 
+     * @param event The event describing the update
      */
-    void update();
+    void update(CartEvent event);
 }

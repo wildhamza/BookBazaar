@@ -2,197 +2,196 @@ package com.bookshop.services;
 
 import com.bookshop.models.User;
 import com.bookshop.utils.PasswordHasher;
+import com.bookshop.utils.SessionManager;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Service for handling user authentication and registration.
+ * Service class for authentication-related operations.
  */
 public class AuthService {
     
+    private final UserService userService;
+    
     /**
-     * Authenticates a user with the given username and password.
+     * Constructor with UserService dependency.
      * 
-     * @param username The username to authenticate
-     * @param password The password to authenticate
+     * @param userService The UserService to use
+     */
+    public AuthService(UserService userService) {
+        this.userService = userService;
+    }
+    
+    /**
+     * Default constructor that creates a default UserService.
+     */
+    public AuthService() {
+        this(new UserService());
+    }
+    
+    /**
+     * Login a user.
+     * 
+     * @param username The username
+     * @param password The password
      * @return The authenticated user, or null if authentication fails
-     * @throws SQLException If a database error occurs
      */
-    public User authenticateUser(String username, String password) throws SQLException {
-        if (username == null || password == null) {
-            return null;
-        }
-        
-        // Implementation would fetch the user from the database and verify the password
-        // This is a placeholder implementation for testing
-        
-        // For testing the admin user with BCrypt hash
-        if ("admin".equals(username)) {
-            String hashedPassword = PasswordHasher.hashPassword("admin123");
-            if (PasswordHasher.checkPassword(password, hashedPassword)) {
-                User admin = new User();
-                admin.setId(1);
-                admin.setUsername("admin");
-                admin.setPasswordHash(hashedPassword);
-                admin.setRole(User.Role.ADMIN);
-                admin.setEmail("admin@bookshop.com");
-                admin.setFullName("Admin User");
-                return admin;
+    public User login(String username, String password) {
+        try {
+            User user = userService.authenticateUser(username, password);
+            
+            if (user != null) {
+                // Set the current user in the session
+                SessionManager.getInstance().setCurrentUser(user);
+                return user;
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.err.println("Error during login: " + e.getMessage());
         }
         
-        // TODO: Implement the actual database operation
         return null;
     }
     
     /**
-     * Registers a new user with the given information.
+     * Register a new user.
      * 
-     * @param username The username for the new user
-     * @param password The password for the new user
-     * @param email The email for the new user
-     * @param fullName The full name for the new user
+     * @param username The username
+     * @param password The password
+     * @param fullName The full name
+     * @param email The email
+     * @param address The address
+     * @param phoneNumber The phone number
      * @return The registered user, or null if registration fails
-     * @throws SQLException If a database error occurs
-     * @throws IllegalArgumentException If the username is already taken
      */
-    public User registerUser(String username, String password, String email, String fullName) 
-            throws SQLException {
-        if (username == null || password == null || email == null) {
-            throw new IllegalArgumentException("Username, password, and email cannot be null");
-        }
-        
-        // Check if the username is already taken
-        if (isUsernameTaken(username)) {
-            throw new IllegalArgumentException("Username is already taken");
-        }
-        
-        // Hash the password
-        String hashedPassword = PasswordHasher.hashPassword(password);
-        
-        // Create the user object
+    public User register(String username, String password, String fullName, String email, 
+                        String address, String phoneNumber) {
+        // Create a new user object
         User user = new User();
         user.setUsername(username);
-        user.setPasswordHash(hashedPassword);
-        user.setEmail(email);
         user.setFullName(fullName);
-        user.setRole(User.Role.CUSTOMER);
-        
-        // Implementation would insert the user into the database and get the generated ID
-        // This is a placeholder implementation
-        
-        // TODO: Implement the actual database operation
-        return user;
-    }
-    
-    /**
-     * Checks if a username is already taken.
-     * 
-     * @param username The username to check
-     * @return true if the username is taken, false otherwise
-     * @throws SQLException If a database error occurs
-     */
-    public boolean isUsernameTaken(String username) throws SQLException {
-        // Implementation would check if the username exists in the database
-        // This is a placeholder implementation
-        
-        // TODO: Implement the actual database operation
-        return false;
-    }
-    
-    /**
-     * Updates a user's password.
-     * 
-     * @param userId The ID of the user to update
-     * @param oldPassword The old password (for verification)
-     * @param newPassword The new password
-     * @return true if the password was updated, false otherwise
-     * @throws SQLException If a database error occurs
-     */
-    public boolean updatePassword(int userId, String oldPassword, String newPassword) throws SQLException {
-        // Implementation would verify the old password and update it in the database
-        // This is a placeholder implementation
-        
-        // TODO: Implement the actual database operation
-        return false;
-    }
-    
-    /**
-     * Gets a user by their ID.
-     * 
-     * @param userId The ID of the user to get
-     * @return The user with the specified ID, or null if not found
-     * @throws SQLException If a database error occurs
-     */
-    public User getUserById(int userId) throws SQLException {
-        // Implementation would fetch the user from the database by ID
-        // This is a placeholder implementation
-        
-        // TODO: Implement the actual database operation
-        return null;
-    }
-    
-    /**
-     * Gets a user by their username.
-     * 
-     * @param username The username of the user to get
-     * @return The user with the specified username, or null if not found
-     * @throws SQLException If a database error occurs
-     */
-    public User getUserByUsername(String username) throws SQLException {
-        // Implementation would fetch the user from the database by username
-        // This is a placeholder implementation
-        
-        // TODO: Implement the actual database operation
-        return null;
-    }
-    
-    /**
-     * Registers a new customer with the given information.
-     * 
-     * @param username The username for the new customer
-     * @param password The password for the new customer
-     * @param firstName The first name for the new customer
-     * @param lastName The last name for the new customer
-     * @param email The email for the new customer
-     * @param phoneNumber The phone number for the new customer
-     * @param address The address for the new customer
-     * @return The registered customer, or null if registration fails
-     * @throws SQLException If a database error occurs
-     * @throws IllegalArgumentException If the username is already taken
-     */
-    public User registerCustomer(String username, String password, String firstName, String lastName, 
-                               String email, String phoneNumber, String address) throws SQLException {
-        if (username == null || password == null || email == null) {
-            throw new IllegalArgumentException("Username, password, and email cannot be null");
-        }
-        
-        // Check if the username is already taken
-        if (isUsernameTaken(username)) {
-            throw new IllegalArgumentException("Username is already taken");
-        }
-        
-        // Hash the password
-        String hashedPassword = PasswordHasher.hashPassword(password);
-        
-        // Create the user object
-        User user = new User();
-        user.setUsername(username);
-        user.setPasswordHash(hashedPassword);
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
         user.setEmail(email);
-        user.setPhoneNumber(phoneNumber);
         user.setAddress(address);
-        user.setRole(User.Role.CUSTOMER);
+        user.setPhoneNumber(phoneNumber);
+        user.setRole("CUSTOMER"); // Default role for new registrations
+        user.setOrderCount(0); // New users start with 0 orders
         
-        // Implementation would insert the user into the database and get the generated ID
-        // This is a placeholder implementation
+        try {
+            // Try to register the user
+            boolean success = userService.registerUser(user, password);
+            
+            if (success) {
+                // Retrieve the user to get the generated ID
+                User registeredUser = userService.getUserByUsername(username);
+                if (registeredUser != null) {
+                    // Set the current user in the session
+                    SessionManager.getInstance().setCurrentUser(registeredUser);
+                }
+                return registeredUser;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.err.println("Error during registration: " + e.getMessage());
+        }
         
-        // TODO: Implement the actual database operation
-        return user;
+        return null;
+    }
+    
+    /**
+     * Logout the current user.
+     */
+    public void logout() {
+        SessionManager.getInstance().setCurrentUser(null);
+    }
+    
+    /**
+     * Check if the current session has an active user.
+     * 
+     * @return true if a user is logged in, false otherwise
+     */
+    public boolean isLoggedIn() {
+        return SessionManager.getInstance().getCurrentUser() != null;
+    }
+    
+    /**
+     * Check if the current user is an administrator.
+     * 
+     * @return true if the current user is an admin, false otherwise
+     */
+    public boolean isAdmin() {
+        User currentUser = SessionManager.getInstance().getCurrentUser();
+        return userService.isAdmin(currentUser);
+    }
+    
+    /**
+     * Get the current user.
+     * 
+     * @return The current user, or null if no user is logged in
+     */
+    public User getCurrentUser() {
+        return SessionManager.getInstance().getCurrentUser();
+    }
+    
+    /**
+     * Check if a user is a regular loyalty member (has made 5 or more orders).
+     * 
+     * @param user The user to check
+     * @return true if the user is a regular member, false otherwise
+     */
+    public boolean isRegularMember(User user) {
+        return userService.isRegularMember(user);
+    }
+    
+    /**
+     * Check if a user is a premium loyalty member (has made 10 or more orders).
+     * 
+     * @param user The user to check
+     * @return true if the user is a premium member, false otherwise
+     */
+    public boolean isPremiumMember(User user) {
+        return userService.isPremiumMember(user);
+    }
+    
+    /**
+     * Update a user's profile information.
+     * 
+     * @param user The user with updated information
+     * @return true if the update was successful, false otherwise
+     */
+    public boolean updateProfile(User user) {
+        try {
+            boolean success = userService.updateUserProfile(user);
+            
+            if (success) {
+                // Update the session with the latest user data
+                User updatedUser = userService.getUserById(user.getId());
+                if (updatedUser != null) {
+                    SessionManager.getInstance().setCurrentUser(updatedUser);
+                }
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.err.println("Error updating profile: " + e.getMessage());
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Change a user's password.
+     * 
+     * @param userId The user ID
+     * @param newPassword The new password
+     * @return true if the password was changed successfully, false otherwise
+     */
+    public boolean changePassword(int userId, String newPassword) {
+        try {
+            return userService.changePassword(userId, newPassword);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.err.println("Error changing password: " + e.getMessage());
+            return false;
+        }
     }
 }

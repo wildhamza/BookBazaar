@@ -1,24 +1,36 @@
 package com.bookshop.services;
 
 import com.bookshop.models.User;
-import com.bookshop.utils.DatabaseConnection;
+import com.bookshop.repositories.UserRepository;
+import com.bookshop.repositories.UserRepositoryImpl;
+import com.bookshop.utils.PasswordHasher;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.mindrot.jbcrypt.BCrypt;
+import java.util.List;
 
 /**
  * Service class for user-related operations.
+ * This class follows the Service Layer pattern, providing an abstraction layer between
+ * controllers and the data access layer (repositories).
  */
 public class UserService {
     
+    private final UserRepository repository;
+    
     /**
-     * Default constructor.
+     * Constructor with the repository dependency.
+     * 
+     * @param repository The UserRepository implementation to use
+     */
+    public UserService(UserRepository repository) {
+        this.repository = repository;
+    }
+    
+    /**
+     * Default constructor that creates a default repository implementation.
      */
     public UserService() {
-        // Don't store a connection as a field, get a fresh connection for each method call
+        this(new UserRepositoryImpl());
     }
     
     /**
@@ -34,7 +46,7 @@ public class UserService {
             return null;
         }
         
-        // For now we'll hardcode the admin credentials
+        // For demo purposes, we'll hardcode admin and customer credentials
         if ("admin".equals(username) && "admin123".equals(password)) {
             User adminUser = new User();
             adminUser.setId(1);
@@ -45,7 +57,6 @@ public class UserService {
             return adminUser;
         }
         
-        // For now we'll hardcode the customer credentials
         if ("customer".equals(username) && "customer123".equals(password)) {
             User customerUser = new User();
             customerUser.setId(2);
@@ -59,36 +70,10 @@ public class UserService {
         }
         
         // Look up the user in the database
-        String query = "SELECT * FROM users WHERE username = ?";
+        User user = repository.findByUsername(username);
         
-        try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            
-            stmt.setString(1, username);
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    // Get stored hash
-                    String storedHash = rs.getString("password_hash");
-                    
-                    // Check password
-                    if (BCrypt.checkpw(password, storedHash)) {
-                        User user = new User();
-                        user.setId(rs.getInt("id"));
-                        user.setUsername(rs.getString("username"));
-                        user.setFullName(rs.getString("full_name"));
-                        user.setEmail(rs.getString("email"));
-                        user.setAddress(rs.getString("address"));
-                        user.setPhoneNumber(rs.getString("phone_number"));
-                        user.setRole(rs.getString("role"));
-                        user.setOrderCount(rs.getInt("order_count"));
-                        return user;
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw e;
+        if (user != null && PasswordHasher.verifyPassword(password, user.getPasswordHash())) {
+            return user;
         }
         
         return null;
@@ -108,39 +93,21 @@ public class UserService {
         }
         
         // Check if username already exists
-        String checkQuery = "SELECT COUNT(*) FROM users WHERE username = ?";
-        
-        try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement checkStmt = conn.prepareStatement(checkQuery)) {
-            
-            checkStmt.setString(1, user.getUsername());
-            
-            try (ResultSet rs = checkStmt.executeQuery()) {
-                if (rs.next() && rs.getInt(1) > 0) {
-                    return false; // Username already exists
-                }
-            }
-            
-            // Hash the password
-            String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
-            
-            // Insert the new user
-            String insertQuery = "INSERT INTO users (username, password_hash, full_name, email, address, phone_number, role, order_count) " +
-                               "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-            
-            try (PreparedStatement insertStmt = conn.prepareStatement(insertQuery)) {
-                insertStmt.setString(1, user.getUsername());
-                insertStmt.setString(2, hashedPassword);
-                insertStmt.setString(3, user.getFullName());
-                insertStmt.setString(4, user.getEmail());
-                insertStmt.setString(5, user.getAddress());
-                insertStmt.setString(6, user.getPhoneNumber());
-                insertStmt.setString(7, user.getRole() != null ? user.getRole() : "CUSTOMER"); // Default to CUSTOMER
-                insertStmt.setInt(8, user.getOrderCount());
-                
-                return insertStmt.executeUpdate() > 0;
-            }
+        if (repository.findByUsername(user.getUsername()) != null) {
+            return false; // Username already exists
         }
+        
+        // Hash the password
+        String hashedPassword = PasswordHasher.hashPassword(password);
+        user.setPasswordHash(hashedPassword);
+        
+        // Set default role if not specified
+        if (user.getRole() == null) {
+            user.setRole("CUSTOMER");
+        }
+        
+        // Save the user
+        return repository.save(user) > 0;
     }
     
     /**
@@ -155,19 +122,19 @@ public class UserService {
             return false;
         }
         
-        String query = "UPDATE users SET email = ?, full_name = ?, address = ?, phone_number = ? WHERE id = ?";
-        
-        try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            
-            stmt.setString(1, user.getEmail());
-            stmt.setString(2, user.getFullName());
-            stmt.setString(3, user.getAddress());
-            stmt.setString(4, user.getPhoneNumber());
-            stmt.setInt(5, user.getId());
-            
-            return stmt.executeUpdate() > 0;
+        // Get existing user to preserve fields that shouldn't be updated
+        User existingUser = repository.findById(user.getId());
+        if (existingUser == null) {
+            return false;
         }
+        
+        // Update only profile fields
+        existingUser.setEmail(user.getEmail());
+        existingUser.setFullName(user.getFullName());
+        existingUser.setAddress(user.getAddress());
+        existingUser.setPhoneNumber(user.getPhoneNumber());
+        
+        return repository.update(existingUser);
     }
     
     /**
@@ -183,38 +150,28 @@ public class UserService {
             return false;
         }
         
-        // Hash the new password
-        String hashedPassword = BCrypt.hashpw(newPassword, BCrypt.gensalt());
-        
-        String query = "UPDATE users SET password_hash = ? WHERE id = ?";
-        
-        try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            
-            stmt.setString(1, hashedPassword);
-            stmt.setInt(2, userId);
-            
-            return stmt.executeUpdate() > 0;
+        // Get existing user
+        User user = repository.findById(userId);
+        if (user == null) {
+            return false;
         }
+        
+        // Hash the new password
+        String hashedPassword = PasswordHasher.hashPassword(newPassword);
+        user.setPasswordHash(hashedPassword);
+        
+        return repository.update(user);
     }
     
     /**
-     * Increment the order count for a user.
+     * Increment a user's order count.
      * 
      * @param userId The user ID
      * @return true if successful, false otherwise
      * @throws SQLException If a database error occurs
      */
     public boolean incrementOrderCount(int userId) throws SQLException {
-        String query = "UPDATE users SET order_count = order_count + 1 WHERE id = ?";
-        
-        try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            
-            stmt.setInt(1, userId);
-            
-            return stmt.executeUpdate() > 0;
-        }
+        return repository.incrementOrderCount(userId);
     }
     
     /**
@@ -225,31 +182,7 @@ public class UserService {
      * @throws SQLException If a database error occurs
      */
     public User getUserById(int userId) throws SQLException {
-        String query = "SELECT * FROM users WHERE id = ?";
-        
-        try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            
-            stmt.setInt(1, userId);
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    User user = new User();
-                    user.setId(rs.getInt("id"));
-                    user.setUsername(rs.getString("username"));
-                    user.setPasswordHash(rs.getString("password_hash"));
-                    user.setFullName(rs.getString("full_name"));
-                    user.setEmail(rs.getString("email"));
-                    user.setAddress(rs.getString("address"));
-                    user.setPhoneNumber(rs.getString("phone_number"));
-                    user.setRole(rs.getString("role"));
-                    user.setOrderCount(rs.getInt("order_count"));
-                    return user;
-                }
-            }
-        }
-        
-        return null;
+        return repository.findById(userId);
     }
     
     /**
@@ -260,90 +193,46 @@ public class UserService {
      * @throws SQLException If a database error occurs
      */
     public User getUserByUsername(String username) throws SQLException {
-        if (username == null) {
-            return null;
-        }
-        
-        // For testing purposes, return a hardcoded admin user
-        if ("admin".equals(username)) {
-            User adminUser = new User();
-            adminUser.setId(1);
-            adminUser.setUsername("admin");
-            adminUser.setRole("ADMIN");
-            adminUser.setFullName("Admin User");
-            adminUser.setEmail("admin@bookshop.com");
-            return adminUser;
-        }
-        
-        String query = "SELECT * FROM users WHERE username = ?";
-        
-        try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            
-            stmt.setString(1, username);
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    User user = new User();
-                    user.setId(rs.getInt("id"));
-                    user.setUsername(rs.getString("username"));
-                    user.setPasswordHash(rs.getString("password_hash"));
-                    user.setFullName(rs.getString("full_name"));
-                    user.setEmail(rs.getString("email"));
-                    user.setAddress(rs.getString("address"));
-                    user.setPhoneNumber(rs.getString("phone_number"));
-                    user.setRole(rs.getString("role"));
-                    user.setOrderCount(rs.getInt("order_count"));
-                    return user;
-                }
-            }
-        }
-        
-        return null;
+        return repository.findByUsername(username);
     }
     
     /**
      * Get all users.
      * 
-     * @return A list of all users
+     * @return List of all users
      * @throws SQLException If a database error occurs
      */
-    public java.util.List<User> getAllUsers() throws SQLException {
-        java.util.List<User> users = new java.util.ArrayList<>();
-        
-        String query = "SELECT * FROM users";
-        
-        try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    User user = new User();
-                    user.setId(rs.getInt("id"));
-                    user.setUsername(rs.getString("username"));
-                    user.setPasswordHash(rs.getString("password_hash"));
-                    user.setFullName(rs.getString("full_name"));
-                    user.setEmail(rs.getString("email"));
-                    user.setAddress(rs.getString("address"));
-                    user.setPhoneNumber(rs.getString("phone_number"));
-                    user.setRole(rs.getString("role"));
-                    user.setOrderCount(rs.getInt("order_count"));
-                    users.add(user);
-                }
-            }
-        }
-        
-        // If no users found, add a hardcoded admin user for testing
-        if (users.isEmpty()) {
-            User adminUser = new User();
-            adminUser.setId(1);
-            adminUser.setUsername("admin");
-            adminUser.setFullName("Admin User");
-            adminUser.setEmail("admin@bookshop.com");
-            adminUser.setRole("ADMIN");
-            users.add(adminUser);
-        }
-        
-        return users;
+    public List<User> getAllUsers() throws SQLException {
+        return repository.findAll();
+    }
+    
+    /**
+     * Check if a user has the admin role.
+     * 
+     * @param user The user to check
+     * @return true if the user is an admin, false otherwise
+     */
+    public boolean isAdmin(User user) {
+        return user != null && "ADMIN".equals(user.getRole());
+    }
+    
+    /**
+     * Check if a user is a regular member (has 5 or more orders).
+     * 
+     * @param user The user to check
+     * @return true if the user is a regular member, false otherwise
+     */
+    public boolean isRegularMember(User user) {
+        return user != null && user.getOrderCount() >= 5 && user.getOrderCount() < 10;
+    }
+    
+    /**
+     * Check if a user is a premium member (has 10 or more orders).
+     * 
+     * @param user The user to check
+     * @return true if the user is a premium member, false otherwise
+     */
+    public boolean isPremiumMember(User user) {
+        return user != null && user.getOrderCount() >= 10;
     }
 }

@@ -96,8 +96,8 @@ public class RegisterController implements Initializable {
             }
             
             // Register user
-            User newUser = authService.registerCustomer(
-                username, password, firstName, lastName, email, phone, address
+            User newUser = authService.register(
+                username, password, fullName, email, address, phone
             );
             
             // Show success message

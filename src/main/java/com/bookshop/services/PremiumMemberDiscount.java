@@ -4,18 +4,16 @@ import com.bookshop.models.User;
 import java.math.BigDecimal;
 
 /**
- * Premium member discount strategy - applies a 20% discount for premium loyalty members.
- * A premium loyalty member is a user with at least 10 previous orders.
- * This is a concrete implementation of the DiscountStrategy interface.
+ * Implementation of the Discount Strategy pattern for premium members.
+ * Provides a 15% discount for users with 10 or more orders.
  */
 public class PremiumMemberDiscount implements DiscountStrategy {
     
-    private static final BigDecimal DISCOUNT_PERCENTAGE = new BigDecimal("0.20"); // 20% discount
-    private static final int MIN_ORDER_COUNT = 10;
+    private static final BigDecimal DISCOUNT_PERCENTAGE = new BigDecimal("0.15"); // 15% discount
     
     /**
      * Calculates a discount amount for a purchase.
-     * Premium members get a 20% discount.
+     * Premium members get a 15% discount.
      * 
      * @param user The user making the purchase
      * @param amount The total purchase amount before discount
@@ -23,9 +21,6 @@ public class PremiumMemberDiscount implements DiscountStrategy {
      */
     @Override
     public BigDecimal calculateDiscount(User user, BigDecimal amount) {
-        if (!isApplicable(user)) {
-            return BigDecimal.ZERO;
-        }
         return amount.multiply(DISCOUNT_PERCENTAGE);
     }
     
@@ -38,7 +33,7 @@ public class PremiumMemberDiscount implements DiscountStrategy {
      */
     @Override
     public boolean isApplicable(User user) {
-        return user != null && user.getOrderCount() >= MIN_ORDER_COUNT;
+        return user != null && user.getOrderCount() >= 10;
     }
     
     /**
@@ -48,6 +43,6 @@ public class PremiumMemberDiscount implements DiscountStrategy {
      */
     @Override
     public String getDescription() {
-        return "20% Premium Member Discount (10+ orders)";
+        return "15% Premium Member Discount";
     }
 }

@@ -1,48 +1,53 @@
 package com.bookshop.services;
 
-import com.bookshop.utils.DatabaseConnection;
 import com.bookshop.models.Book;
+import com.bookshop.models.BookDTO;
+import com.bookshop.repositories.BookRepository;
+import com.bookshop.repositories.BookRepositoryImpl;
+import com.bookshop.utils.BookFactory;
 
-import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Service class for book-related operations.
+ * This class follows the Service Layer pattern, providing an abstraction layer between
+ * controllers and the data access layer (repositories).
  */
 public class BookService {
     
+    private final BookRepository repository;
+    
     /**
-     * Gets all books from the database.
+     * Constructor with the repository dependency.
+     * 
+     * @param repository The BookRepository implementation to use
+     */
+    public BookService(BookRepository repository) {
+        this.repository = repository;
+    }
+    
+    /**
+     * Default constructor that creates a default repository implementation.
+     */
+    public BookService() {
+        this(new BookRepositoryImpl());
+    }
+    
+    /**
+     * Gets all books.
      * 
      * @return A list of all books
      * @throws SQLException If a database access error occurs
      */
     public List<Book> getAllBooks() throws SQLException {
-        List<Book> books = new ArrayList<>();
-        
         System.out.println("BookService: getAllBooks called");
         
-        try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT * FROM books ORDER BY title")) {
-            
-            System.out.println("BookService: Executing query: SELECT * FROM books ORDER BY title");
-            int count = 0;
-            
-            while (rs.next()) {
-                count++;
-                Book book = mapResultSetToBook(rs);
-                books.add(book);
-                System.out.println("BookService: Found book: " + book.getTitle() + " (ID: " + book.getId() + ")");
-            }
-            
-            System.out.println("BookService: Found " + count + " books in total");
+        try {
+            List<Book> books = repository.findAll();
+            System.out.println("BookService: Found " + books.size() + " books in total");
+            return books;
         } catch (SQLException e) {
             System.err.println("BookService: SQLException in getAllBooks: " + e.getMessage());
             e.printStackTrace();
@@ -52,176 +57,112 @@ public class BookService {
             e.printStackTrace();
             throw new SQLException("Error retrieving books: " + e.getMessage(), e);
         }
-        
-        return books;
     }
     
     /**
-     * Gets books by category from the database.
+     * Gets books by category.
      * 
      * @param category The category to filter by
      * @return A list of books in the specified category
      * @throws SQLException If a database access error occurs
      */
     public List<Book> getBooksByCategory(String category) throws SQLException {
-        List<Book> books = new ArrayList<>();
-        
-        String sql = "SELECT * FROM books WHERE category = ? ORDER BY title";
-        
-        try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setString(1, category);
-            
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
-                    Book book = mapResultSetToBook(rs);
-                    books.add(book);
-                }
-            }
-        }
-        
-        return books;
+        return repository.findByCategory(category);
     }
     
     /**
-     * Gets a book by its ID from the database.
+     * Gets a book by its ID.
      * 
      * @param id The book ID
      * @return The book, or null if not found
      * @throws SQLException If a database access error occurs
      */
     public Book getBookById(int id) throws SQLException {
-        String sql = "SELECT * FROM books WHERE id = ?";
-        
-        try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setInt(1, id);
-            
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    return mapResultSetToBook(rs);
-                }
-            }
-        }
-        
-        return null;
+        return repository.findById(id);
     }
     
     /**
-     * Adds a new book to the database.
+     * Gets a book by its ID and returns it as a DTO.
+     * 
+     * @param id The book ID
+     * @return The book DTO, or null if not found
+     * @throws SQLException If a database access error occurs
+     */
+    public BookDTO getBookDTOById(int id) throws SQLException {
+        Book book = repository.findById(id);
+        if (book == null) {
+            return null;
+        }
+        return BookFactory.createDTOFromBook(book);
+    }
+    
+    /**
+     * Adds a new book.
      * 
      * @param book The book to add
      * @return The ID of the newly added book
      * @throws SQLException If a database access error occurs
      */
     public int addBook(Book book) throws SQLException {
-        String sql = "INSERT INTO books (title, author, isbn, publisher, price, category, description, image_url, stock_quantity) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        
-        try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            
-            pstmt.setString(1, book.getTitle());
-            pstmt.setString(2, book.getAuthor());
-            pstmt.setString(3, book.getIsbn());
-            pstmt.setString(4, book.getPublisher());
-            pstmt.setBigDecimal(5, book.getPrice());
-            pstmt.setString(6, book.getCategory());
-            pstmt.setString(7, book.getDescription());
-            pstmt.setString(8, book.getImageUrl());
-            pstmt.setInt(9, book.getStockQuantity());
-            
-            int affectedRows = pstmt.executeUpdate();
-            
-            if (affectedRows == 0) {
-                throw new SQLException("Creating book failed, no rows affected.");
-            }
-            
-            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    int id = generatedKeys.getInt(1);
-                    book.setId(id);
-                    return id;
-                } else {
-                    throw new SQLException("Creating book failed, no ID obtained.");
-                }
-            }
-        }
+        return repository.save(book);
     }
     
     /**
-     * Updates an existing book in the database.
+     * Adds a new book from a DTO.
+     * 
+     * @param bookDTO The book DTO to add
+     * @return The ID of the newly added book
+     * @throws SQLException If a database access error occurs
+     */
+    public int addBook(BookDTO bookDTO) throws SQLException {
+        Book book = BookFactory.createBookFromDTO(bookDTO);
+        return repository.save(book);
+    }
+    
+    /**
+     * Updates an existing book.
      * 
      * @param book The book to update
      * @return true if successful, false otherwise
      * @throws SQLException If a database access error occurs
      */
     public boolean updateBook(Book book) throws SQLException {
-        String sql = "UPDATE books SET title = ?, author = ?, isbn = ?, publisher = ?, " +
-                     "price = ?, category = ?, description = ?, image_url = ?, stock_quantity = ? " +
-                     "WHERE id = ?";
-        
-        try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setString(1, book.getTitle());
-            pstmt.setString(2, book.getAuthor());
-            pstmt.setString(3, book.getIsbn());
-            pstmt.setString(4, book.getPublisher());
-            pstmt.setBigDecimal(5, book.getPrice());
-            pstmt.setString(6, book.getCategory());
-            pstmt.setString(7, book.getDescription());
-            pstmt.setString(8, book.getImageUrl());
-            pstmt.setInt(9, book.getStockQuantity());
-            pstmt.setInt(10, book.getId());
-            
-            int affectedRows = pstmt.executeUpdate();
-            return affectedRows > 0;
-        }
+        return repository.update(book);
     }
     
     /**
-     * Deletes a book from the database by its ID.
+     * Updates an existing book from a DTO.
      * 
-     * @param id The ID of the book to delete
+     * @param bookDTO The book DTO to update
+     * @return true if successful, false otherwise
+     * @throws SQLException If a database access error occurs
+     */
+    public boolean updateBook(BookDTO bookDTO) throws SQLException {
+        Book book = BookFactory.createBookFromDTO(bookDTO);
+        return repository.update(book);
+    }
+    
+    /**
+     * Deletes a book by its ID.
+     * 
+     * @param id The book ID
      * @return true if successful, false otherwise
      * @throws SQLException If a database access error occurs
      */
     public boolean deleteBook(int id) throws SQLException {
-        String sql = "DELETE FROM books WHERE id = ?";
-        
-        try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setInt(1, id);
-            
-            int affectedRows = pstmt.executeUpdate();
-            return affectedRows > 0;
-        }
+        return repository.delete(id);
     }
     
     /**
-     * Updates the quantity of a book in the database.
+     * Updates the stock quantity of a book.
      * 
-     * @param bookId The ID of the book
-     * @param newQuantity The new quantity
+     * @param bookId The book ID
+     * @param newQuantity The new stock quantity
      * @return true if successful, false otherwise
      * @throws SQLException If a database access error occurs
      */
     public boolean updateBookQuantity(int bookId, int newQuantity) throws SQLException {
-        String sql = "UPDATE books SET stock_quantity = ? WHERE id = ?";
-        
-        try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setInt(1, newQuantity);
-            pstmt.setInt(2, bookId);
-            
-            int affectedRows = pstmt.executeUpdate();
-            return affectedRows > 0;
-        }
+        return repository.updateStockQuantity(bookId, newQuantity);
     }
     
     /**
@@ -232,32 +173,21 @@ public class BookService {
      * @throws SQLException If a database access error occurs
      */
     public List<Book> searchBooks(String query) throws SQLException {
-        List<Book> books = new ArrayList<>();
-        
-        String sql = "SELECT * FROM books WHERE " +
-                     "LOWER(title) LIKE ? OR " +
-                     "LOWER(author) LIKE ? OR " +
-                     "LOWER(description) LIKE ? " +
-                     "ORDER BY title";
-        
-        String searchPattern = "%" + query.toLowerCase() + "%";
-        
-        try (Connection conn = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setString(1, searchPattern);
-            pstmt.setString(2, searchPattern);
-            pstmt.setString(3, searchPattern);
-            
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
-                    Book book = mapResultSetToBook(rs);
-                    books.add(book);
-                }
-            }
-        }
-        
-        return books;
+        return repository.search(query);
+    }
+    
+    /**
+     * Searches for books by title, author, or description and returns them as DTOs.
+     * 
+     * @param query The search query
+     * @return A list of book DTOs matching the search criteria
+     * @throws SQLException If a database access error occurs
+     */
+    public List<BookDTO> searchBooksAsDTO(String query) throws SQLException {
+        List<Book> books = repository.search(query);
+        return books.stream()
+            .map(BookFactory::createDTOFromBook)
+            .collect(Collectors.toList());
     }
     
     /**
@@ -269,41 +199,6 @@ public class BookService {
      * @throws SQLException If a database access error occurs
      */
     public boolean updateStockQuantity(int bookId, int quantityChange) throws SQLException {
-        Book book = getBookById(bookId);
-        if (book == null) {
-            return false;
-        }
-        
-        int newQuantity = book.getStockQuantity() + quantityChange;
-        // Ensure we don't go below 0
-        if (newQuantity < 0) {
-            newQuantity = 0;
-        }
-        
-        return updateBookQuantity(bookId, newQuantity);
-    }
-    
-    /**
-     * Maps a ResultSet row to a Book object.
-     * 
-     * @param rs The ResultSet
-     * @return The Book object
-     * @throws SQLException If a database access error occurs
-     */
-    private Book mapResultSetToBook(ResultSet rs) throws SQLException {
-        Book book = new Book();
-        
-        book.setId(rs.getInt("id"));
-        book.setTitle(rs.getString("title"));
-        book.setAuthor(rs.getString("author"));
-        book.setIsbn(rs.getString("isbn"));
-        book.setPublisher(rs.getString("publisher"));
-        book.setPrice(rs.getBigDecimal("price"));
-        book.setCategory(rs.getString("category"));
-        book.setDescription(rs.getString("description"));
-        book.setImageUrl(rs.getString("image_url"));
-        book.setStockQuantity(rs.getInt("stock_quantity"));
-        
-        return book;
+        return repository.updateStockQuantityByDelta(bookId, quantityChange);
     }
 }

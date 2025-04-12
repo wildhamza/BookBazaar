@@ -648,7 +648,7 @@ public class ConsoleMain {
         System.out.println("Total: $" + total);
         
         // Apply discount if applicable
-        BigDecimal discountedTotal = discountService.applyBestDiscount(currentUser, total);
+        BigDecimal discountedTotal = discountService.calculateDiscountedPrice(total, currentUser);
         if (!discountedTotal.equals(total)) {
             BigDecimal discountAmount = total.subtract(discountedTotal);
             System.out.println("Discount: $" + discountAmount);
