@@ -1,93 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1000.0" styleClass="main-container" stylesheets="@../styles/styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bookshop.controllers.ShoppingCartController">
-   <top>
-      <VBox BorderPane.alignment="CENTER">
-         <children>
-            <HBox alignment="CENTER_LEFT" spacing="20.0">
-               <padding>
-                  <Insets bottom="10.0" left="20.0" right="20.0" top="20.0" />
-               </padding>
-               <children>
-                  <Label styleClass="header-label" text="Shopping Cart">
-                     <font>
-                        <Font name="System Bold" size="24.0" />
-                     </font>
-                  </Label>
-                  <HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
-                     <children>
-                        <Button fx:id="continueShoppingButton" mnemonicParsing="false" onAction="#handleContinueShopping" styleClass="secondary-button" text="Continue Shopping" />
-                     </children>
-                  </HBox>
-               </children>
-            </HBox>
-            <Separator />
-         </children>
-      </VBox>
-   </top>
-   <center>
-      <VBox spacing="20.0" BorderPane.alignment="CENTER">
-         <padding>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-         </padding>
-         <children>
-            <TableView fx:id="cartTableView" prefHeight="400.0" VBox.vgrow="ALWAYS">
-              <columns>
-                <TableColumn fx:id="titleColumn" prefWidth="250.0" text="Title" />
-                <TableColumn fx:id="authorColumn" prefWidth="150.0" text="Author" />
-                  <TableColumn fx:id="priceColumn" prefWidth="100.0" text="Price" />
-                  <TableColumn fx:id="quantityColumn" prefWidth="100.0" text="Quantity" />
-                  <TableColumn fx:id="subtotalColumn" prefWidth="100.0" text="Subtotal" />
-              </columns>
-            </TableView>
-            <HBox alignment="CENTER_RIGHT" spacing="20.0">
-               <children>
-                  <Label styleClass="total-label" text="Total: ">
-                     <font>
-                        <Font name="System Bold" size="16.0" />
-                     </font>
-                  </Label>
-                  <Label fx:id="totalAmountLabel" styleClass="total-amount" text="$0.00">
-                     <font>
-                        <Font size="16.0" />
-                     </font>
-                  </Label>
-               </children>
-            </HBox>
-            <Separator />
-            <HBox alignment="CENTER_LEFT" spacing="20.0">
-               <children>
-                  <Label text="Payment Method:">
-                     <font>
-                        <Font name="System Bold" size="14.0" />
-                     </font>
-                  </Label>
-                  <ComboBox fx:id="paymentMethodComboBox" prefWidth="200.0" promptText="Select Payment Method" />
-                  <HBox alignment="CENTER_RIGHT" spacing="10.0" HBox.hgrow="ALWAYS">
-                     <children>
-                        <Button fx:id="clearCartButton" mnemonicParsing="false" onAction="#handleClearCart" styleClass="warning-button" text="Clear Cart" />
-                        <Button fx:id="checkoutButton" mnemonicParsing="false" onAction="#handleCheckout" styleClass="primary-button" text="Checkout">
-                           <font>
-                              <Font size="14.0" />
-                           </font>
-                        </Button>
-                     </children>
-                  </HBox>
-               </children>
-            </HBox>
-         </children>
-      </VBox>
-   </center>
-</BorderPane>
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="com.bookshop.controllers.ShoppingCartController" spacing="10">
+    <padding>
+        <Insets top="15" right="15" bottom="15" left="15"/>
+    </padding>
+    <children>
+        <Label text="Shopping Cart" style="-fx-font-size: 20; -fx-font-weight: bold;"/>
+        
+        <TableView fx:id="cartTableView" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="titleColumn" text="Title" prefWidth="200"/>
+                <TableColumn fx:id="authorColumn" text="Author" prefWidth="150"/>
+                <TableColumn fx:id="priceColumn" text="Price" prefWidth="100"/>
+                <TableColumn fx:id="quantityColumn" text="Quantity" prefWidth="80"/>
+                <TableColumn fx:id="subtotalColumn" text="Subtotal" prefWidth="100"/>
+            </columns>
+        </TableView>
+        
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <Label fx:id="totalLabel" text="Total: $0.00" style="-fx-font-weight: bold;"/>
+        </HBox>
+        
+        <HBox spacing="10">
+            <Button fx:id="increaseQuantityButton" text="+" onAction="#handleIncreaseQuantity" disable="true"/>
+            <Button fx:id="decreaseQuantityButton" text="-" onAction="#handleDecreaseQuantity" disable="true"/>
+            <Button fx:id="removeItemButton" text="Remove" onAction="#handleRemoveItem" disable="true"/>
+            <Button fx:id="clearCartButton" text="Clear Cart" onAction="#handleClearCart" disable="true"/>
+        </HBox>
+        
+        <HBox spacing="10" alignment="CENTER">
+            <Label text="Payment Method:"/>
+            <ComboBox fx:id="paymentMethodComboBox" prefWidth="150"/>
+        </HBox>
+        
+        <Label fx:id="statusLabel" text="" style="-fx-text-fill: red;"/>
+        
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <Button fx:id="continueShoppingButton" text="Continue Shopping" onAction="#handleContinueShopping"/>
+            <Button fx:id="checkoutButton" text="Checkout" onAction="#handleCheckout" disable="true" style="-fx-base: lightgreen;"/>
+        </HBox>
+    </children>
+</VBox>

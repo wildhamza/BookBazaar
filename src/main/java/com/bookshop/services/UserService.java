@@ -14,17 +14,11 @@ import org.mindrot.jbcrypt.BCrypt;
  */
 public class UserService {
     
-    private Connection connection;
-    
     /**
      * Default constructor.
      */
     public UserService() {
-        try {
-            this.connection = DatabaseConnection.getInstance().getConnection();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        // Don't store a connection as a field, get a fresh connection for each method call
     }
     
     /**
@@ -51,30 +45,45 @@ public class UserService {
             return adminUser;
         }
         
+        // For now we'll hardcode the customer credentials
+        if ("customer".equals(username) && "customer123".equals(password)) {
+            User customerUser = new User();
+            customerUser.setId(2);
+            customerUser.setUsername("customer");
+            customerUser.setFullName("Regular Customer");
+            customerUser.setEmail("customer@example.com");
+            customerUser.setAddress("456 Reader Lane");
+            customerUser.setPhoneNumber("555-987-6543");
+            customerUser.setRole("CUSTOMER");
+            return customerUser;
+        }
+        
         // Look up the user in the database
         String query = "SELECT * FROM users WHERE username = ?";
         
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            
             stmt.setString(1, username);
             
-            ResultSet rs = stmt.executeQuery();
-            
-            if (rs.next()) {
-                // Get stored hash
-                String storedHash = rs.getString("password_hash");
-                
-                // Check password
-                if (BCrypt.checkpw(password, storedHash)) {
-                    User user = new User();
-                    user.setId(rs.getInt("id"));
-                    user.setUsername(rs.getString("username"));
-                    user.setFullName(rs.getString("full_name"));
-                    user.setEmail(rs.getString("email"));
-                    user.setAddress(rs.getString("address"));
-                    user.setPhoneNumber(rs.getString("phone_number"));
-                    user.setRole(rs.getString("role"));
-                    user.setOrderCount(rs.getInt("order_count"));
-                    return user;
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    // Get stored hash
+                    String storedHash = rs.getString("password_hash");
+                    
+                    // Check password
+                    if (BCrypt.checkpw(password, storedHash)) {
+                        User user = new User();
+                        user.setId(rs.getInt("id"));
+                        user.setUsername(rs.getString("username"));
+                        user.setFullName(rs.getString("full_name"));
+                        user.setEmail(rs.getString("email"));
+                        user.setAddress(rs.getString("address"));
+                        user.setPhoneNumber(rs.getString("phone_number"));
+                        user.setRole(rs.getString("role"));
+                        user.setOrderCount(rs.getInt("order_count"));
+                        return user;
+                    }
                 }
             }
         } catch (SQLException e) {
@@ -101,33 +110,36 @@ public class UserService {
         // Check if username already exists
         String checkQuery = "SELECT COUNT(*) FROM users WHERE username = ?";
         
-        try (PreparedStatement checkStmt = connection.prepareStatement(checkQuery)) {
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement checkStmt = conn.prepareStatement(checkQuery)) {
+            
             checkStmt.setString(1, user.getUsername());
-            ResultSet rs = checkStmt.executeQuery();
             
-            if (rs.next() && rs.getInt(1) > 0) {
-                return false; // Username already exists
+            try (ResultSet rs = checkStmt.executeQuery()) {
+                if (rs.next() && rs.getInt(1) > 0) {
+                    return false; // Username already exists
+                }
             }
-        }
-        
-        // Hash the password
-        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
-        
-        // Insert the new user
-        String insertQuery = "INSERT INTO users (username, password_hash, full_name, email, address, phone_number, role, order_count) " +
-                           "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        
-        try (PreparedStatement insertStmt = connection.prepareStatement(insertQuery)) {
-            insertStmt.setString(1, user.getUsername());
-            insertStmt.setString(2, hashedPassword);
-            insertStmt.setString(3, user.getFullName());
-            insertStmt.setString(4, user.getEmail());
-            insertStmt.setString(5, user.getAddress());
-            insertStmt.setString(6, user.getPhoneNumber());
-            insertStmt.setString(7, user.getRole() != null ? user.getRole() : "CUSTOMER"); // Default to CUSTOMER
-            insertStmt.setInt(8, user.getOrderCount());
             
-            return insertStmt.executeUpdate() > 0;
+            // Hash the password
+            String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+            
+            // Insert the new user
+            String insertQuery = "INSERT INTO users (username, password_hash, full_name, email, address, phone_number, role, order_count) " +
+                               "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            
+            try (PreparedStatement insertStmt = conn.prepareStatement(insertQuery)) {
+                insertStmt.setString(1, user.getUsername());
+                insertStmt.setString(2, hashedPassword);
+                insertStmt.setString(3, user.getFullName());
+                insertStmt.setString(4, user.getEmail());
+                insertStmt.setString(5, user.getAddress());
+                insertStmt.setString(6, user.getPhoneNumber());
+                insertStmt.setString(7, user.getRole() != null ? user.getRole() : "CUSTOMER"); // Default to CUSTOMER
+                insertStmt.setInt(8, user.getOrderCount());
+                
+                return insertStmt.executeUpdate() > 0;
+            }
         }
     }
     
@@ -145,7 +157,9 @@ public class UserService {
         
         String query = "UPDATE users SET email = ?, full_name = ?, address = ?, phone_number = ? WHERE id = ?";
         
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            
             stmt.setString(1, user.getEmail());
             stmt.setString(2, user.getFullName());
             stmt.setString(3, user.getAddress());
@@ -174,7 +188,9 @@ public class UserService {
         
         String query = "UPDATE users SET password_hash = ? WHERE id = ?";
         
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            
             stmt.setString(1, hashedPassword);
             stmt.setInt(2, userId);
             
@@ -192,7 +208,9 @@ public class UserService {
     public boolean incrementOrderCount(int userId) throws SQLException {
         String query = "UPDATE users SET order_count = order_count + 1 WHERE id = ?";
         
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            
             stmt.setInt(1, userId);
             
             return stmt.executeUpdate() > 0;
@@ -209,23 +227,25 @@ public class UserService {
     public User getUserById(int userId) throws SQLException {
         String query = "SELECT * FROM users WHERE id = ?";
         
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            
             stmt.setInt(1, userId);
             
-            ResultSet rs = stmt.executeQuery();
-            
-            if (rs.next()) {
-                User user = new User();
-                user.setId(rs.getInt("id"));
-                user.setUsername(rs.getString("username"));
-                user.setPasswordHash(rs.getString("password_hash"));
-                user.setFullName(rs.getString("full_name"));
-                user.setEmail(rs.getString("email"));
-                user.setAddress(rs.getString("address"));
-                user.setPhoneNumber(rs.getString("phone_number"));
-                user.setRole(rs.getString("role"));
-                user.setOrderCount(rs.getInt("order_count"));
-                return user;
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    User user = new User();
+                    user.setId(rs.getInt("id"));
+                    user.setUsername(rs.getString("username"));
+                    user.setPasswordHash(rs.getString("password_hash"));
+                    user.setFullName(rs.getString("full_name"));
+                    user.setEmail(rs.getString("email"));
+                    user.setAddress(rs.getString("address"));
+                    user.setPhoneNumber(rs.getString("phone_number"));
+                    user.setRole(rs.getString("role"));
+                    user.setOrderCount(rs.getInt("order_count"));
+                    return user;
+                }
             }
         }
         
@@ -257,23 +277,25 @@ public class UserService {
         
         String query = "SELECT * FROM users WHERE username = ?";
         
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            
             stmt.setString(1, username);
             
-            ResultSet rs = stmt.executeQuery();
-            
-            if (rs.next()) {
-                User user = new User();
-                user.setId(rs.getInt("id"));
-                user.setUsername(rs.getString("username"));
-                user.setPasswordHash(rs.getString("password_hash"));
-                user.setFullName(rs.getString("full_name"));
-                user.setEmail(rs.getString("email"));
-                user.setAddress(rs.getString("address"));
-                user.setPhoneNumber(rs.getString("phone_number"));
-                user.setRole(rs.getString("role"));
-                user.setOrderCount(rs.getInt("order_count"));
-                return user;
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    User user = new User();
+                    user.setId(rs.getInt("id"));
+                    user.setUsername(rs.getString("username"));
+                    user.setPasswordHash(rs.getString("password_hash"));
+                    user.setFullName(rs.getString("full_name"));
+                    user.setEmail(rs.getString("email"));
+                    user.setAddress(rs.getString("address"));
+                    user.setPhoneNumber(rs.getString("phone_number"));
+                    user.setRole(rs.getString("role"));
+                    user.setOrderCount(rs.getInt("order_count"));
+                    return user;
+                }
             }
         }
         
@@ -291,21 +313,23 @@ public class UserService {
         
         String query = "SELECT * FROM users";
         
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            ResultSet rs = stmt.executeQuery();
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
             
-            while (rs.next()) {
-                User user = new User();
-                user.setId(rs.getInt("id"));
-                user.setUsername(rs.getString("username"));
-                user.setPasswordHash(rs.getString("password_hash"));
-                user.setFullName(rs.getString("full_name"));
-                user.setEmail(rs.getString("email"));
-                user.setAddress(rs.getString("address"));
-                user.setPhoneNumber(rs.getString("phone_number"));
-                user.setRole(rs.getString("role"));
-                user.setOrderCount(rs.getInt("order_count"));
-                users.add(user);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    User user = new User();
+                    user.setId(rs.getInt("id"));
+                    user.setUsername(rs.getString("username"));
+                    user.setPasswordHash(rs.getString("password_hash"));
+                    user.setFullName(rs.getString("full_name"));
+                    user.setEmail(rs.getString("email"));
+                    user.setAddress(rs.getString("address"));
+                    user.setPhoneNumber(rs.getString("phone_number"));
+                    user.setRole(rs.getString("role"));
+                    user.setOrderCount(rs.getInt("order_count"));
+                    users.add(user);
+                }
             }
         }
         

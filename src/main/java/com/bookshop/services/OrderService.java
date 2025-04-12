@@ -150,24 +150,66 @@ public class OrderService {
         List<Order> orders = new ArrayList<>();
         String sql = "SELECT * FROM orders ORDER BY order_date DESC";
         
+        System.out.println("OrderService: getAllOrders called");
+        
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
             
+            System.out.println("OrderService: Query executed");
+            
+            int count = 0;
             while (rs.next()) {
+                count++;
+                System.out.println("OrderService: Processing order #" + count);
+                
                 Order order = new Order();
                 order.setId(rs.getInt("id"));
                 order.setUserId(rs.getInt("user_id"));
-                order.setOrderDate(rs.getTimestamp("order_date").toLocalDateTime());
-                order.setStatus(rs.getString("status"));
-                order.setTotalAmount(rs.getBigDecimal("total_amount"));
+                
+                try {
+                    Timestamp timestamp = rs.getTimestamp("order_date");
+                    if (timestamp != null) {
+                        order.setOrderDate(timestamp.toLocalDateTime());
+                    } else {
+                        System.out.println("OrderService: order_date is null for order ID " + order.getId());
+                        order.setOrderDate(LocalDateTime.now());
+                    }
+                } catch (Exception e) {
+                    System.err.println("OrderService: Error parsing order_date: " + e.getMessage());
+                    order.setOrderDate(LocalDateTime.now());
+                }
+                
+                String status = rs.getString("status");
+                System.out.println("OrderService: Order status is: " + status);
+                order.setStatus(status);
+                
+                try {
+                    order.setTotalAmount(rs.getBigDecimal("total_amount"));
+                } catch (Exception e) {
+                    System.err.println("OrderService: Error getting total_amount: " + e.getMessage());
+                    order.setTotalAmount(BigDecimal.ZERO);
+                }
+                
                 order.setPaymentMethod(rs.getString("payment_method"));
                 
                 // Load order items
-                order.setItems(getOrderItems(order.getId()));
+                List<OrderItem> items = getOrderItems(order.getId());
+                System.out.println("OrderService: Order ID " + order.getId() + " has " + items.size() + " items");
+                order.setItems(items);
                 
                 orders.add(order);
             }
+            
+            System.out.println("OrderService: Found " + orders.size() + " orders in total");
+        } catch (SQLException e) {
+            System.err.println("OrderService: SQLException in getAllOrders: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        } catch (Exception e) {
+            System.err.println("OrderService: Unexpected exception in getAllOrders: " + e.getMessage());
+            e.printStackTrace();
+            throw new SQLException("Error retrieving orders: " + e.getMessage(), e);
         }
         
         return orders;

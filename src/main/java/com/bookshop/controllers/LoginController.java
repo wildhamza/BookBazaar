@@ -3,6 +3,7 @@ package com.bookshop.controllers;
 import com.bookshop.models.User;
 import com.bookshop.services.UserService;
 import com.bookshop.utils.SessionManager;
+import com.bookshop.utils.ViewNavigator;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -13,6 +14,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+
+import java.io.IOException;
 
 /**
  * Controller for the login view.
@@ -54,22 +57,20 @@ public class LoginController {
         }
         
         try {
-            // For now, just support admin login with hardcoded credentials
-            if (username.equals("admin") && password.equals("admin123")) {
-                // Create admin user
-                User adminUser = new User();
-                adminUser.setId(1);
-                adminUser.setUsername("admin");
-                adminUser.setRole("admin");
-                
+            // Authenticate user using UserService
+            User user = userService.authenticateUser(username, password);
+            
+            if (user != null) {
                 // Set current user in session
-                SessionManager.getInstance().setCurrentUser(adminUser);
+                SessionManager.getInstance().setCurrentUser(user);
                 
-                // Navigate to admin dashboard
-                loadAdminDashboard();
+                // Navigate to the appropriate dashboard based on user role
+                if ("ADMIN".equalsIgnoreCase(user.getRole())) {
+                    loadAdminDashboard();
+                } else {
+                    loadCustomerDashboard();
+                }
             } else {
-                // In a real application, we would check the database
-                // For now, show error message
                 messageLabel.setText("Invalid username or password");
             }
         } catch (Exception e) {
@@ -86,12 +87,40 @@ public class LoginController {
     @FXML
     private void handleRegister(ActionEvent event) {
         try {
-            // Load the registration view
-            Parent root = FXMLLoader.load(getClass().getResource("/views/register.fxml"));
-            // If for some reason the resource can't be found in /views/, try the /fxml/ directory
-            if (root == null) {
-                root = FXMLLoader.load(getClass().getResource("/fxml/register.fxml"));
+            System.out.println("Attempting to load register view...");
+            
+            // Try to load from ViewNavigator first
+            try {
+                System.out.println("Trying to use ViewNavigator...");
+                ViewNavigator.getInstance().navigateTo("register.fxml");
+                return;
+            } catch (Exception e) {
+                System.out.println("ViewNavigator failed: " + e.getMessage());
+                // Fall back to manual loading
             }
+            
+            // Try views directory
+            System.out.println("Trying to load from /views/register.fxml");
+            java.net.URL viewsUrl = getClass().getResource("/views/register.fxml");
+            System.out.println("Views URL: " + viewsUrl);
+            
+            // Try fxml directory
+            System.out.println("Trying to load from /fxml/register.fxml");
+            java.net.URL fxmlUrl = getClass().getResource("/fxml/register.fxml");
+            System.out.println("FXML URL: " + fxmlUrl);
+            
+            // Choose the URL based on what's available
+            java.net.URL url = viewsUrl != null ? viewsUrl : fxmlUrl;
+            
+            if (url == null) {
+                throw new IOException("Could not find register.fxml in any location");
+            }
+            
+            System.out.println("Loading from URL: " + url);
+            
+            // Load from the URL
+            Parent root = FXMLLoader.load(url);
+            
             Scene scene = new Scene(root);
             
             Stage stage = (Stage) usernameField.getScene().getWindow();
@@ -99,6 +128,7 @@ public class LoginController {
             stage.show();
         } catch (Exception e) {
             messageLabel.setText("Error loading registration page: " + e.getMessage());
+            System.err.println("Error loading register view: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -121,6 +151,28 @@ public class LoginController {
             stage.show();
         } catch (Exception e) {
             messageLabel.setText("Error loading admin dashboard: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Loads the customer dashboard.
+     */
+    private void loadCustomerDashboard() {
+        try {
+            // Load the customer dashboard view
+            Parent root = FXMLLoader.load(getClass().getResource("/views/customer_dashboard.fxml"));
+            // If for some reason the resource can't be found in /views/, try the /fxml/ directory
+            if (root == null) {
+                root = FXMLLoader.load(getClass().getResource("/fxml/customer_dashboard.fxml"));
+            }
+            Scene scene = new Scene(root);
+            
+            Stage stage = (Stage) usernameField.getScene().getWindow();
+            stage.setScene(scene);
+            stage.show();
+        } catch (Exception e) {
+            messageLabel.setText("Error loading customer dashboard: " + e.getMessage());
             e.printStackTrace();
         }
     }

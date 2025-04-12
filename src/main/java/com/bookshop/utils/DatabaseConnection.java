@@ -18,7 +18,7 @@ public class DatabaseConnection {
     // Database configuration - using PostgreSQL environment variables
     private static final String DB_URL = System.getenv("DATABASE_URL");
     private static final String DB_USER = System.getenv("PGUSER") != null ? System.getenv("PGUSER") : "postgres";
-    private static final String DB_PASSWORD = System.getenv("PGPASSWORD") != null ? System.getenv("PGPASSWORD") : "password";
+    private static final String DB_PASSWORD = System.getenv("PGPASSWORD") != null ? System.getenv("PGPASSWORD") : "905477";
     private static final String DB_HOST = System.getenv("PGHOST") != null ? System.getenv("PGHOST") : "localhost";
     private static final String DB_PORT = System.getenv("PGPORT") != null ? System.getenv("PGPORT") : "5432";
     private static final String DB_NAME = System.getenv("PGDATABASE") != null ? System.getenv("PGDATABASE") : "bookshop";
@@ -66,7 +66,7 @@ public class DatabaseConnection {
                 // Use default localhost connection
                 String jdbcUrl = "jdbc:postgresql://localhost:5432/bookshop";
                 System.out.println("Connecting to default PostgreSQL: " + jdbcUrl);
-                connection = DriverManager.getConnection(jdbcUrl, "postgres", "password");
+                connection = DriverManager.getConnection(jdbcUrl, "postgres", "admin123");
             }
             
             // Initialize database if needed
@@ -228,6 +228,13 @@ public class DatabaseConnection {
                 "INSERT INTO users (username, password_hash, full_name, email, role) " +
                 "SELECT 'admin', '$2a$10$h.dl5J86rGH7I8bD9bZeZeci0pDt0.VwR.k5.5wcn4p/7ZpQzJCqO', 'Admin User', 'admin@bookshop.com', 'ADMIN' " +
                 "WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = 'admin')"
+            );
+            
+            // Insert customer user if it doesn't exist
+            stmt.execute(
+                "INSERT INTO users (username, password_hash, full_name, email, address, phone_number, role) " +
+                "SELECT 'customer', '$2a$12$h.dl5J86rGH7I8bD9bZeZeci0pDt0.VwR.k5.5wcn4p/7ZpQzJCqO', 'Regular Customer', 'customer@example.com', '456 Reader Lane', '555-987-6543', 'CUSTOMER' " +
+                "WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = 'customer')"
             );
             
             // Check if books table is empty

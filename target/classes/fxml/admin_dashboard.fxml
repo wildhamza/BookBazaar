@@ -23,7 +23,7 @@
                   <Insets bottom="10.0" left="20.0" right="20.0" top="20.0" />
                </padding>
                <children>
-                  <Label styleClass="header-label" text="Online Bookshop - Admin Panel">
+                  <Label styleClass="header-label" text="Admin Dashboard">
                      <font>
                         <Font name="System Bold" size="24.0" />
                      </font>
@@ -34,8 +34,10 @@
                         <Font size="16.0" />
                      </font>
                   </Label>
-                  <HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+                  <HBox alignment="CENTER_RIGHT" spacing="10.0" HBox.hgrow="ALWAYS">
                      <children>
+                        <Button fx:id="manageBookBtn" mnemonicParsing="false" onAction="#handleManageBooks" styleClass="primary-button" text="Manage Books" />
+                        <Button fx:id="viewOrdersBtn" mnemonicParsing="false" onAction="#handleViewOrders" styleClass="info-button" text="View Orders" />
                         <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#handleLogout" styleClass="warning-button" text="Logout" />
                      </children>
                   </HBox>

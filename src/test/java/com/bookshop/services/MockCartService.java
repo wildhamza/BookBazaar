@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Mock implementation of CartService for unit testing
  */
-public class MockCartService extends CartService {
+public class MockCartService {
     
     private List<CartItem> cartItems;
     private List<CartObserver> observers;
@@ -21,7 +21,6 @@ public class MockCartService extends CartService {
      * Default constructor.
      */
     public MockCartService() {
-        super();
         this.cartItems = new ArrayList<>();
         this.observers = new ArrayList<>();
     }
@@ -133,7 +132,6 @@ public class MockCartService extends CartService {
      * 
      * @return List of cart items
      */
-    @Override
     public List<CartItem> getCartItems() {
         return new ArrayList<>(cartItems);
     }
@@ -143,7 +141,6 @@ public class MockCartService extends CartService {
      * 
      * @return true if successful
      */
-    @Override
     public boolean clearCart() {
         cartItems.clear();
         notifyObservers();
@@ -155,7 +152,6 @@ public class MockCartService extends CartService {
      * 
      * @return The total cost
      */
-    @Override
     public BigDecimal calculateTotal() {
         BigDecimal total = BigDecimal.ZERO;
         

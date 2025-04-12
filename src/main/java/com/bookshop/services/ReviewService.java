@@ -1,7 +1,7 @@
 package com.bookshop.services;
 
 import com.bookshop.models.Review;
-// Using the fully qualified name in the getConnection method
+import com.bookshop.utils.DatabaseConnection;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -17,17 +17,11 @@ import java.util.List;
  */
 public class ReviewService {
     
-    private Connection connection;
-    
     /**
      * Default constructor.
      */
     public ReviewService() {
-        try {
-            this.connection = com.bookshop.utils.DatabaseConnection.getInstance().getConnection();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        // Empty constructor - connections will be obtained as needed
     }
     
     /**
@@ -38,10 +32,11 @@ public class ReviewService {
      * @throws SQLException If a database error occurs
      */
     public boolean addReview(Review review) throws SQLException {
-        String query = "INSERT INTO reviews (user_id, book_id, rating, content, review_date) " +
+        String query = "INSERT INTO reviews (user_id, book_id, rating, comment, review_date) " +
                       "VALUES (?, ?, ?, ?, ?)";
         
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, review.getUserId());
             stmt.setInt(2, review.getBookId());
             stmt.setInt(3, review.getRating());
@@ -92,7 +87,8 @@ public class ReviewService {
     public boolean hasUserReviewedBook(int userId, int bookId) throws SQLException {
         String query = "SELECT COUNT(*) FROM reviews WHERE user_id = ? AND book_id = ?";
         
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, userId);
             stmt.setInt(2, bookId);
             
@@ -122,7 +118,8 @@ public class ReviewService {
                       "WHERE r.book_id = ? " +
                       "ORDER BY r.review_date DESC";
         
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, bookId);
             
             ResultSet rs = stmt.executeQuery();
@@ -133,7 +130,7 @@ public class ReviewService {
                 review.setUserId(rs.getInt("user_id"));
                 review.setBookId(rs.getInt("book_id"));
                 review.setRating(rs.getInt("rating"));
-                review.setContent(rs.getString("content"));
+                review.setContent(rs.getString("comment"));
                 review.setReviewDate(rs.getTimestamp("review_date").toLocalDateTime());
                 review.setUsername(rs.getString("username"));
                 
@@ -160,7 +157,8 @@ public class ReviewService {
                       "WHERE r.user_id = ? " +
                       "ORDER BY r.review_date DESC";
         
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, userId);
             
             ResultSet rs = stmt.executeQuery();
@@ -171,7 +169,7 @@ public class ReviewService {
                 review.setUserId(rs.getInt("user_id"));
                 review.setBookId(rs.getInt("book_id"));
                 review.setRating(rs.getInt("rating"));
-                review.setContent(rs.getString("content"));
+                review.setContent(rs.getString("comment"));
                 review.setReviewDate(rs.getTimestamp("review_date").toLocalDateTime());
                 review.setBookTitle(rs.getString("book_title"));
                 
@@ -194,7 +192,8 @@ public class ReviewService {
         int bookId = 0;
         String getBookIdQuery = "SELECT book_id FROM reviews WHERE id = ?";
         
-        try (PreparedStatement stmt = connection.prepareStatement(getBookIdQuery)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = connection.prepareStatement(getBookIdQuery)) {
             stmt.setInt(1, reviewId);
             ResultSet rs = stmt.executeQuery();
             
@@ -208,7 +207,8 @@ public class ReviewService {
         // Now delete the review
         String query = "DELETE FROM reviews WHERE id = ?";
         
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, reviewId);
             
             int result = stmt.executeUpdate();
@@ -230,32 +230,29 @@ public class ReviewService {
      * @throws SQLException If a database error occurs
      */
     private void updateBookRating(int bookId) throws SQLException {
-        // Get average rating and count
+        // Get average rating and count for debugging purposes only
         String getStatsQuery = "SELECT AVG(rating) AS avg_rating, COUNT(*) AS review_count " +
                               "FROM reviews WHERE book_id = ?";
         
-        double avgRating = 0.0;
-        int reviewCount = 0;
-        
-        try (PreparedStatement stmt = connection.prepareStatement(getStatsQuery)) {
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = connection.prepareStatement(getStatsQuery)) {
             stmt.setInt(1, bookId);
             ResultSet rs = stmt.executeQuery();
             
             if (rs.next()) {
-                avgRating = rs.getDouble("avg_rating");
-                reviewCount = rs.getInt("review_count");
+                double avgRating = rs.getDouble("avg_rating");
+                int reviewCount = rs.getInt("review_count");
+                System.out.println("Book ID " + bookId + " has average rating " + avgRating + 
+                                  " from " + reviewCount + " reviews");
+                
+                // Note: We're not updating the books table because the average_rating and review_count columns don't exist
+                // In a future update, you may want to add these columns to the books table
             }
         }
         
-        // Update the book
-        String updateBookQuery = "UPDATE books SET average_rating = ?, review_count = ? WHERE id = ?";
-        
-        try (PreparedStatement stmt = connection.prepareStatement(updateBookQuery)) {
-            stmt.setDouble(1, avgRating);
-            stmt.setInt(2, reviewCount);
-            stmt.setInt(3, bookId);
-            
-            stmt.executeUpdate();
-        }
+        // Skip updating the book table for now since the columns don't exist
+        // If you want to add this functionality, first update the database schema to add:
+        // ALTER TABLE books ADD COLUMN average_rating DOUBLE PRECISION DEFAULT 0.0;
+        // ALTER TABLE books ADD COLUMN review_count INTEGER DEFAULT 0;
     }
 }

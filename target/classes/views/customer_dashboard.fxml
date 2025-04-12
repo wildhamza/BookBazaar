@@ -32,7 +32,8 @@
                         <Font size="14.0" />
                      </font>
                   </Label>
-                  <Button fx:id="cartButton" mnemonicParsing="false" onAction="#handleViewCart" text="View Cart (0)" />
+                  <Label fx:id="cartItemCountLabel" text="0 items" />
+                  <Button fx:id="viewCartButton" mnemonicParsing="false" onAction="#handleViewCartButton" text="View Cart" />
                   <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#handleLogout" text="Logout" />
                </children>
             </HBox>

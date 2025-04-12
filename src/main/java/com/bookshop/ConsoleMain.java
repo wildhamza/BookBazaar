@@ -43,7 +43,7 @@ public class ConsoleMain {
             // Initialize services
             bookService = new BookService();
             userService = new UserService();
-            cartService = new CartService();
+            cartService = CartService.getInstance();
             orderService = new OrderService();
             reviewService = new ReviewService();
             discountService = new DiscountService();

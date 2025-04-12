@@ -97,7 +97,7 @@ public class EditBookController implements Initializable {
             new StringConverter<Integer>() {
                 @Override
                 public String toString(Integer value) {
-                    return value.toString();
+                    return value == null ? "0" : value.toString();
                 }
                 
                 @Override

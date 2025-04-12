@@ -264,12 +264,13 @@ public class Book {
     }
     
     /**
-     * Get the average rating.
+     * Gets the average rating.
      * 
-     * @return The average rating
+     * @return The average rating, or 0 if not set
      */
     public double getAverageRating() {
-        return averageRating;
+        // This field doesn't exist in the database yet
+        return 0;
     }
     
     /**
@@ -360,16 +361,18 @@ public class Book {
     }
     
     /**
-     * Get the quantity for cart or order item.
+     * Get the quantity.
      * 
      * @return The quantity
      */
     public int getQuantity() {
-        return quantity;
+        // If this Book is used in a shopping cart context, return the cart quantity
+        // Otherwise in a catalog context, return the stock quantity
+        return quantity > 0 ? quantity : stockQuantity;
     }
     
     /**
-     * Set the quantity for cart or order item.
+     * Set the quantity.
      * 
      * @param quantity The quantity to set
      */
@@ -425,12 +428,13 @@ public class Book {
     }
     
     /**
-     * Get the review count.
+     * Gets the review count.
      * 
-     * @return The review count
+     * @return The review count, or 0 if not set
      */
     public int getReviewCount() {
-        return reviewCount;
+        // This field doesn't exist in the database yet
+        return 0;
     }
     
     /**

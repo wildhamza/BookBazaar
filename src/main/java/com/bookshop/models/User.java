@@ -197,7 +197,7 @@ public class User {
      * @return true if the user is an admin, false otherwise
      */
     public boolean isAdmin() {
-        return "admin".equals(role);
+        return "ADMIN".equalsIgnoreCase(role);
     }
     
     /**

@@ -14,6 +14,8 @@ import com.bookshop.services.BookService;
 import com.bookshop.services.UserService;
 import com.bookshop.models.Book;
 import com.bookshop.models.User;
+import com.bookshop.utils.ViewNavigator;
+import com.bookshop.utils.SceneManager;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -45,6 +47,10 @@ public class Main extends Application {
             Platform.exit();
             return;
         }
+        
+        // Set the primary stage in the ViewNavigator and SceneManager
+        ViewNavigator.getInstance().setStage(primaryStage);
+        SceneManager.getInstance().setStage(primaryStage);
         
         // Load the login view for GUI mode
         Parent root = FXMLLoader.load(getClass().getResource("/views/login.fxml"));

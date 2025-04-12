@@ -1,43 +1,47 @@
-/home/runner/workspace/src/main/java/com/bookshop/services/PaymentStrategy.java
-/home/runner/workspace/src/main/java/com/bookshop/services/DiscountService.java
-/home/runner/workspace/src/main/java/com/bookshop/services/AuthService.java
-/home/runner/workspace/src/main/java/com/bookshop/services/PurchaseService.java
-/home/runner/workspace/src/main/java/com/bookshop/strategies/discount/PremiumLoyaltyDiscount.java
-/home/runner/workspace/src/main/java/com/bookshop/controllers/AdminDashboardController.java
-/home/runner/workspace/src/main/java/com/bookshop/models/CartItem.java
-/home/runner/workspace/src/main/java/com/bookshop/observers/Subject.java
-/home/runner/workspace/src/main/java/com/bookshop/HeadlessMain.java
-/home/runner/workspace/src/main/java/com/bookshop/services/DiscountStrategy.java
-/home/runner/workspace/src/main/java/com/bookshop/controllers/ShoppingCartController.java
-/home/runner/workspace/src/main/java/com/bookshop/controllers/CustomerOrdersController.java
-/home/runner/workspace/src/main/java/com/bookshop/utils/DatabaseConnection.java
-/home/runner/workspace/src/main/java/com/bookshop/services/RegularMemberDiscount.java
-/home/runner/workspace/src/main/java/com/bookshop/controllers/EditBookController.java
-/home/runner/workspace/src/main/java/com/bookshop/Main.java
-/home/runner/workspace/src/main/java/com/bookshop/services/PremiumMemberDiscount.java
-/home/runner/workspace/src/main/java/com/bookshop/models/User.java
-/home/runner/workspace/src/main/java/com/bookshop/models/Book.java
-/home/runner/workspace/src/main/java/com/bookshop/services/ReviewService.java
-/home/runner/workspace/src/main/java/com/bookshop/services/BookService.java
-/home/runner/workspace/src/main/java/com/bookshop/services/CreditCardPayment.java
-/home/runner/workspace/src/main/java/com/bookshop/services/NoDiscount.java
-/home/runner/workspace/src/main/java/com/bookshop/controllers/BookDetailsController.java
-/home/runner/workspace/src/main/java/com/bookshop/controllers/CustomerDashboardController.java
-/home/runner/workspace/src/main/java/com/bookshop/strategies/discount/RegularLoyaltyDiscount.java
-/home/runner/workspace/src/main/java/com/bookshop/utils/BookFactory.java
-/home/runner/workspace/src/main/java/com/bookshop/services/PayPalPayment.java
-/home/runner/workspace/src/main/java/com/bookshop/utils/ViewNavigator.java
-/home/runner/workspace/src/main/java/com/bookshop/utils/SessionManager.java
-/home/runner/workspace/src/main/java/com/bookshop/utils/PasswordHasher.java
-/home/runner/workspace/src/main/java/com/bookshop/ConsoleMain.java
-/home/runner/workspace/src/main/java/com/bookshop/models/Order.java
-/home/runner/workspace/src/main/java/com/bookshop/services/CartService.java
-/home/runner/workspace/src/main/java/com/bookshop/services/UserService.java
-/home/runner/workspace/src/main/java/com/bookshop/models/OrderItem.java
-/home/runner/workspace/src/main/java/com/bookshop/models/Review.java
-/home/runner/workspace/src/main/java/com/bookshop/services/OrderService.java
-/home/runner/workspace/src/main/java/com/bookshop/controllers/RegisterController.java
-/home/runner/workspace/src/main/java/com/bookshop/db/DatabaseConnection.java
-/home/runner/workspace/src/main/java/com/bookshop/controllers/LoginController.java
-/home/runner/workspace/src/main/java/com/bookshop/observers/CartObserver.java
-/home/runner/workspace/src/main/java/com/bookshop/strategies/discount/DiscountStrategy.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\controllers\AdminDashboardController.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\utils\OrderDebugger.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\utils\SceneManager.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\ConsoleMain.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\services\CreditCardPayment.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\services\PurchaseService.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\controllers\CustomerDashboardController.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\models\OrderItem.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\controllers\EditBookController.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\services\UserService.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\services\PayPalPayment.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\controllers\RegisterController.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\Main.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\models\User.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\services\DiscountService.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\controllers\LoginController.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\services\PremiumMemberDiscount.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\strategies\discount\PremiumLoyaltyDiscount.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\utils\PasswordHasher.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\controllers\ShoppingCartController.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\services\AuthService.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\controllers\AdminOrdersController.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\db\DatabaseConnection.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\services\ReviewService.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\services\RegularMemberDiscount.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\models\CartItem.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\utils\ViewNavigator.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\controllers\CustomerOrdersController.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\models\Review.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\strategies\discount\DiscountStrategy.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\services\PaymentStrategy.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\utils\DatabaseInitializer.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\services\DiscountStrategy.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\HeadlessMain.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\observers\Subject.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\strategies\discount\RegularLoyaltyDiscount.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\models\Order.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\utils\DatabaseConnection.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\observers\CartObserver.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\utils\BookFactory.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\services\OrderService.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\models\Book.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\controllers\BookDetailsController.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\services\CartService.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\services\NoDiscount.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\services\BookService.java
+C:\Users\WildNutBuster\Desktop\BookBazaar (2)\BookBazaar\src\main\java\com\bookshop\utils\SessionManager.java

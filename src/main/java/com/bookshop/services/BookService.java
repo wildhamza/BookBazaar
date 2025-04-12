@@ -26,14 +26,31 @@ public class BookService {
     public List<Book> getAllBooks() throws SQLException {
         List<Book> books = new ArrayList<>();
         
+        System.out.println("BookService: getAllBooks called");
+        
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery("SELECT * FROM books ORDER BY title")) {
             
+            System.out.println("BookService: Executing query: SELECT * FROM books ORDER BY title");
+            int count = 0;
+            
             while (rs.next()) {
+                count++;
                 Book book = mapResultSetToBook(rs);
                 books.add(book);
+                System.out.println("BookService: Found book: " + book.getTitle() + " (ID: " + book.getId() + ")");
             }
+            
+            System.out.println("BookService: Found " + count + " books in total");
+        } catch (SQLException e) {
+            System.err.println("BookService: SQLException in getAllBooks: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        } catch (Exception e) {
+            System.err.println("BookService: Unexpected exception in getAllBooks: " + e.getMessage());
+            e.printStackTrace();
+            throw new SQLException("Error retrieving books: " + e.getMessage(), e);
         }
         
         return books;

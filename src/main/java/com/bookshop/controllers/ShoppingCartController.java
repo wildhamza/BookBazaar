@@ -4,6 +4,7 @@ import com.bookshop.models.CartItem;
 import com.bookshop.models.Order;
 import com.bookshop.models.User;
 import com.bookshop.services.CartService;
+import com.bookshop.services.CartService.CartUpdateListener;
 import com.bookshop.services.PaymentStrategy;
 import com.bookshop.services.PurchaseService;
 import com.bookshop.utils.SessionManager;
@@ -24,7 +25,7 @@ import java.text.NumberFormat;
 /**
  * Controller for the shopping cart view.
  */
-public class ShoppingCartController {
+public class ShoppingCartController implements CartUpdateListener {
     
     @FXML private TableView<CartItem> cartTableView;
     @FXML private TableColumn<CartItem, String> titleColumn;
@@ -39,6 +40,7 @@ public class ShoppingCartController {
     @FXML private Button removeItemButton;
     @FXML private Button clearCartButton;
     @FXML private Button backToShopButton;
+    @FXML private Button continueShoppingButton;
     @FXML private Label statusLabel;
     @FXML private ComboBox<String> paymentMethodComboBox;
     
@@ -52,7 +54,7 @@ public class ShoppingCartController {
      */
     @FXML
     public void initialize() {
-        cartService = new CartService();
+        cartService = CartService.getInstance();
         purchaseService = new PurchaseService();
         currentUser = SessionManager.getInstance().getCurrentUser();
         
@@ -61,6 +63,9 @@ public class ShoppingCartController {
             ViewNavigator.getInstance().navigateTo("login.fxml");
             return;
         }
+        
+        // Register as a listener for cart updates
+        cartService.addCartUpdateListener(this);
         
         // Setup table columns
         titleColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getBookTitle()));
@@ -260,39 +265,101 @@ public class ShoppingCartController {
             return;
         }
         
-        if (paymentMethodComboBox.getValue() == null) {
-            statusLabel.setText("Please select a payment method.");
-            return;
+        // Debug user information
+        System.out.println("Checkout for user ID: " + currentUser.getId() + ", Name: " + currentUser.getFullName());
+        
+        // Check if current user matches session user
+        User sessionUser = SessionManager.getInstance().getCurrentUser();
+        if (sessionUser != null) {
+            System.out.println("Session user ID: " + sessionUser.getId() + ", Name: " + sessionUser.getFullName());
+            if (sessionUser.getId() != currentUser.getId()) {
+                System.out.println("WARNING: Session user doesn't match controller user. Updating to session user.");
+                currentUser = sessionUser;
+            }
         }
         
+        // Disable the checkout button to prevent multiple clicks
+        checkoutButton.setDisable(true);
+        statusLabel.setText("Processing your order...");
+        
+        // Create simple payment strategy
+        PaymentStrategy paymentStrategy = createPaymentStrategy("Standard");
+        
         try {
-            // Create appropriate payment strategy based on selection
-            PaymentStrategy paymentStrategy = createPaymentStrategy(paymentMethodComboBox.getValue());
-            
-            // Process the purchase
+            // Process the purchase - using direct call instead of background thread for simplicity
             Order order = purchaseService.processPurchase(cartItems, currentUser, paymentStrategy);
             
             if (order != null) {
-                // Clear the cart after successful purchase
-                cartService.clearCart(currentUser.getId());
+                System.out.println("Order created successfully with ID: " + order.getId() + 
+                                 " for user ID: " + order.getUserId());
                 
-                // Show success message
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Order Placed");
-                alert.setHeaderText("Order Successfully Placed");
-                alert.setContentText("Your order has been successfully placed. Order ID: " + order.getId());
-                
-                // When user closes the alert, navigate to order history
-                alert.showAndWait().ifPresent(response -> {
-                    ViewNavigator.getInstance().navigateTo("customer_orders.fxml");
-                });
+                try {
+                    // Clear the cart after successful purchase
+                    cartService.clearCart(currentUser.getId());
+                    
+                    // Show success message
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Order Placed");
+                    alert.setHeaderText("Order Successfully Placed");
+                    alert.setContentText("Your order #" + order.getId() + " has been recorded. You can view it in your orders section. User ID: " + currentUser.getId());
+                    
+                    // When user closes the alert, navigate to order history
+                    alert.showAndWait().ifPresent(response -> {
+                        // Unregister the listener before navigating away
+                        cartService.removeCartUpdateListener(this);
+                        try {
+                            System.out.println("Navigating to orders view for user ID: " + currentUser.getId());
+                            ViewNavigator.getInstance().navigateTo("customer_orders.fxml");
+                        } catch (Exception ex) {
+                            // If navigation fails, go back to dashboard instead
+                            System.err.println("Error navigating to orders view: " + ex.getMessage());
+                            try {
+                                ViewNavigator.getInstance().navigateTo("customer_dashboard.fxml");
+                            } catch (Exception e2) {
+                                // If all navigation fails, show error
+                                statusLabel.setText("Error: Could not navigate to any view. Please restart the application.");
+                            }
+                        }
+                    });
+                } catch (SQLException e) {
+                    // If clearing cart fails, still show success but with a warning
+                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                    alert.setTitle("Order Placed - With Warning");
+                    alert.setHeaderText("Order Successfully Placed");
+                    alert.setContentText("Your order #" + order.getId() + " has been recorded, but there was an issue clearing your cart. " +
+                                         "You may need to clear it manually.");
+                    
+                    alert.showAndWait().ifPresent(response -> {
+                        // Unregister the listener before navigating away
+                        cartService.removeCartUpdateListener(this);
+                        try {
+                            System.out.println("Navigating to orders view for user ID: " + currentUser.getId());
+                            ViewNavigator.getInstance().navigateTo("customer_orders.fxml");
+                        } catch (Exception ex) {
+                            // If navigation fails, go back to dashboard instead
+                            System.err.println("Error navigating to orders view: " + ex.getMessage());
+                            try {
+                                ViewNavigator.getInstance().navigateTo("customer_dashboard.fxml");
+                            } catch (Exception e2) {
+                                // If all navigation fails, show error
+                                statusLabel.setText("Error: Could not navigate to any view. Please restart the application.");
+                            }
+                        }
+                    });
+                }
             } else {
-                statusLabel.setText("Failed to process your order. Please try again.");
+                System.err.println("Failed to create order for user ID: " + currentUser.getId());
+                statusLabel.setText("Failed to create order. Please try again.");
+                checkoutButton.setDisable(false);
             }
-            
         } catch (SQLException e) {
-            statusLabel.setText("Error processing checkout: " + e.getMessage());
             e.printStackTrace();
+            statusLabel.setText("Database error: " + e.getMessage());
+            checkoutButton.setDisable(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            statusLabel.setText("Unexpected error: " + e.getMessage());
+            checkoutButton.setDisable(false);
         }
     }
     
@@ -321,6 +388,33 @@ public class ShoppingCartController {
      */
     @FXML
     public void handleBackToShop(ActionEvent event) {
+        // Unregister the listener before navigating away
+        cartService.removeCartUpdateListener(this);
         ViewNavigator.getInstance().navigateTo("customer_dashboard.fxml");
+    }
+    
+    /**
+     * Handles the continue shopping button action.
+     * 
+     * @param event The action event
+     */
+    @FXML
+    public void handleContinueShopping(ActionEvent event) {
+        // Unregister the listener before navigating away
+        cartService.removeCartUpdateListener(this);
+        ViewNavigator.getInstance().navigateTo("customer_dashboard.fxml");
+    }
+    
+    /**
+     * Handles cart updates from the CartService.
+     * 
+     * @param userId The ID of the user whose cart was updated
+     */
+    @Override
+    public void onCartUpdated(int userId) {
+        if (currentUser != null && currentUser.getId() == userId) {
+            // Update UI on JavaFX thread
+            javafx.application.Platform.runLater(this::loadCartItems);
+        }
     }
 }

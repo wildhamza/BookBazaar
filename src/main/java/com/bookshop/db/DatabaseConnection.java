@@ -35,7 +35,7 @@ public class DatabaseConnection {
         
         this.url = env.getOrDefault("DATABASE_URL", "jdbc:postgresql://" + dbHost + ":" + dbPort + "/" + dbName);
         this.user = env.getOrDefault("PGUSER", "postgres");
-        this.password = env.getOrDefault("PGPASSWORD", "password");
+        this.password = env.getOrDefault("PGPASSWORD", "905477");
         
         // Extract proper JDBC URL if using the PostgreSQL URL format
         if (this.url.startsWith("postgres://")) {

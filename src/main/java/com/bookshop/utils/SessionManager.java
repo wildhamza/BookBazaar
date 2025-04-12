@@ -1,6 +1,7 @@
 package com.bookshop.utils;
 
 import com.bookshop.models.Book;
+import com.bookshop.models.Order;
 import com.bookshop.models.User;
 
 /**
@@ -12,6 +13,7 @@ public class SessionManager {
     private static SessionManager instance;
     private User currentUser;
     private Book currentBook;
+    private Order currentOrder;
     
     /**
      * Private constructor to prevent direct instantiation.
@@ -69,6 +71,24 @@ public class SessionManager {
     }
     
     /**
+     * Get the current order (for viewing details).
+     * 
+     * @return The current order
+     */
+    public Order getCurrentOrder() {
+        return currentOrder;
+    }
+    
+    /**
+     * Set the current order (for viewing details).
+     * 
+     * @param order The order to set as current
+     */
+    public void setCurrentOrder(Order order) {
+        this.currentOrder = order;
+    }
+    
+    /**
      * Alias for getCurrentBook.
      */
     public Book getSelectedBook() {
@@ -81,6 +101,7 @@ public class SessionManager {
     public void clearSession() {
         currentUser = null;
         currentBook = null;
+        currentOrder = null;
     }
     
     /**
@@ -105,6 +126,6 @@ public class SessionManager {
      * @return true if the current user is an admin, false otherwise
      */
     public boolean isAdmin() {
-        return isLoggedIn() && "admin".equals(currentUser.getRole());
+        return isLoggedIn() && "ADMIN".equalsIgnoreCase(currentUser.getRole());
     }
 }

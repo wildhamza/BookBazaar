@@ -39,6 +39,7 @@
                         <Label fx:id="cartItemCountLabel" styleClass="cart-count" text="0 items" />
                         <Button fx:id="viewCartButton" mnemonicParsing="false" onAction="#handleViewCartButton" styleClass="secondary-button" text="View Cart" />
                         <Button fx:id="viewOrdersButton" mnemonicParsing="false" onAction="#handleViewOrdersButton" styleClass="secondary-button" text="My Orders" />
+                        <Button fx:id="refreshOrdersButton" mnemonicParsing="false" onAction="#handleRefreshOrders" styleClass="secondary-button" text="Refresh Orders" />
                         <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#handleLogoutButton" styleClass="warning-button" text="Logout" />
                      </children>
                   </HBox>
