@@ -1,11 +1,9 @@
--- Drop tables if they exist
 DROP TABLE IF EXISTS order_items;
 DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS reviews;
 DROP TABLE IF EXISTS books;
 DROP TABLE IF EXISTS users;
 
--- Create users table
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
@@ -17,7 +15,6 @@ CREATE TABLE users (
     role VARCHAR(20) NOT NULL CHECK (role IN ('ADMIN', 'CUSTOMER'))
 );
 
--- Create books table
 CREATE TABLE books (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
@@ -31,7 +28,6 @@ CREATE TABLE books (
     stock_quantity INTEGER NOT NULL DEFAULT 0
 );
 
--- Create reviews table
 CREATE TABLE reviews (
     id SERIAL PRIMARY KEY,
     book_id INTEGER NOT NULL,
@@ -44,7 +40,6 @@ CREATE TABLE reviews (
     UNIQUE (book_id, user_id)
 );
 
--- Create orders table
 CREATE TABLE orders (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
@@ -56,7 +51,6 @@ CREATE TABLE orders (
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
--- Create order_items table
 CREATE TABLE order_items (
     id SERIAL PRIMARY KEY,
     order_id INTEGER NOT NULL,
@@ -69,7 +63,6 @@ CREATE TABLE order_items (
     FOREIGN KEY (book_id) REFERENCES books (id) ON DELETE SET NULL
 );
 
--- Create indexes
 CREATE INDEX idx_books_title ON books (title);
 CREATE INDEX idx_books_author ON books (author);
 CREATE INDEX idx_books_category ON books (category);
@@ -77,15 +70,12 @@ CREATE INDEX idx_reviews_book_id ON reviews (book_id);
 CREATE INDEX idx_orders_user_id ON orders (user_id);
 CREATE INDEX idx_order_items_order_id ON order_items (order_id);
 
--- Insert admin user (password: admin123)
 INSERT INTO users (username, password_hash, full_name, email, address, phone_number, role)
 VALUES ('admin', '$2a$12$M8OSI5ZMKpWRn3tCjbzh6eXwkXQJmQg9Hw66O9Z6U0RW9wLqCCL5W', 'Admin User', 'admin@bookshop.com', '123 Admin St', '555-123-4567', 'ADMIN');
 
--- Insert default customer user (password: customer123)
 INSERT INTO users (username, password_hash, full_name, email, address, phone_number, role)
 VALUES ('customer', '$2a$12$h.dl5J86rGH7I8bD9bZeZeci0pDt0.VwR.k5.5wcn4p/7ZpQzJCqO', 'Regular Customer', 'customer@example.com', '456 Reader Lane', '555-987-6543', 'CUSTOMER');
 
--- Insert sample books
 INSERT INTO books (title, author, publisher, price, category, isbn, image_url, description, stock_quantity)
 VALUES 
 ('The Great Gatsby', 'F. Scott Fitzgerald', 'Scribner', 12.99, 'Fiction', '9780743273565', 'https://covers.openlibrary.org/b/isbn/9780743273565-L.jpg', 'The story of eccentric millionaire Jay Gatsby and his passion for the beautiful Daisy Buchanan.', 50),
@@ -109,14 +99,12 @@ VALUES
 ('The Night Circus', 'Erin Morgenstern', 'Anchor Books', 12.99, 'Fantasy', '9780307744432', 'https://covers.openlibrary.org/b/isbn/9780307744432-L.jpg', 'A competition between two young magicians set in a mysterious circus that only appears at night.', 25),
 ('Where the Crawdads Sing', 'Delia Owens', 'G.P. Putnam''s Sons', 14.99, 'Fiction', '9780735219090', 'https://covers.openlibrary.org/b/isbn/9780735219090-L.jpg', 'A coming-of-age story and a surprising tale of possible murder.', 40);
 
--- Insert additional users
 INSERT INTO users (username, password_hash, full_name, email, address, phone_number, role)
 VALUES 
 ('sarah', '$2a$12$h.dl5J86rGH7I8bD9bZeZeci0pDt0.VwR.k5.5wcn4p/7ZpQzJCqO', 'Sarah Johnson', 'sarah@example.com', '789 Book Ave', '555-345-6789', 'CUSTOMER'),
 ('michael', '$2a$12$h.dl5J86rGH7I8bD9bZeZeci0pDt0.VwR.k5.5wcn4p/7ZpQzJCqO', 'Michael Smith', 'michael@example.com', '101 Reader Blvd', '555-567-8901', 'CUSTOMER'),
 ('emma', '$2a$12$h.dl5J86rGH7I8bD9bZeZeci0pDt0.VwR.k5.5wcn4p/7ZpQzJCqO', 'Emma Wilson', 'emma@example.com', '202 Novel St', '555-678-9012', 'CUSTOMER');
 
--- Insert sample reviews
 INSERT INTO reviews (book_id, user_id, rating, comment, created_at)
 VALUES 
 (1, 2, 5, 'A true classic! The prose is beautiful and the story timeless.', '2023-01-15 10:30:00'),
@@ -130,7 +118,6 @@ VALUES
 (15, 4, 4, 'Genuinely scary. Couldn''t put it down!', '2023-05-05 20:15:00'),
 (18, 3, 5, 'Heartbreaking and beautifully written.', '2023-05-12 17:30:00');
 
--- Insert sample orders
 INSERT INTO orders (user_id, order_date, total_amount, status, shipping_address, payment_method)
 VALUES
 (2, '2023-06-01 09:15:00', 37.97, 'DELIVERED', '456 Reader Lane', 'Credit Card'),
@@ -139,7 +126,6 @@ VALUES
 (2, '2023-07-15 16:20:00', 26.98, 'PROCESSING', '456 Reader Lane', 'Credit Card'),
 (3, '2023-08-01 10:00:00', 46.97, 'PENDING', '789 Book Ave', 'PayPal');
 
--- Insert sample order items
 INSERT INTO order_items (order_id, book_id, book_title, book_author, quantity, price_at_purchase)
 VALUES
 (1, 1, 'The Great Gatsby', 'F. Scott Fitzgerald', 1, 12.99),

@@ -14,9 +14,6 @@ import com.bookshop.observers.CartEvent;
 import java.math.BigDecimal;
 import java.util.List;
 
-/**
- * Unit tests for the CartService class.
- */
 public class CartServiceTest {
     
     private MockCartService cartService;
@@ -27,7 +24,6 @@ public class CartServiceTest {
     void setUp() {
         cartService = new MockCartService();
         
-        // Create a test book
         testBook = new Book();
         testBook.setId(1);
         testBook.setTitle("Test Book");
@@ -35,7 +31,6 @@ public class CartServiceTest {
         testBook.setPrice(new BigDecimal("19.99"));
         testBook.setStockQuantity(10);
         
-        // Create a test observer
         testObserver = new TestCartObserver();
         cartService.addObserver(testObserver);
     }
@@ -63,13 +58,10 @@ public class CartServiceTest {
     @Test
     @DisplayName("Test updating an item quantity in the cart")
     void testUpdateCartItemQuantity() {
-        // Add an item to the cart
         cartService.addToCart(testBook, 1);
         
-        // Reset the observer
         testObserver.wasNotified = false;
         
-        // Update the quantity
         int newQuantity = 3;
         cartService.updateCartItemQuantity(0, newQuantity);
         
@@ -83,13 +75,10 @@ public class CartServiceTest {
     @Test
     @DisplayName("Test removing an item from the cart")
     void testRemoveFromCart() {
-        // Add an item to the cart
         cartService.addToCart(testBook, 1);
         
-        // Reset the observer
         testObserver.wasNotified = false;
         
-        // Remove the item
         cartService.removeFromCart(0);
         
         List<CartItem> cartItems = cartService.getCartItems();
@@ -101,7 +90,6 @@ public class CartServiceTest {
     @Test
     @DisplayName("Test calculating the total cart price")
     void testCalculateTotal() {
-        // Create a second test book
         Book testBook2 = new Book();
         testBook2.setId(2);
         testBook2.setTitle("Test Book 2");
@@ -109,17 +97,13 @@ public class CartServiceTest {
         testBook2.setPrice(new BigDecimal("29.99"));
         testBook2.setStockQuantity(5);
         
-        // Add both books to the cart
-        cartService.addToCart(testBook, 2); // 2 x $19.99 = $39.98
-        cartService.addToCart(testBook2, 1); // 1 x $29.99 = $29.99
+        cartService.addToCart(testBook, 2); 
+        cartService.addToCart(testBook2, 1); 
         
-        // Calculate the expected total
-        BigDecimal expected = new BigDecimal("69.97"); // $39.98 + $29.99 = $69.97
+        BigDecimal expected = new BigDecimal("69.97"); 
         
-        // Get the actual total
         BigDecimal actual = cartService.calculateTotal();
         
-        // Compare (allowing for small rounding differences)
         assertEquals(expected.doubleValue(), actual.doubleValue(), 0.01,
                     "Cart total should be calculated correctly");
     }
@@ -127,13 +111,10 @@ public class CartServiceTest {
     @Test
     @DisplayName("Test clearing the cart")
     void testClearCart() {
-        // Add an item to the cart
         cartService.addToCart(testBook, 1);
         
-        // Reset the observer
         testObserver.wasNotified = false;
         
-        // Clear the cart
         cartService.clearCart();
         
         List<CartItem> cartItems = cartService.getCartItems();
@@ -142,7 +123,6 @@ public class CartServiceTest {
         assertTrue(testObserver.wasNotified, "Observer should be notified when the cart is cleared");
     }
     
-    // A simple observer implementation for testing
     private static class TestCartObserver implements CartObserver {
         boolean wasNotified = false;
         
@@ -151,6 +131,4 @@ public class CartServiceTest {
             wasNotified = true;
         }
     }
-    
-    // Add more test cases as needed
 }

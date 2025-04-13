@@ -12,25 +12,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Service class for managing book reviews.
- */
 public class ReviewService {
     
-    /**
-     * Default constructor.
-     */
     public ReviewService() {
-        // Empty constructor - connections will be obtained as needed
     }
     
-    /**
-     * Adds a new review.
-     * 
-     * @param review The review to add
-     * @return true if successful, false otherwise
-     * @throws SQLException If a database error occurs
-     */
     public boolean addReview(Review review) throws SQLException {
         String query = "INSERT INTO reviews (user_id, book_id, rating, comment, review_date) " +
                       "VALUES (?, ?, ?, ?, ?)";
@@ -46,7 +32,6 @@ public class ReviewService {
             int result = stmt.executeUpdate();
             
             if (result > 0) {
-                // Update the book's average rating
                 updateBookRating(review.getBookId());
                 return true;
             }
@@ -55,16 +40,6 @@ public class ReviewService {
         }
     }
     
-    /**
-     * Adds a new review.
-     * 
-     * @param userId The user ID
-     * @param bookId The book ID
-     * @param content The review content
-     * @param rating The rating (1-5)
-     * @return true if successful, false otherwise
-     * @throws SQLException If a database error occurs
-     */
     public boolean addReview(int userId, int bookId, String content, int rating) throws SQLException {
         Review review = new Review();
         review.setUserId(userId);
@@ -76,14 +51,6 @@ public class ReviewService {
         return addReview(review);
     }
     
-    /**
-     * Checks if a user has already reviewed a book.
-     * 
-     * @param userId The user ID
-     * @param bookId The book ID
-     * @return true if the user has already reviewed the book, false otherwise
-     * @throws SQLException If a database error occurs
-     */
     public boolean hasUserReviewedBook(int userId, int bookId) throws SQLException {
         String query = "SELECT COUNT(*) FROM reviews WHERE user_id = ? AND book_id = ?";
         
@@ -102,13 +69,6 @@ public class ReviewService {
         return false;
     }
     
-    /**
-     * Gets all reviews for a book.
-     * 
-     * @param bookId The book ID
-     * @return A list of reviews
-     * @throws SQLException If a database error occurs
-     */
     public List<Review> getBookReviews(int bookId) throws SQLException {
         List<Review> reviews = new ArrayList<>();
         
@@ -141,13 +101,6 @@ public class ReviewService {
         return reviews;
     }
     
-    /**
-     * Gets all reviews by a user.
-     * 
-     * @param userId The user ID
-     * @return A list of reviews
-     * @throws SQLException If a database error occurs
-     */
     public List<Review> getUserReviews(int userId) throws SQLException {
         List<Review> reviews = new ArrayList<>();
         
@@ -180,15 +133,7 @@ public class ReviewService {
         return reviews;
     }
     
-    /**
-     * Deletes a review.
-     * 
-     * @param reviewId The review ID
-     * @return true if successful, false otherwise
-     * @throws SQLException If a database error occurs
-     */
     public boolean deleteReview(int reviewId) throws SQLException {
-        // First get the book ID to update its rating later
         int bookId = 0;
         String getBookIdQuery = "SELECT book_id FROM reviews WHERE id = ?";
         
@@ -200,11 +145,10 @@ public class ReviewService {
             if (rs.next()) {
                 bookId = rs.getInt("book_id");
             } else {
-                return false; // Review not found
+                return false;
             }
         }
         
-        // Now delete the review
         String query = "DELETE FROM reviews WHERE id = ?";
         
         try (Connection connection = DatabaseConnection.getInstance().getConnection();
@@ -214,7 +158,6 @@ public class ReviewService {
             int result = stmt.executeUpdate();
             
             if (result > 0 && bookId > 0) {
-                // Update the book's average rating
                 updateBookRating(bookId);
                 return true;
             }
@@ -223,14 +166,7 @@ public class ReviewService {
         }
     }
     
-    /**
-     * Updates a book's average rating and review count.
-     * 
-     * @param bookId The book ID
-     * @throws SQLException If a database error occurs
-     */
     private void updateBookRating(int bookId) throws SQLException {
-        // Get average rating and count for debugging purposes only
         String getStatsQuery = "SELECT AVG(rating) AS avg_rating, COUNT(*) AS review_count " +
                               "FROM reviews WHERE book_id = ?";
         
@@ -244,15 +180,7 @@ public class ReviewService {
                 int reviewCount = rs.getInt("review_count");
                 System.out.println("Book ID " + bookId + " has average rating " + avgRating + 
                                   " from " + reviewCount + " reviews");
-                
-                // Note: We're not updating the books table because the average_rating and review_count columns don't exist
-                // In a future update, you may want to add these columns to the books table
             }
         }
-        
-        // Skip updating the book table for now since the columns don't exist
-        // If you want to add this functionality, first update the database schema to add:
-        // ALTER TABLE books ADD COLUMN average_rating DOUBLE PRECISION DEFAULT 0.0;
-        // ALTER TABLE books ADD COLUMN review_count INTEGER DEFAULT 0;
     }
 }

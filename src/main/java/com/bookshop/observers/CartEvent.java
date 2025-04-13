@@ -3,13 +3,8 @@ package com.bookshop.observers;
 import com.bookshop.models.Book;
 import com.bookshop.models.CartItem;
 
-/**
- * Event class for cart updates.
- * Used with the Observer pattern to communicate cart changes.
- */
 public class CartEvent {
     
-    // Event types
     public enum EventType {
         ITEM_ADDED,
         ITEM_REMOVED,
@@ -23,15 +18,6 @@ public class CartEvent {
     private final Book book;
     private final int quantity;
     
-    /**
-     * Constructor for CartEvent.
-     * 
-     * @param userId The user ID
-     * @param type The event type
-     * @param item The cart item (may be null for CART_CLEARED events)
-     * @param book The book (may be null for CART_CLEARED events)
-     * @param quantity The quantity
-     */
     public CartEvent(int userId, EventType type, CartItem item, Book book, int quantity) {
         this.userId = userId;
         this.type = type;
@@ -40,65 +26,30 @@ public class CartEvent {
         this.quantity = quantity;
     }
     
-    /**
-     * Constructor for CART_CLEARED events.
-     * 
-     * @param userId The user ID
-     */
     public CartEvent(int userId) {
         this(userId, EventType.CART_CLEARED, null, null, 0);
     }
     
-    /**
-     * Get the user ID.
-     * 
-     * @return The user ID
-     */
     public int getUserId() {
         return userId;
     }
     
-    /**
-     * Get the event type.
-     * 
-     * @return The event type
-     */
     public EventType getType() {
         return type;
     }
     
-    /**
-     * Get the cart item.
-     * 
-     * @return The cart item
-     */
     public CartItem getItem() {
         return item;
     }
     
-    /**
-     * Get the book.
-     * 
-     * @return The book
-     */
     public Book getBook() {
         return book;
     }
     
-    /**
-     * Get the quantity.
-     * 
-     * @return The quantity
-     */
     public int getQuantity() {
         return quantity;
     }
     
-    /**
-     * Get a string representation of the event.
-     * 
-     * @return A string representation of the event
-     */
     @Override
     public String toString() {
         switch (type) {

@@ -22,9 +22,6 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.NumberFormat;
 
-/**
- * Controller for the shopping cart view.
- */
 public class ShoppingCartController implements CartUpdateListener {
     
     @FXML private TableView<CartItem> cartTableView;
@@ -49,9 +46,6 @@ public class ShoppingCartController implements CartUpdateListener {
     private User currentUser;
     private ObservableList<CartItem> cartItems;
     
-    /**
-     * Initializes the controller.
-     */
     @FXML
     public void initialize() {
         cartService = CartService.getInstance();
@@ -59,15 +53,12 @@ public class ShoppingCartController implements CartUpdateListener {
         currentUser = SessionManager.getInstance().getCurrentUser();
         
         if (currentUser == null) {
-            // If not logged in, redirect to login page
             ViewNavigator.getInstance().navigateTo("login.fxml");
             return;
         }
         
-        // Register as a listener for cart updates
         cartService.addCartUpdateListener(this);
         
-        // Setup table columns
         titleColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getBookTitle()));
         authorColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getBookAuthor()));
         priceColumn.setCellValueFactory(cellData -> {
@@ -80,14 +71,11 @@ public class ShoppingCartController implements CartUpdateListener {
             return new SimpleStringProperty(currencyFormat.format(cellData.getValue().getSubtotal()));
         });
         
-        // Setup payment method combo box
         paymentMethodComboBox.getItems().addAll("Credit Card", "PayPal", "Bank Transfer");
         paymentMethodComboBox.getSelectionModel().selectFirst();
         
-        // Load cart items
         loadCartItems();
         
-        // Setup button states based on selection
         cartTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             boolean hasSelection = newSelection != null;
             increaseQuantityButton.setDisable(!hasSelection);
@@ -96,18 +84,13 @@ public class ShoppingCartController implements CartUpdateListener {
         });
     }
     
-    /**
-     * Loads cart items from the database.
-     */
     private void loadCartItems() {
         try {
             cartItems = FXCollections.observableArrayList(cartService.getCartItems(currentUser.getId()));
             cartTableView.setItems(cartItems);
             
-            // Update the total amount
             updateTotal();
             
-            // Update UI state based on cart content
             boolean hasItems = !cartItems.isEmpty();
             checkoutButton.setDisable(!hasItems);
             clearCartButton.setDisable(!hasItems);
@@ -118,9 +101,6 @@ public class ShoppingCartController implements CartUpdateListener {
         }
     }
     
-    /**
-     * Updates the total display.
-     */
     private void updateTotal() {
         try {
             BigDecimal total = cartService.calculateTotal(currentUser.getId());
@@ -132,11 +112,6 @@ public class ShoppingCartController implements CartUpdateListener {
         }
     }
     
-    /**
-     * Handles the increase quantity button action.
-     * 
-     * @param event The action event
-     */
     @FXML
     public void handleIncreaseQuantity(ActionEvent event) {
         CartItem selectedItem = cartTableView.getSelectionModel().getSelectedItem();
@@ -159,11 +134,6 @@ public class ShoppingCartController implements CartUpdateListener {
         }
     }
     
-    /**
-     * Handles the decrease quantity button action.
-     * 
-     * @param event The action event
-     */
     @FXML
     public void handleDecreaseQuantity(ActionEvent event) {
         CartItem selectedItem = cartTableView.getSelectionModel().getSelectedItem();
@@ -186,11 +156,6 @@ public class ShoppingCartController implements CartUpdateListener {
         }
     }
     
-    /**
-     * Handles the remove item button action.
-     * 
-     * @param event The action event
-     */
     @FXML
     public void handleRemoveItem(ActionEvent event) {
         CartItem selectedItem = cartTableView.getSelectionModel().getSelectedItem();
@@ -202,7 +167,6 @@ public class ShoppingCartController implements CartUpdateListener {
                     cartItems.remove(selectedItem);
                     updateTotal();
                     
-                    // Update UI state based on cart content
                     boolean hasItems = !cartItems.isEmpty();
                     checkoutButton.setDisable(!hasItems);
                     clearCartButton.setDisable(!hasItems);
@@ -216,11 +180,6 @@ public class ShoppingCartController implements CartUpdateListener {
         }
     }
     
-    /**
-     * Handles the clear cart button action.
-     * 
-     * @param event The action event
-     */
     @FXML
     public void handleClearCart(ActionEvent event) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -237,7 +196,6 @@ public class ShoppingCartController implements CartUpdateListener {
                         cartItems.clear();
                         updateTotal();
                         
-                        // Update UI state
                         checkoutButton.setDisable(true);
                         clearCartButton.setDisable(true);
                         
@@ -253,11 +211,6 @@ public class ShoppingCartController implements CartUpdateListener {
         });
     }
     
-    /**
-     * Handles the checkout button action.
-     * 
-     * @param event The action event
-     */
     @FXML
     public void handleCheckout(ActionEvent event) {
         if (cartItems.isEmpty()) {
@@ -265,10 +218,8 @@ public class ShoppingCartController implements CartUpdateListener {
             return;
         }
         
-        // Debug user information
         System.out.println("Checkout for user ID: " + currentUser.getId() + ", Name: " + currentUser.getFullName());
         
-        // Check if current user matches session user
         User sessionUser = SessionManager.getInstance().getCurrentUser();
         if (sessionUser != null) {
             System.out.println("Session user ID: " + sessionUser.getId() + ", Name: " + sessionUser.getFullName());
@@ -278,15 +229,12 @@ public class ShoppingCartController implements CartUpdateListener {
             }
         }
         
-        // Disable the checkout button to prevent multiple clicks
         checkoutButton.setDisable(true);
         statusLabel.setText("Processing your order...");
         
-        // Create simple payment strategy
         PaymentStrategy paymentStrategy = createPaymentStrategy("Standard");
         
         try {
-            // Process the purchase - using direct call instead of background thread for simplicity
             Order order = purchaseService.processPurchase(cartItems, currentUser, paymentStrategy);
             
             if (order != null) {
@@ -294,35 +242,28 @@ public class ShoppingCartController implements CartUpdateListener {
                                  " for user ID: " + order.getUserId());
                 
                 try {
-                    // Clear the cart after successful purchase
                     cartService.clearCart(currentUser.getId());
                     
-                    // Show success message
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
                     alert.setTitle("Order Placed");
                     alert.setHeaderText("Order Successfully Placed");
                     alert.setContentText("Your order #" + order.getId() + " has been recorded. You can view it in your orders section. User ID: " + currentUser.getId());
                     
-                    // When user closes the alert, navigate to order history
                     alert.showAndWait().ifPresent(response -> {
-                        // Unregister the listener before navigating away
                         cartService.removeCartUpdateListener(this);
                         try {
                             System.out.println("Navigating to orders view for user ID: " + currentUser.getId());
                             ViewNavigator.getInstance().navigateTo("customer_orders.fxml");
                         } catch (Exception ex) {
-                            // If navigation fails, go back to dashboard instead
                             System.err.println("Error navigating to orders view: " + ex.getMessage());
                             try {
                                 ViewNavigator.getInstance().navigateTo("customer_dashboard.fxml");
                             } catch (Exception e2) {
-                                // If all navigation fails, show error
                                 statusLabel.setText("Error: Could not navigate to any view. Please restart the application.");
                             }
                         }
                     });
                 } catch (SQLException e) {
-                    // If clearing cart fails, still show success but with a warning
                     Alert alert = new Alert(Alert.AlertType.WARNING);
                     alert.setTitle("Order Placed - With Warning");
                     alert.setHeaderText("Order Successfully Placed");
@@ -330,18 +271,15 @@ public class ShoppingCartController implements CartUpdateListener {
                                          "You may need to clear it manually.");
                     
                     alert.showAndWait().ifPresent(response -> {
-                        // Unregister the listener before navigating away
                         cartService.removeCartUpdateListener(this);
                         try {
                             System.out.println("Navigating to orders view for user ID: " + currentUser.getId());
                             ViewNavigator.getInstance().navigateTo("customer_orders.fxml");
                         } catch (Exception ex) {
-                            // If navigation fails, go back to dashboard instead
                             System.err.println("Error navigating to orders view: " + ex.getMessage());
                             try {
                                 ViewNavigator.getInstance().navigateTo("customer_dashboard.fxml");
                             } catch (Exception e2) {
-                                // If all navigation fails, show error
                                 statusLabel.setText("Error: Could not navigate to any view. Please restart the application.");
                             }
                         }
@@ -363,57 +301,30 @@ public class ShoppingCartController implements CartUpdateListener {
         }
     }
     
-    /**
-     * Creates a payment strategy based on the selected payment method.
-     * 
-     * @param paymentMethod The selected payment method
-     * @return The payment strategy
-     */
     private PaymentStrategy createPaymentStrategy(String paymentMethod) {
-        // This would be implemented with actual payment strategies
-        // For now, we'll use a dummy implementation that always succeeds
         return new PaymentStrategy() {
             @Override
             public boolean processPayment(User user, BigDecimal amount) {
-                // In a real application, this would process the actual payment
                 return true;
             }
         };
     }
     
-    /**
-     * Handles the back to shop button action.
-     * 
-     * @param event The action event
-     */
     @FXML
     public void handleBackToShop(ActionEvent event) {
-        // Unregister the listener before navigating away
         cartService.removeCartUpdateListener(this);
         ViewNavigator.getInstance().navigateTo("customer_dashboard.fxml");
     }
     
-    /**
-     * Handles the continue shopping button action.
-     * 
-     * @param event The action event
-     */
     @FXML
     public void handleContinueShopping(ActionEvent event) {
-        // Unregister the listener before navigating away
         cartService.removeCartUpdateListener(this);
         ViewNavigator.getInstance().navigateTo("customer_dashboard.fxml");
     }
     
-    /**
-     * Handles cart updates from the CartService.
-     * 
-     * @param userId The ID of the user whose cart was updated
-     */
     @Override
     public void onCartUpdated(int userId) {
         if (currentUser != null && currentUser.getId() == userId) {
-            // Update UI on JavaFX thread
             javafx.application.Platform.runLater(this::loadCartItems);
         }
     }

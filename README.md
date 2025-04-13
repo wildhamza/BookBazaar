@@ -108,8 +108,7 @@ public class DatabaseConnection {
     private static DatabaseConnection instance;
     private Connection connection;
     
-    private DatabaseConnection() {
-        // Private constructor to prevent instantiation
+    private DatabaseConnection() { 
     }
     
     public static synchronized DatabaseConnection getInstance() {
@@ -118,8 +117,7 @@ public class DatabaseConnection {
         }
         return instance;
     }
-    
-    // Methods to get connection, initialize database, etc.
+     
 }
 ```
 
@@ -131,13 +129,11 @@ public class BookFactory {
     public static Book createBook(ResultSet rs) throws SQLException {
         Book book = new Book();
         book.setId(rs.getInt("id"));
-        book.setTitle(rs.getString("title"));
-        // Set other properties
+        book.setTitle(rs.getString("title")); 
         return book;
     }
     
-    public static Book createBookFromDTO(BookDTO dto) {
-        // Create a book from DTO
+    public static Book createBookFromDTO(BookDTO dto) { 
     }
 }
 ```
@@ -154,14 +150,14 @@ public interface DiscountStrategy {
 public class RegularMemberDiscount implements DiscountStrategy {
     @Override
     public BigDecimal calculateDiscount(BigDecimal originalPrice) {
-        return originalPrice.multiply(new BigDecimal("0.10")); // 10% discount
+        return originalPrice.multiply(new BigDecimal("0.10")); 
     }
 }
 
 public class PremiumMemberDiscount implements DiscountStrategy {
     @Override
     public BigDecimal calculateDiscount(BigDecimal originalPrice) {
-        return originalPrice.multiply(new BigDecimal("0.15")); // 15% discount
+        return originalPrice.multiply(new BigDecimal("0.15")); 
     }
 }
 ```
@@ -222,12 +218,10 @@ public class BookService {
         if (book == null) {
             return false;
         }
-        
         int newQuantity = book.getStockQuantity() + quantityChange;
         if (newQuantity < 0) {
             newQuantity = 0;
         }
-        
         book.setStockQuantity(newQuantity);
         return repository.update(book);
     }
@@ -259,7 +253,6 @@ public class SceneManager {
                     mainContainer.getChildren().get(0).getId()
                 );
             }
-            
             mainContainer.getChildren().clear();
             mainContainer.getChildren().add(screenMap.get(name));
         }
@@ -831,32 +824,26 @@ The application uses Mockito to create mock objects that simulate dependencies, 
 ### Sample Test Code
 
 ```java
-// Testing the Book class
 @Test
 public void testReduceStock() {
     Book book = new Book();
     book.setStockQuantity(10);
     
-    // Test successful reduction
     boolean result = book.reduceStock(3);
     assertTrue(result);
     assertEquals(7, book.getStockQuantity());
     
-    // Test invalid reduction (too large)
     result = book.reduceStock(10);
     assertFalse(result);
     assertEquals(7, book.getStockQuantity());
     
-    // Test invalid reduction (negative)
     result = book.reduceStock(-1);
     assertFalse(result);
     assertEquals(7, book.getStockQuantity());
 }
 
-// Testing UserService with mock repository
 @Test
 public void testAuthenticateUser() {
-    // Setup
     UserRepository mockRepo = mock(UserRepository.class);
     User validUser = new User();
     validUser.setId(1);
@@ -867,44 +854,40 @@ public void testAuthenticateUser() {
     
     UserService userService = new UserService(mockRepo);
     
-    // Test valid credentials
     User result = userService.authenticateUser("testuser", "password123");
     assertNotNull(result);
     assertEquals(1, result.getId());
     
-    // Test invalid credentials
     result = userService.authenticateUser("testuser", "wrongpassword");
     assertNull(result);
     
-    // Test non-existent user
     result = userService.authenticateUser("nonexistent", "password123");
     assertNull(result);
 }
 
-// Testing DiscountService
 @Test
 public void testCalculateDiscountedPrice() {
     User regularUser = new User();
-    regularUser.setOrderCount(7); // Regular member (5+ orders)
+    regularUser.setOrderCount(7);
     
     User premiumUser = new User();
-    premiumUser.setOrderCount(12); // Premium member (10+ orders)
+    premiumUser.setOrderCount(12); 
     
     User standardUser = new User();
-    standardUser.setOrderCount(2); // Standard customer
+    standardUser.setOrderCount(2);
     
     DiscountService discountService = new DiscountService();
     BigDecimal originalPrice = new BigDecimal("100.00");
     
-    // Test regular member discount (10%)
+    
     BigDecimal regularDiscount = discountService.calculateDiscountedPrice(originalPrice, regularUser);
     assertEquals(new BigDecimal("90.00"), regularDiscount);
     
-    // Test premium member discount (15%)
+    
     BigDecimal premiumDiscount = discountService.calculateDiscountedPrice(originalPrice, premiumUser);
     assertEquals(new BigDecimal("85.00"), premiumDiscount);
     
-    // Test standard customer (no discount)
+    
     BigDecimal standardDiscount = discountService.calculateDiscountedPrice(originalPrice, standardUser);
     assertEquals(originalPrice, standardDiscount);
 }
@@ -940,10 +923,8 @@ Users are granted the minimum levels of access needed to perform their functions
 The application uses BCrypt for secure credential management:
 
 ```java
-// Hashing a password during user registration
 String hashedPassword = BCrypt.hashpw(plainPassword, BCrypt.gensalt());
 
-// Verifying a password during authentication
 boolean passwordMatches = BCrypt.checkpw(inputPassword, storedHashedPassword);
 ```
 
@@ -969,7 +950,6 @@ Different interface components are displayed based on user role:
 - All access control is enforced server-side to prevent manipulation
 
 ```java
-// Example of role-based access control in a controller
 @FXML
 private void initialize() {
     User currentUser = SessionManager.getInstance().getCurrentUser();
@@ -983,15 +963,13 @@ private void initialize() {
     }
 }
 
-// Example of permission check in a service method
 public boolean deleteBook(int bookId) throws SQLException {
     User currentUser = SessionManager.getInstance().getCurrentUser();
     
     if (currentUser == null || !currentUser.isAdmin()) {
-        return false; // Not authorized
+        return false;
     }
     
-    // Proceed with deletion
     return bookRepository.delete(bookId);
 }
 ```
@@ -1008,27 +986,3 @@ Key achievements include:
 - Comprehensive feature set for both customers and administrators
 - Efficient data management with proper database design
 - Application of GoF design patterns to solve specific challenges
-
-### Future Improvements
-
-1. **Extended Features**
-   - Recommendation system based on purchase history
-   - Integration with external book APIs for automatic catalog updates
-   - Export functionality for reports and invoices
-   - Enhanced search capabilities with filters and sorting options
-
-2. **Technical Enhancements**
-   - Implement caching for frequently accessed data
-   - Add comprehensive logging for better debugging and monitoring
-   - Improve UI/UX with additional JavaFX controls and animations
-   - Extend test coverage with integration and UI tests
-
-3. **Security Improvements**
-   - Implement two-factor authentication
-   - Add API key-based authentication for potential external integrations
-   - Enhanced input validation and sanitization
-
-4. **Performance Optimization**
-   - Background loading for large datasets
-   - Pagination for book lists and search results
-   - Image caching and lazy loading

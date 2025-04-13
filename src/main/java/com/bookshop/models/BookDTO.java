@@ -3,10 +3,6 @@ package com.bookshop.models;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-/**
- * Data Transfer Object for Book entities.
- * Used to transfer book data between layers without exposing the domain model.
- */
 public class BookDTO {
     private int id;
     private String title;
@@ -20,28 +16,10 @@ public class BookDTO {
     private LocalDate publicationDate;
     private String imageUrl;
     
-    /**
-     * Default constructor.
-     */
     public BookDTO() {
-        // Default constructor
         this.price = BigDecimal.ZERO;
     }
     
-    /**
-     * Parameterized constructor.
-     * 
-     * @param id The book ID
-     * @param title The title
-     * @param author The author
-     * @param isbn The ISBN
-     * @param publisher The publisher
-     * @param category The category
-     * @param description The description
-     * @param price The price
-     * @param stockQuantity The stock quantity
-     * @param imageUrl The image URL
-     */
     public BookDTO(int id, String title, String author, String isbn, String publisher,
             String category, String description, BigDecimal price, int stockQuantity,
             String imageUrl) {
@@ -57,7 +35,6 @@ public class BookDTO {
         this.imageUrl = imageUrl;
     }
 
-    // Getters and setters
     public int getId() {
         return id;
     }

@@ -105,6 +105,7 @@ public class AdminDashboardController {
     private String currentCategory = "All Categories";
     private String currentSortBy = "Title";
     
+    @SuppressWarnings("unused")
     @FXML
     public void initialize() {
         bookService = new BookService();
@@ -524,6 +525,7 @@ public class AdminDashboardController {
         try {
             UserService userService = new UserService();
             List<User> allUsers = userService.getAllUsers();
+            @SuppressWarnings("unused")
             List<User> filteredUsers = allUsers.stream()
                 .filter(user -> 
                     user.getUsername().toLowerCase().contains(searchText) || 

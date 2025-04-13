@@ -10,9 +10,6 @@ import com.bookshop.utils.PasswordHasher;
 
 import java.sql.SQLException;
 
-/**
- * Unit tests for the AuthService class.
- */
 public class AuthServiceTest {
     
     private AuthService authService;
@@ -25,8 +22,6 @@ public class AuthServiceTest {
     @Test
     @DisplayName("Test user authentication with valid credentials")
     void testAuthenticateUserWithValidCredentials() throws SQLException {
-        // Since this test depends on database state, we need to use known credentials
-        // In a real application, you would mock the database or use an in-memory test database
         User user = authService.login("admin", "admin123");
         
         assertNotNull(user, "User should not be null when credentials are valid");
@@ -48,15 +43,10 @@ public class AuthServiceTest {
         String password = "testpassword";
         String hashedPassword = PasswordHasher.hashPassword(password);
         
-        // The hash should be different from the original password
         assertNotEquals(password, hashedPassword);
         
-        // Verification should work
         assertTrue(PasswordHasher.verifyPassword(password, hashedPassword));
         
-        // Wrong password should fail
         assertFalse(PasswordHasher.verifyPassword("wrongpassword", hashedPassword));
     }
-    
-    // Add more test cases as needed
 }

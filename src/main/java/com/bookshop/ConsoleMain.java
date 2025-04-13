@@ -14,11 +14,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Scanner;
 
-/**
- * Console-based application for BookShop.
- * This provides a text-based interface for environments that don't support JavaFX
- * or for users who prefer a command-line interface.
- */
 public class ConsoleMain {
     
     private static Scanner scanner = new Scanner(System.in);
@@ -30,17 +25,11 @@ public class ConsoleMain {
     private static DiscountService discountService;
     private static User currentUser = null;
     
-    /**
-     * Main method.
-     *
-     * @param args Command line arguments
-     */
     public static void main(String[] args) {
         System.out.println("BookShop Console Application");
         System.out.println("----------------------------");
         
         try {
-            // Initialize services
             bookService = new BookService();
             userService = new UserService();
             cartService = CartService.getInstance();
@@ -48,15 +37,11 @@ public class ConsoleMain {
             reviewService = new ReviewService();
             discountService = new DiscountService();
             
-            // Run database tests to verify connections
             runDatabaseTests();
             
-            // Start the application
             if (args.length > 0 && args[0].equals("--test")) {
-                // Just run tests if in test mode
                 System.out.println("Test mode completed successfully.");
             } else {
-                // Start interactive mode
                 runInteractiveMode();
             }
         } catch (Exception e) {
@@ -66,16 +51,10 @@ public class ConsoleMain {
             scanner.close();
         }
     }
-    
-    /**
-     * Run basic database tests to verify connectivity.
-     *
-     * @throws SQLException if a database error occurs
-     */
+     
     private static void runDatabaseTests() throws SQLException {
         System.out.println("Testing database connection...");
         
-        // Test BookService
         List<Book> books = bookService.getAllBooks();
         System.out.println("Found " + books.size() + " books in the database.");
         
@@ -92,7 +71,6 @@ public class ConsoleMain {
             }
         }
         
-        // Test UserService
         System.out.println("Testing UserService...");
         User adminUser = userService.authenticateUser("admin", "admin123");
         
@@ -113,9 +91,6 @@ public class ConsoleMain {
         }
     }
     
-    /**
-     * Run the interactive mode for user interaction.
-     */
     private static void runInteractiveMode() {
         boolean running = true;
         
@@ -148,9 +123,6 @@ public class ConsoleMain {
     
     // Menu display methods
     
-    /**
-     * Display login menu.
-     */
     private static void displayLoginMenu() {
         System.out.println("\n=== Login Menu ===");
         System.out.println("1. Login");
@@ -158,9 +130,6 @@ public class ConsoleMain {
         System.out.println("3. Exit");
     }
     
-    /**
-     * Display admin menu.
-     */
     private static void displayAdminMenu() {
         System.out.println("\n=== Admin Menu ===");
         System.out.println("Welcome, " + currentUser.getUsername() + " (Admin)");
@@ -174,9 +143,6 @@ public class ConsoleMain {
         System.out.println("8. Exit");
     }
     
-    /**
-     * Display customer menu.
-     */
     private static void displayCustomerMenu() {
         System.out.println("\n=== Customer Menu ===");
         System.out.println("Welcome, " + currentUser.getUsername());
@@ -188,19 +154,10 @@ public class ConsoleMain {
         System.out.println("6. Logout");
         System.out.println("7. Exit");
     }
-    
-    // Menu handling methods
-    
-    /**
-     * Handle login menu choices.
-     *
-     * @param choice User's choice
-     * @return true to continue, false to exit
-     * @throws SQLException if a database error occurs
-     */
+     
     private static boolean handleLoginMenu(int choice) throws SQLException {
         switch (choice) {
-            case 1: // Login
+            case 1: 
                 System.out.print("Username: ");
                 String username = scanner.nextLine();
                 System.out.print("Password: ");
@@ -216,7 +173,7 @@ public class ConsoleMain {
                 }
                 return true;
                 
-            case 2: // Register
+            case 2: 
                 User newUser = new User();
                 System.out.print("Username: ");
                 newUser.setUsername(scanner.nextLine());
@@ -238,7 +195,7 @@ public class ConsoleMain {
                 }
                 return true;
                 
-            case 3: // Exit
+            case 3: 
                 return false;
                 
             default:
@@ -246,47 +203,40 @@ public class ConsoleMain {
                 return true;
         }
     }
-    
-    /**
-     * Handle admin menu choices.
-     *
-     * @param choice User's choice
-     * @return true to continue, false to exit
-     * @throws SQLException if a database error occurs
-     */
+     
     private static boolean handleAdminMenu(int choice) throws SQLException {
         switch (choice) {
-            case 1: // View All Books
+            case 1: 
                 displayAllBooks();
                 return true;
                 
-            case 2: // Add New Book
+            case 2: 
                 addNewBook();
                 return true;
                 
-            case 3: // Edit Book
+            case 3: 
                 editBook();
                 return true;
                 
-            case 4: // Delete Book
+            case 4: 
                 deleteBook();
                 return true;
                 
-            case 5: // View All Users
+            case 5: 
                 displayAllUsers();
                 return true;
                 
-            case 6: // View All Orders
+            case 6: 
                 displayAllOrders();
                 return true;
                 
-            case 7: // Logout
+            case 7: 
                 currentUser = null;
                 SessionManager.getInstance().setCurrentUser(null);
                 System.out.println("Logged out successfully!");
                 return true;
                 
-            case 8: // Exit
+            case 8: 
                 return false;
                 
             default:
@@ -294,19 +244,11 @@ public class ConsoleMain {
                 return true;
         }
     }
-    
-    /**
-     * Handle customer menu choices.
-     *
-     * @param choice User's choice
-     * @return true to continue, false to exit
-     * @throws SQLException if a database error occurs
-     */
+     
     private static boolean handleCustomerMenu(int choice) throws SQLException {
         switch (choice) {
-            case 1: // View All Books
+            case 1: 
                 displayAllBooks();
-                // Additional option to add to cart
                 System.out.print("Would you like to add a book to cart? (Y/N): ");
                 String addToCart = scanner.nextLine();
                 if (addToCart.equalsIgnoreCase("Y")) {
@@ -314,29 +256,29 @@ public class ConsoleMain {
                 }
                 return true;
                 
-            case 2: // Search Books
+            case 2: 
                 searchBooks();
                 return true;
                 
-            case 3: // View Cart
+            case 3: 
                 viewCart();
                 return true;
                 
-            case 4: // View Orders
+            case 4: 
                 viewOrders();
                 return true;
                 
-            case 5: // View Profile
+            case 5: 
                 viewProfile();
                 return true;
                 
-            case 6: // Logout
+            case 6: 
                 currentUser = null;
                 SessionManager.getInstance().setCurrentUser(null);
                 System.out.println("Logged out successfully!");
                 return true;
                 
-            case 7: // Exit
+            case 7: 
                 return false;
                 
             default:
@@ -344,14 +286,7 @@ public class ConsoleMain {
                 return true;
         }
     }
-    
-    // Function implementations
-    
-    /**
-     * Display all books.
-     *
-     * @throws SQLException if a database error occurs
-     */
+     
     private static void displayAllBooks() throws SQLException {
         List<Book> books = bookService.getAllBooks();
         System.out.println("\n=== All Books ===");
@@ -371,12 +306,7 @@ public class ConsoleMain {
             System.out.println("--------------------");
         }
     }
-    
-    /**
-     * Add a new book.
-     *
-     * @throws SQLException if a database error occurs
-     */
+     
     private static void addNewBook() throws SQLException {
         Book book = new Book();
         
@@ -407,12 +337,7 @@ public class ConsoleMain {
             System.out.println("Failed to add book!");
         }
     }
-    
-    /**
-     * Edit an existing book.
-     *
-     * @throws SQLException if a database error occurs
-     */
+     
     private static void editBook() throws SQLException {
         int bookId = getIntInput("Enter Book ID to edit: ");
         Book book = bookService.getBookById(bookId);
@@ -458,12 +383,7 @@ public class ConsoleMain {
             System.out.println("Failed to update book!");
         }
     }
-    
-    /**
-     * Delete a book.
-     *
-     * @throws SQLException if a database error occurs
-     */
+     
     private static void deleteBook() throws SQLException {
         int bookId = getIntInput("Enter Book ID to delete: ");
         
@@ -481,12 +401,7 @@ public class ConsoleMain {
             System.out.println("Delete operation cancelled.");
         }
     }
-    
-    /**
-     * Display all users.
-     *
-     * @throws SQLException if a database error occurs
-     */
+     
     private static void displayAllUsers() throws SQLException {
         List<User> users = userService.getAllUsers();
         System.out.println("\n=== All Users ===");
@@ -506,12 +421,7 @@ public class ConsoleMain {
             System.out.println("--------------------");
         }
     }
-    
-    /**
-     * Display all orders.
-     *
-     * @throws SQLException if a database error occurs
-     */
+     
     private static void displayAllOrders() throws SQLException {
         List<Order> orders = orderService.getAllOrders();
         System.out.println("\n=== All Orders ===");
@@ -528,8 +438,7 @@ public class ConsoleMain {
             System.out.println("Status: " + order.getStatus());
             System.out.println("Total Amount: $" + order.getTotalAmount());
             System.out.println("Payment Method: " + order.getPaymentMethod());
-            
-            // Display order items
+             
             List<OrderItem> items = orderService.getOrderItems(order.getId());
             System.out.println("Items:");
             for (OrderItem item : items) {
@@ -540,12 +449,7 @@ public class ConsoleMain {
             System.out.println("--------------------");
         }
     }
-    
-    /**
-     * Search for books.
-     *
-     * @throws SQLException if a database error occurs
-     */
+     
     private static void searchBooks() throws SQLException {
         System.out.print("Enter search term: ");
         String searchTerm = scanner.nextLine();
@@ -567,7 +471,6 @@ public class ConsoleMain {
             System.out.println("--------------------");
         }
         
-        // Additional option to add to cart
         if (currentUser != null && !currentUser.getRole().equals("ADMIN")) {
             System.out.print("Would you like to add a book to cart? (Y/N): ");
             String addToCart = scanner.nextLine();
@@ -577,11 +480,6 @@ public class ConsoleMain {
         }
     }
     
-    /**
-     * Add a book to the cart.
-     *
-     * @throws SQLException if a database error occurs
-     */
     private static void addBookToCart() throws SQLException {
         int bookId = getIntInput("Enter Book ID to add to cart: ");
         Book book = bookService.getBookById(bookId);
@@ -616,11 +514,6 @@ public class ConsoleMain {
         }
     }
     
-    /**
-     * View the user's cart.
-     *
-     * @throws SQLException if a database error occurs
-     */
     private static void viewCart() throws SQLException {
         List<CartItem> cartItems = cartService.getCartItems(currentUser.getId());
         System.out.println("\n=== Your Cart ===");
@@ -647,7 +540,6 @@ public class ConsoleMain {
         
         System.out.println("Total: $" + total);
         
-        // Apply discount if applicable
         BigDecimal discountedTotal = discountService.calculateDiscountedPrice(total, currentUser);
         if (!discountedTotal.equals(total)) {
             BigDecimal discountAmount = total.subtract(discountedTotal);
@@ -673,18 +565,12 @@ public class ConsoleMain {
                 checkout(discountedTotal);
                 break;
             case 4:
-                // Return to menu
                 break;
             default:
                 System.out.println("Invalid choice!");
         }
     }
     
-    /**
-     * Update the quantity of a cart item.
-     *
-     * @throws SQLException if a database error occurs
-     */
     private static void updateCartItemQuantity() throws SQLException {
         int cartItemId = getIntInput("Enter Cart Item ID to update: ");
         int newQuantity = getIntInput("Enter new quantity: ");
@@ -702,11 +588,6 @@ public class ConsoleMain {
         }
     }
     
-    /**
-     * Remove an item from the cart.
-     *
-     * @throws SQLException if a database error occurs
-     */
     private static void removeCartItem() throws SQLException {
         int cartItemId = getIntInput("Enter Cart Item ID to remove: ");
         
@@ -718,12 +599,7 @@ public class ConsoleMain {
         }
     }
     
-    /**
-     * Process checkout.
-     *
-     * @param totalAmount The total amount to charge
-     * @throws SQLException if a database error occurs
-     */
+    @SuppressWarnings("unused")
     private static void checkout(BigDecimal totalAmount) throws SQLException {
         List<CartItem> cartItems = cartService.getCartItems(currentUser.getId());
         
@@ -777,11 +653,6 @@ public class ConsoleMain {
         }
     }
     
-    /**
-     * View the user's orders.
-     *
-     * @throws SQLException if a database error occurs
-     */
     private static void viewOrders() throws SQLException {
         List<Order> orders = orderService.getOrdersByUser(currentUser.getId());
         System.out.println("\n=== Your Orders ===");
@@ -798,7 +669,6 @@ public class ConsoleMain {
             System.out.println("Total Amount: $" + order.getTotalAmount());
             System.out.println("Payment Method: " + order.getPaymentMethod());
             
-            // Display order items
             List<OrderItem> items = orderService.getOrderItems(order.getId());
             System.out.println("Items:");
             for (OrderItem item : items) {
@@ -810,9 +680,6 @@ public class ConsoleMain {
         }
     }
     
-    /**
-     * View the user's profile.
-     */
     private static void viewProfile() {
         System.out.println("\n=== Your Profile ===");
         System.out.println("Username: " + currentUser.getUsername());
@@ -822,7 +689,6 @@ public class ConsoleMain {
         System.out.println("Phone: " + (currentUser.getPhoneNumber() != null ? currentUser.getPhoneNumber() : "Not set"));
         System.out.println("Order Count: " + currentUser.getOrderCount());
         
-        // Show membership status
         if (currentUser.isPremiumMember()) {
             System.out.println("Status: Premium Member (15% discount)");
         } else if (currentUser.isRegularMember()) {
@@ -847,47 +713,45 @@ public class ConsoleMain {
                 changePassword();
                 break;
             case 3:
-                // Return to menu
                 break;
             default:
                 System.out.println("Invalid choice!");
         }
     }
     
-    /**
-     * Update the user's profile.
-     */
     private static void updateProfile() {
         System.out.println("\n=== Update Profile ===");
-        
+
         System.out.println("Current Full Name: " + currentUser.getFullName());
         System.out.print("New Full Name (leave empty to keep current): ");
         String fullName = scanner.nextLine();
         if (!fullName.isEmpty()) {
             currentUser.setFullName(fullName);
         }
-        
+
         System.out.println("Current Email: " + currentUser.getEmail());
         System.out.print("New Email (leave empty to keep current): ");
         String email = scanner.nextLine();
         if (!email.isEmpty()) {
             currentUser.setEmail(email);
         }
-        
-        System.out.println("Current Address: " + (currentUser.getAddress() != null ? currentUser.getAddress() : "Not set"));
+
+        System.out.println(
+                "Current Address: " + (currentUser.getAddress() != null ? currentUser.getAddress() : "Not set"));
         System.out.print("New Address (leave empty to keep current): ");
         String address = scanner.nextLine();
         if (!address.isEmpty()) {
             currentUser.setAddress(address);
         }
-        
-        System.out.println("Current Phone: " + (currentUser.getPhoneNumber() != null ? currentUser.getPhoneNumber() : "Not set"));
+
+        System.out.println(
+                "Current Phone: " + (currentUser.getPhoneNumber() != null ? currentUser.getPhoneNumber() : "Not set"));
         System.out.print("New Phone (leave empty to keep current): ");
         String phone = scanner.nextLine();
         if (!phone.isEmpty()) {
             currentUser.setPhoneNumber(phone);
         }
-        
+
         try {
             boolean updated = userService.updateUserProfile(currentUser);
             if (updated) {
@@ -900,9 +764,6 @@ public class ConsoleMain {
         }
     }
     
-    /**
-     * Change the user's password.
-     */
     private static void changePassword() {
         System.out.println("\n=== Change Password ===");
         
@@ -937,14 +798,6 @@ public class ConsoleMain {
         }
     }
     
-    // Helper methods
-    
-    /**
-     * Get integer input with error handling.
-     *
-     * @param prompt The prompt to display
-     * @return The integer input
-     */
     private static int getIntInput(String prompt) {
         while (true) {
             System.out.print(prompt);
@@ -957,12 +810,6 @@ public class ConsoleMain {
         }
     }
     
-    /**
-     * Get string input.
-     *
-     * @param prompt The prompt to display
-     * @return The string input
-     */
     private static String getStringInput(String prompt) {
         System.out.print(prompt);
         return scanner.nextLine();

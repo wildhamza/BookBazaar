@@ -11,16 +11,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Service class for managing purchases and orders.
- */
 public class PurchaseService {
     
     private BookService bookService;
     
-    /**
-     * Default constructor.
-     */
     public PurchaseService() {
         try {
             this.bookService = new BookService();
@@ -29,15 +23,6 @@ public class PurchaseService {
         }
     }
     
-    /**
-     * Processes a purchase from the cart items.
-     * 
-     * @param cartItems The cart items to purchase
-     * @param user The user making the purchase
-     * @param paymentStrategy The payment strategy to use
-     * @return The created order if successful, null otherwise
-     * @throws SQLException If a database error occurs
-     */
     public Order processPurchase(ObservableList<CartItem> cartItems, User user, PaymentStrategy paymentStrategy) throws SQLException {
         if (cartItems == null || cartItems.isEmpty() || user == null) {
             return null;
@@ -46,10 +31,8 @@ public class PurchaseService {
         Connection connection = null;
         
         try {
-            // Get a fresh connection
             connection = DatabaseConnection.getInstance().getConnection();
             
-            // Create order
             Order order = new Order();
             order.setUserId(user.getId());
             order.setOrderDate(LocalDateTime.now());
@@ -57,14 +40,12 @@ public class PurchaseService {
             order.setShippingAddress(user.getAddress());
             order.setPaymentMethod("Standard");
             
-            // Calculate total
             BigDecimal total = BigDecimal.ZERO;
             for (CartItem item : cartItems) {
                 total = total.add(item.getSubtotal());
             }
             order.setTotalAmount(total);
             
-            // Insert order record
             String insertOrderSQL = "INSERT INTO orders (user_id, order_date, status, total_amount, shipping_address, payment_method) " +
                                   "VALUES (?, ?, ?, ?, ?, ?) RETURNING id";
             
@@ -90,7 +71,6 @@ public class PurchaseService {
                 }
             }
             
-            // Insert order items
             String insertItemSQL = "INSERT INTO order_items (order_id, book_id, quantity, price) VALUES (?, ?, ?, ?)";
             PreparedStatement itemStmt = connection.prepareStatement(insertItemSQL);
             
@@ -111,7 +91,6 @@ public class PurchaseService {
             
             itemStmt.executeBatch();
             
-            // Update user order count
             String updateUserSQL = "UPDATE users SET order_count = order_count + 1 WHERE id = ?";
             PreparedStatement userStmt = connection.prepareStatement(updateUserSQL);
             userStmt.setInt(1, user.getId());
@@ -129,13 +108,6 @@ public class PurchaseService {
         }
     }
     
-    /**
-     * Gets all orders for a user.
-     * 
-     * @param userId The user ID
-     * @return A list of orders
-     * @throws SQLException If a database error occurs
-     */
     public List<Order> getOrdersByUserId(int userId) throws SQLException {
         List<Order> orders = new ArrayList<>();
         
@@ -163,12 +135,6 @@ public class PurchaseService {
         return orders;
     }
     
-    /**
-     * Gets all orders.
-     * 
-     * @return A list of all orders
-     * @throws SQLException If a database error occurs
-     */
     public List<Order> getAllOrders() throws SQLException {
         List<Order> orders = new ArrayList<>();
         
@@ -186,13 +152,6 @@ public class PurchaseService {
         return orders;
     }
     
-    /**
-     * Gets an order by ID.
-     * 
-     * @param orderId The order ID
-     * @return The order, or null if not found
-     * @throws SQLException If a database error occurs
-     */
     public Order getOrderById(int orderId) throws SQLException {
         try (Connection connection = DatabaseConnection.getInstance().getConnection();
              PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM orders WHERE id = ?")) {
@@ -211,14 +170,6 @@ public class PurchaseService {
         return null;
     }
     
-    /**
-     * Updates the status of an order.
-     * 
-     * @param orderId The order ID
-     * @param status The new status
-     * @return true if successful, false otherwise
-     * @throws SQLException If a database error occurs
-     */
     public boolean updateOrderStatus(int orderId, Order.Status status) throws SQLException {
         try (Connection connection = DatabaseConnection.getInstance().getConnection();
              PreparedStatement pstmt = connection.prepareStatement("UPDATE orders SET status = ? WHERE id = ?")) {
@@ -231,27 +182,17 @@ public class PurchaseService {
         }
     }
     
-    /**
-     * Cancels an order.
-     * 
-     * @param orderId The order ID
-     * @return true if successful, false otherwise
-     * @throws SQLException If a database error occurs
-     */
     public boolean cancelOrder(int orderId) throws SQLException {
         try (Connection connection = DatabaseConnection.getInstance().getConnection()) {
-            // Begin transaction
             connection.setAutoCommit(false);
             
             try {
-                // 1. Get order
                 Order order = getOrderById(orderId);
                 if (order == null || order.getStatus() == Order.Status.CANCELLED) {
                     connection.rollback();
                     return false;
                 }
                 
-                // 2. Update order status
                 String updateOrderQuery = "UPDATE orders SET status = ? WHERE id = ?";
                 try (PreparedStatement pstmt = connection.prepareStatement(updateOrderQuery)) {
                     pstmt.setString(1, Order.Status.CANCELLED.name());
@@ -259,7 +200,6 @@ public class PurchaseService {
                     pstmt.executeUpdate();
                 }
                 
-                // 3. Restore book quantities
                 for (OrderItem item : order.getItems()) {
                     Book book = bookService.getBookById(item.getBookId());
                     if (book != null) {
@@ -268,72 +208,49 @@ public class PurchaseService {
                     }
                 }
                 
-                // Commit transaction
                 connection.commit();
                 return true;
             } catch (Exception e) {
-                // Rollback transaction on error
                 connection.rollback();
                 e.printStackTrace();
                 return false;
             } finally {
-                // Restore auto-commit
                 connection.setAutoCommit(true);
             }
         }
     }
     
-    /**
-     * Deletes an order from the database.
-     * 
-     * @param orderId The order ID
-     * @return true if successful, false otherwise
-     * @throws SQLException If a database error occurs
-     */
     public boolean deleteOrder(int orderId) throws SQLException {
         try (Connection connection = DatabaseConnection.getInstance().getConnection()) {
-            // Start a transaction
             connection.setAutoCommit(false);
             
             try {
-                // First, delete the order items
                 try (PreparedStatement pstmt = connection.prepareStatement("DELETE FROM order_items WHERE order_id = ?")) {
                     pstmt.setInt(1, orderId);
                     pstmt.executeUpdate();
                 }
                 
-                // Then, delete the order
                 try (PreparedStatement pstmt = connection.prepareStatement("DELETE FROM orders WHERE id = ?")) {
                     pstmt.setInt(1, orderId);
                     int rowsAffected = pstmt.executeUpdate();
                     
                     if (rowsAffected == 0) {
-                        // No rows affected, rollback the transaction
                         connection.rollback();
                         return false;
                     }
                 }
                 
-                // Commit the transaction
                 connection.commit();
                 return true;
             } catch (SQLException e) {
-                // Rollback the transaction in case of error
                 connection.rollback();
                 throw e;
             } finally {
-                // Restore auto-commit mode
                 connection.setAutoCommit(true);
             }
         }
     }
     
-    /**
-     * Loads order items for an order.
-     * 
-     * @param order The order
-     * @throws SQLException If a database error occurs
-     */
     private void loadOrderItems(Order order) throws SQLException {
         try (Connection connection = DatabaseConnection.getInstance().getConnection();
              PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM order_items WHERE order_id = ?")) {
@@ -349,7 +266,6 @@ public class PurchaseService {
                     item.setQuantity(rs.getInt("quantity"));
                     item.setPrice(rs.getBigDecimal("price"));
                     
-                    // Get book details
                     Book book = bookService.getBookById(item.getBookId());
                     if (book != null) {
                         item.setBookTitle(book.getTitle());
@@ -362,14 +278,10 @@ public class PurchaseService {
         }
     }
     
-    /**
-     * Debug method to check the database tables
-     */
     public void checkDatabaseTables() {
         try (Connection connection = DatabaseConnection.getInstance().getConnection();
              Statement stmt = connection.createStatement()) {
             
-            // Check orders table
             System.out.println("--- CHECKING ORDERS TABLE ---");
             try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM orders")) {
                 if (rs.next()) {
@@ -377,7 +289,6 @@ public class PurchaseService {
                 }
             }
             
-            // Check a few sample orders
             try (ResultSet rs = stmt.executeQuery("SELECT * FROM orders LIMIT 5")) {
                 while (rs.next()) {
                     System.out.println("Order #" + rs.getInt("id") + 
@@ -386,7 +297,6 @@ public class PurchaseService {
                 }
             }
             
-            // Check order_items table
             System.out.println("--- CHECKING ORDER_ITEMS TABLE ---");
             try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM order_items")) {
                 if (rs.next()) {
@@ -394,7 +304,6 @@ public class PurchaseService {
                 }
             }
             
-            // Check a few sample order items
             try (ResultSet rs = stmt.executeQuery("SELECT * FROM order_items LIMIT 5")) {
                 while (rs.next()) {
                     System.out.println("Item #" + rs.getInt("id") + 
@@ -410,32 +319,22 @@ public class PurchaseService {
         }
     }
     
-    /**
-     * Maps a ResultSet row to an Order object.
-     * 
-     * @param rs The ResultSet
-     * @return The Order object
-     * @throws SQLException If a database error occurs
-     */
     private Order mapResultSetToOrder(ResultSet rs) throws SQLException {
         Order order = new Order();
         order.setId(rs.getInt("id"));
         order.setUserId(rs.getInt("user_id"));
         order.setOrderDate(rs.getTimestamp("order_date").toLocalDateTime());
         
-        // Handle status case-insensitively
         String statusStr = rs.getString("status");
         try {
             order.setStatus(Order.Status.valueOf(statusStr.toUpperCase()));
         } catch (IllegalArgumentException e) {
             System.err.println("Invalid status in database: " + statusStr);
-            // Default to PENDING if status is invalid
             order.setStatus(Order.Status.PENDING);
         }
         
         order.setTotalAmount(rs.getBigDecimal("total_amount"));
         
-        // Check if discount_amount column exists in the result set
         try {
             BigDecimal discountAmount = rs.getBigDecimal("discount_amount");
             if (discountAmount != null) {
@@ -444,7 +343,6 @@ public class PurchaseService {
                 order.setDiscountAmount(BigDecimal.ZERO);
             }
         } catch (SQLException e) {
-            // discount_amount column doesn't exist
             order.setDiscountAmount(BigDecimal.ZERO);
         }
         

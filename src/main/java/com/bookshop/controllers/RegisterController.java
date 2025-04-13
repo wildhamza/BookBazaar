@@ -19,9 +19,6 @@ import java.util.ResourceBundle;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
-/**
- * Controller for the registration view.
- */
 public class RegisterController implements Initializable {
     
     @FXML private TextField usernameField;
@@ -42,12 +39,10 @@ public class RegisterController implements Initializable {
         authService = new AuthService();
         errorMessageLabel.setVisible(false);
         
-        // Set up field validation
         setupValidation();
     }
     
     private void setupValidation() {
-        // Limit username to alphanumeric characters
         Pattern usernamePattern = Pattern.compile("[a-zA-Z0-9]*");
         TextFormatter<String> usernameFormatter = new TextFormatter<>(
             (UnaryOperator<TextFormatter.Change>) change -> {
@@ -56,7 +51,6 @@ public class RegisterController implements Initializable {
         );
         usernameField.setTextFormatter(usernameFormatter);
         
-        // Limit phone to numbers and some special characters
         Pattern phonePattern = Pattern.compile("[0-9+\\-() ]*");
         TextFormatter<String> phoneFormatter = new TextFormatter<>(
             (UnaryOperator<TextFormatter.Change>) change -> {
@@ -68,10 +62,8 @@ public class RegisterController implements Initializable {
     
     @FXML
     private void handleRegisterButton(ActionEvent event) {
-        // Clear previous error
         errorMessageLabel.setVisible(false);
         
-        // Get form values
         String username = usernameField.getText().trim();
         String password = passwordField.getText();
         String confirmPassword = confirmPasswordField.getText();
@@ -80,14 +72,14 @@ public class RegisterController implements Initializable {
         String address = addressField.getText().trim();
         String phone = phoneField.getText().trim();
         
-        // Validate form
         if (!validateForm(username, password, confirmPassword, fullName, email, address, phone)) {
             return;
         }
         
         try {
-            // Parse the full name into first and last name
+            @SuppressWarnings("unused")
             String firstName = "";
+            @SuppressWarnings("unused")
             String lastName = "";
             if (fullName != null && !fullName.isEmpty()) {
                 String[] nameParts = fullName.trim().split("\\s+", 2);
@@ -95,19 +87,17 @@ public class RegisterController implements Initializable {
                 lastName = nameParts.length > 1 ? nameParts[1] : "";
             }
             
-            // Register user
+            @SuppressWarnings("unused")
             User newUser = authService.register(
                 username, password, fullName, email, address, phone
             );
             
-            // Show success message
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Registration Successful");
             alert.setHeaderText(null);
             alert.setContentText("Your account has been created successfully. You can now log in.");
             alert.showAndWait();
             
-            // Navigate to login
             ViewNavigator.getInstance().navigateTo("login.fxml");
             
         } catch (Exception e) {
@@ -145,7 +135,6 @@ public class RegisterController implements Initializable {
             return false;
         }
         
-        // Validate email format
         String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
         if (!email.matches(emailRegex)) {
             showError("Invalid email format");

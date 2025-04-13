@@ -14,27 +14,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-/**
- * Service class for managing user shopping carts.
- */
 public class CartService {
     
-    // Observer pattern - interface for cart update listeners
     public interface CartUpdateListener {
         void onCartUpdated(int userId);
     }
     
-    // List of listeners to notify on cart changes
     private final List<CartUpdateListener> listeners = new CopyOnWriteArrayList<>();
     
-    // Singleton instance
     private static CartService instance;
     
-    /**
-     * Gets the singleton instance of CartService.
-     * 
-     * @return The CartService instance
-     */
     public static CartService getInstance() {
         if (instance == null) {
             instance = new CartService();
@@ -42,38 +31,20 @@ public class CartService {
         return instance;
     }
     
-    /**
-     * Private constructor to enforce singleton pattern.
-     */
     private CartService() { 
         this.bookService = new BookService();
     }
     
-    /**
-     * Add a listener to be notified of cart updates.
-     * 
-     * @param listener The listener to add
-     */
     public void addCartUpdateListener(CartUpdateListener listener) {
         if (listener != null && !listeners.contains(listener)) {
             listeners.add(listener);
         }
     }
     
-    /**
-     * Remove a cart update listener.
-     * 
-     * @param listener The listener to remove
-     */
     public void removeCartUpdateListener(CartUpdateListener listener) {
         listeners.remove(listener);
     }
     
-    /**
-     * Notify all listeners that a cart has been updated.
-     * 
-     * @param userId The ID of the user whose cart was updated
-     */
     private void notifyCartUpdated(int userId) {
         for (CartUpdateListener listener : listeners) {
             listener.onCartUpdated(userId);
@@ -82,33 +53,16 @@ public class CartService {
     
     private BookService bookService;
     
-    /**
-     * Gets a fresh database connection.
-     * 
-     * @return A new database connection
-     * @throws SQLException If a database error occurs
-     */
     private Connection getConnection() throws SQLException {
         return DatabaseConnection.getInstance().getConnection();
     }
     
-    /**
-     * Adds an item to the user's cart.
-     * 
-     * @param userId The user ID
-     * @param bookId The book ID
-     * @param quantity The quantity
-     * @return true if successful, false otherwise
-     * @throws SQLException If a database error occurs
-     */
     public boolean addToCart(int userId, int bookId, int quantity) throws SQLException {
-        // Check if the book exists
         Book book = bookService.getBookById(bookId);
         if (book == null || !book.isAvailable(quantity)) {
             return false;
         }
         
-        // Check if the item already exists in the cart
         String checkQuery = "SELECT id, quantity FROM cart_items WHERE user_id = ? AND book_id = ?";
         
         try (Connection connection = getConnection();
@@ -120,7 +74,6 @@ public class CartService {
             ResultSet rs = stmt.executeQuery();
             
             if (rs.next()) {
-                // Update existing item
                 int itemId = rs.getInt("id");
                 int currentQuantity = rs.getInt("quantity");
                 int newQuantity = currentQuantity + quantity;
@@ -139,7 +92,6 @@ public class CartService {
                     return false;
                 }
             } else {
-                // Add new item
                 String insertQuery = "INSERT INTO cart_items (user_id, book_id, quantity) VALUES (?, ?, ?)";
                 try (Connection insertConn = getConnection();
                      PreparedStatement insertStmt = insertConn.prepareStatement(insertQuery)) {
@@ -158,20 +110,11 @@ public class CartService {
         }
     }
     
-    /**
-     * Updates the quantity of an item in the cart.
-     * 
-     * @param itemId The cart item ID
-     * @param quantity The new quantity
-     * @return true if successful, false otherwise
-     * @throws SQLException If a database error occurs
-     */
     public boolean updateCartItemQuantity(int itemId, int quantity) throws SQLException {
         if (quantity <= 0) {
             return removeFromCart(itemId);
         }
         
-        // Get the book ID to check availability
         String getBookIdQuery = "SELECT book_id, user_id FROM cart_items WHERE id = ?";
         int bookId;
         int userId;
@@ -190,13 +133,11 @@ public class CartService {
             userId = rs.getInt("user_id");
         }
         
-        // Check if the book is available in the requested quantity
         Book book = bookService.getBookById(bookId);
         if (book == null || !book.isAvailable(quantity)) {
             return false;
         }
         
-        // Update the quantity
         String updateQuery = "UPDATE cart_items SET quantity = ? WHERE id = ?";
         
         try (Connection connection = getConnection();
@@ -214,15 +155,7 @@ public class CartService {
         }
     }
     
-    /**
-     * Removes an item from the cart.
-     * 
-     * @param itemId The cart item ID
-     * @return true if successful, false otherwise
-     * @throws SQLException If a database error occurs
-     */
     public boolean removeFromCart(int itemId) throws SQLException {
-        // First get the user ID for notification
         int userId;
         String getUserQuery = "SELECT user_id FROM cart_items WHERE id = ?";
         
@@ -233,13 +166,12 @@ public class CartService {
             ResultSet rs = stmt.executeQuery();
             
             if (!rs.next()) {
-                return false; // Item doesn't exist
+                return false;
             }
             
             userId = rs.getInt("user_id");
         }
         
-        // Now delete the item
         String deleteQuery = "DELETE FROM cart_items WHERE id = ?";
         
         try (Connection connection = getConnection();
@@ -256,17 +188,9 @@ public class CartService {
         }
     }
     
-    /**
-     * Gets all items in the user's cart.
-     * 
-     * @param userId The user ID
-     * @return A list of cart items
-     * @throws SQLException If a database error occurs
-     */
     public List<CartItem> getCartItems(int userId) throws SQLException {
         List<CartItem> cartItems = new ArrayList<>();
         
-        // Join with books to get additional details
         String query = "SELECT ci.id, ci.user_id, ci.book_id, ci.quantity, " +
                       "b.title, b.author, b.price " +
                       "FROM cart_items ci " +
@@ -296,13 +220,6 @@ public class CartService {
         return cartItems;
     }
     
-    /**
-     * Gets all items in the user's cart.
-     * Uses the current user if userId is not provided.
-     * 
-     * @return A list of cart items
-     * @throws SQLException If a database error occurs
-     */
     public List<CartItem> getCartItems() throws SQLException {
         User currentUser = com.bookshop.utils.SessionManager.getInstance().getCurrentUser();
         if (currentUser == null) {
@@ -311,13 +228,6 @@ public class CartService {
         return getCartItems(currentUser.getId());
     }
     
-    /**
-     * Clears the user's cart.
-     * 
-     * @param userId The user ID
-     * @return true if successful, false otherwise
-     * @throws SQLException If a database error occurs
-     */
     public boolean clearCart(int userId) throws SQLException {
         String query = "DELETE FROM cart_items WHERE user_id = ?";
         
@@ -330,16 +240,10 @@ public class CartService {
             if (rowsAffected > 0) {
                 notifyCartUpdated(userId);
             }
-            return true; // Return true even if no items were in the cart
+            return true;
         }
     }
     
-    /**
-     * Clears the current user's cart.
-     * 
-     * @return true if successful, false otherwise
-     * @throws SQLException If a database error occurs
-     */
     public boolean clearCart() throws SQLException {
         User currentUser = com.bookshop.utils.SessionManager.getInstance().getCurrentUser();
         if (currentUser == null) {
@@ -348,13 +252,6 @@ public class CartService {
         return clearCart(currentUser.getId());
     }
     
-    /**
-     * Calculates the total price of items in the user's cart.
-     * 
-     * @param userId The user ID
-     * @return The total price
-     * @throws SQLException If a database error occurs
-     */
     public BigDecimal calculateTotal(int userId) throws SQLException {
         List<CartItem> items = getCartItems(userId);
         BigDecimal total = BigDecimal.ZERO;
@@ -366,12 +263,6 @@ public class CartService {
         return total;
     }
     
-    /**
-     * Calculates the total price of items in the current user's cart.
-     * 
-     * @return The total price
-     * @throws SQLException If a database error occurs
-     */
     public BigDecimal calculateTotal() throws SQLException {
         User currentUser = com.bookshop.utils.SessionManager.getInstance().getCurrentUser();
         if (currentUser == null) {
@@ -380,13 +271,6 @@ public class CartService {
         return calculateTotal(currentUser.getId());
     }
     
-    /**
-     * Gets the number of items in the user's cart.
-     * 
-     * @param userId The user ID
-     * @return The number of items
-     * @throws SQLException If a database error occurs
-     */
     public int getCartItemCount(int userId) throws SQLException {
         String query = "SELECT COUNT(*) FROM cart_items WHERE user_id = ?";
         
@@ -404,12 +288,6 @@ public class CartService {
         }
     }
     
-    /**
-     * Gets the number of items in the current user's cart.
-     * 
-     * @return The number of items
-     * @throws SQLException If a database error occurs
-     */
     public int getCartItemCount() throws SQLException {
         User currentUser = com.bookshop.utils.SessionManager.getInstance().getCurrentUser();
         if (currentUser == null) {

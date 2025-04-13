@@ -17,9 +17,6 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-/**
- * Controller for the login view.
- */
 public class LoginController {
     
     @FXML
@@ -33,19 +30,11 @@ public class LoginController {
     
     private UserService userService;
     
-    /**
-     * Initializes the controller.
-     */
     @FXML
     private void initialize() {
         userService = new UserService();
     }
     
-    /**
-     * Handles the login action.
-     * 
-     * @param event The action event
-     */
     @FXML
     private void handleLogin(ActionEvent event) {
         String username = usernameField.getText().trim();
@@ -57,14 +46,11 @@ public class LoginController {
         }
         
         try {
-            // Authenticate user using UserService
             User user = userService.authenticateUser(username, password);
             
             if (user != null) {
-                // Set current user in session
                 SessionManager.getInstance().setCurrentUser(user);
                 
-                // Navigate to the appropriate dashboard based on user role
                 if ("ADMIN".equalsIgnoreCase(user.getRole())) {
                     loadAdminDashboard();
                 } else {
@@ -79,37 +65,27 @@ public class LoginController {
         }
     }
     
-    /**
-     * Handles the register action.
-     * 
-     * @param event The action event
-     */
     @FXML
     private void handleRegister(ActionEvent event) {
         try {
             System.out.println("Attempting to load register view...");
             
-            // Try to load from ViewNavigator first
             try {
                 System.out.println("Trying to use ViewNavigator...");
                 ViewNavigator.getInstance().navigateTo("register.fxml");
                 return;
             } catch (Exception e) {
                 System.out.println("ViewNavigator failed: " + e.getMessage());
-                // Fall back to manual loading
             }
             
-            // Try views directory
             System.out.println("Trying to load from /views/register.fxml");
             java.net.URL viewsUrl = getClass().getResource("/views/register.fxml");
             System.out.println("Views URL: " + viewsUrl);
             
-            // Try fxml directory
             System.out.println("Trying to load from /fxml/register.fxml");
             java.net.URL fxmlUrl = getClass().getResource("/fxml/register.fxml");
             System.out.println("FXML URL: " + fxmlUrl);
             
-            // Choose the URL based on what's available
             java.net.URL url = viewsUrl != null ? viewsUrl : fxmlUrl;
             
             if (url == null) {
@@ -118,7 +94,6 @@ public class LoginController {
             
             System.out.println("Loading from URL: " + url);
             
-            // Load from the URL
             Parent root = FXMLLoader.load(url);
             
             Scene scene = new Scene(root);
@@ -133,14 +108,9 @@ public class LoginController {
         }
     }
     
-    /**
-     * Loads the admin dashboard.
-     */
     private void loadAdminDashboard() {
         try {
-            // Load the admin dashboard view
             Parent root = FXMLLoader.load(getClass().getResource("/views/admin_dashboard.fxml"));
-            // If for some reason the resource can't be found in /views/, try the /fxml/ directory
             if (root == null) {
                 root = FXMLLoader.load(getClass().getResource("/fxml/admin_dashboard.fxml"));
             }
@@ -155,14 +125,9 @@ public class LoginController {
         }
     }
     
-    /**
-     * Loads the customer dashboard.
-     */
     private void loadCustomerDashboard() {
         try {
-            // Load the customer dashboard view
             Parent root = FXMLLoader.load(getClass().getResource("/views/customer_dashboard.fxml"));
-            // If for some reason the resource can't be found in /views/, try the /fxml/ directory
             if (root == null) {
                 root = FXMLLoader.load(getClass().getResource("/fxml/customer_dashboard.fxml"));
             }

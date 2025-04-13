@@ -1,8 +1,6 @@
 package com.bookshop.utils;
 
-import com.bookshop.models.Order;
-import com.bookshop.models.OrderItem;
-import com.bookshop.services.OrderService;
+import com.bookshop.models.Order; 
 import com.bookshop.services.PurchaseService;
 
 import java.sql.Connection;
@@ -12,10 +10,7 @@ import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.sql.Timestamp;
 import java.util.List;
-
-/**
- * Utility class for debugging order-related issues
- */
+ 
 public class OrderDebugger {
     
     public static void main(String[] args) {
@@ -35,8 +30,7 @@ public class OrderDebugger {
     private static void debugDatabaseOrders() {
         try {
             Connection conn = DatabaseConnection.getInstance().getConnection();
-            
-            // Test connection
+             
             System.out.println("Database connection established: " + (conn != null ? "YES" : "NO"));
             
             if (conn != null) {
@@ -54,8 +48,7 @@ public class OrderDebugger {
                         
                         if (count == 0) {
                             System.out.println("No orders found in the database!");
-                        } else {
-                            // Print some sample orders
+                        } else { 
                             String orderSql = "SELECT * FROM orders ORDER BY id LIMIT 5";
                             try (PreparedStatement orderStmt = conn.prepareStatement(orderSql);
                                  ResultSet orderRs = orderStmt.executeQuery()) {
@@ -92,8 +85,7 @@ public class OrderDebugger {
             
             if (allOrders.isEmpty()) {
                 System.out.println("No orders found via service!");
-            } else {
-                // Print some sample orders
+            } else { 
                 System.out.println("\nSample orders from service:");
                 System.out.println("ID | USER_ID | DATE | STATUS | TOTAL | ITEMS");
                 System.out.println("--------------------------------------------------");
@@ -153,8 +145,7 @@ public class OrderDebugger {
     private static void createTestOrder() {
         try {
             Connection conn = DatabaseConnection.getInstance().getConnection();
-            
-            // Check if there are any users
+             
             boolean hasUsers = false;
             try (PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM users");
                  ResultSet rs = stmt.executeQuery()) {
@@ -167,8 +158,7 @@ public class OrderDebugger {
                 System.out.println("No users found in the database. Cannot create test order.");
                 return;
             }
-            
-            // Get the first user ID
+             
             int userId = 0;
             try (PreparedStatement stmt = conn.prepareStatement("SELECT id FROM users LIMIT 1");
                  ResultSet rs = stmt.executeQuery()) {
@@ -183,8 +173,7 @@ public class OrderDebugger {
             }
             
             System.out.println("Using user ID: " + userId + " for test order");
-            
-            // Create a test order
+             
             conn.setAutoCommit(false);
             
             String orderSql = "INSERT INTO orders (user_id, order_date, status, total_amount, payment_method) VALUES (?, ?, ?, ?, ?) RETURNING id";
@@ -203,8 +192,7 @@ public class OrderDebugger {
                     if (generatedKeys.next()) {
                         int orderId = generatedKeys.getInt(1);
                         System.out.println("Created test order with ID: " + orderId);
-                        
-                        // Check if there are any books
+                         
                         boolean hasBooks = false;
                         try (PreparedStatement bookStmt = conn.prepareStatement("SELECT COUNT(*) FROM books");
                              ResultSet rs = bookStmt.executeQuery()) {
@@ -213,8 +201,7 @@ public class OrderDebugger {
                             }
                         }
                         
-                        if (hasBooks) {
-                            // Get the first book ID
+                        if (hasBooks) { 
                             int bookId = 0;
                             try (PreparedStatement bookStmt = conn.prepareStatement("SELECT id FROM books LIMIT 1");
                                  ResultSet rs = bookStmt.executeQuery()) {
@@ -239,8 +226,7 @@ public class OrderDebugger {
                                 }
                             }
                         }
-                        
-                        // Commit the transaction
+                         
                         conn.commit();
                         System.out.println("Transaction committed successfully");
                     }

@@ -8,7 +8,6 @@ import com.bookshop.services.BookService;
 import com.bookshop.services.OrderService;
 import com.bookshop.services.UserService;
 import com.bookshop.utils.SceneManager;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -16,9 +15,6 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.util.StringConverter;
-
-import java.sql.Timestamp;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -78,7 +74,6 @@ public class AdminOrdersController {
         setupStatusFilters();
         loadOrders(null);
         
-        // Setup order selection listener
         ordersTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldOrder, newOrder) -> {
             if (newOrder != null) {
                 displayOrderDetails(newOrder);
@@ -89,7 +84,6 @@ public class AdminOrdersController {
     }
     
     private void setupTables() {
-        // Orders table
         orderIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         userIdColumn.setCellValueFactory(new PropertyValueFactory<>("userId"));
         
@@ -110,7 +104,6 @@ public class AdminOrdersController {
         statusColumn.setCellValueFactory(cellData -> 
             new SimpleStringProperty(cellData.getValue().getStatus().toString()));
         
-        // Order items table
         bookIdColumn.setCellValueFactory(cellData -> 
             new SimpleIntegerProperty(cellData.getValue().getBookId()).asObject());
             
@@ -199,7 +192,6 @@ public class AdminOrdersController {
     private void displayOrderDetails(Order order) {
         selectedOrder = order;
         
-        // Display order details
         User user = getUserById(order.getUserId());
         StringBuilder details = new StringBuilder();
         details.append("Order #").append(order.getId())
@@ -211,7 +203,6 @@ public class AdminOrdersController {
                
         orderDetailsLabel.setText(details.toString());
         
-        // Load order items
         try {
             List<OrderItem> items = orderService.getOrderItems(order.getId());
             orderItemsTableView.setItems(FXCollections.observableArrayList(items));
@@ -221,7 +212,6 @@ public class AdminOrdersController {
             orderItemsTableView.setItems(FXCollections.observableArrayList());
         }
         
-        // Set the current status in the update combo box
         statusUpdateComboBox.getSelectionModel().select(order.getStatus().toString());
     }
     
@@ -302,7 +292,6 @@ public class AdminOrdersController {
     
     @FXML
     private void handleBack() {
-        // Navigate back to admin dashboard
         SceneManager.getInstance().loadScene("admin_dashboard.fxml");
     }
 } 

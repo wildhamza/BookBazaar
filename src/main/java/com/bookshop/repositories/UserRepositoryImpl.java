@@ -2,7 +2,6 @@ package com.bookshop.repositories;
 
 import com.bookshop.models.User;
 import com.bookshop.utils.DatabaseConnection;
-import com.bookshop.utils.PasswordHasher;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,14 +11,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Implementation of the UserRepository interface.
- */
 public class UserRepositoryImpl implements UserRepository {
     
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public List<User> findAll() throws SQLException {
         List<User> users = new ArrayList<>();
@@ -38,9 +31,6 @@ public class UserRepositoryImpl implements UserRepository {
         return users;
     }
     
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public User findById(Integer id) throws SQLException {
         String sql = "SELECT * FROM users WHERE id = ?";
@@ -60,9 +50,6 @@ public class UserRepositoryImpl implements UserRepository {
         return null;
     }
     
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public User findByUsername(String username) throws SQLException {
         String sql = "SELECT * FROM users WHERE username = ?";
@@ -82,9 +69,6 @@ public class UserRepositoryImpl implements UserRepository {
         return null;
     }
     
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public User findByEmail(String email) throws SQLException {
         String sql = "SELECT * FROM users WHERE email = ?";
@@ -104,9 +88,6 @@ public class UserRepositoryImpl implements UserRepository {
         return null;
     }
     
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Integer save(User user) throws SQLException {
         String sql = "INSERT INTO users (username, password_hash, full_name, email, address, phone_number, role) " +
@@ -141,9 +122,6 @@ public class UserRepositoryImpl implements UserRepository {
         }
     }
     
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean update(User user) throws SQLException {
         String sql = "UPDATE users SET username = ?, password_hash = ?, full_name = ?, " +
@@ -167,9 +145,6 @@ public class UserRepositoryImpl implements UserRepository {
         }
     }
     
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean delete(Integer id) throws SQLException {
         String sql = "DELETE FROM users WHERE id = ?";
@@ -184,9 +159,6 @@ public class UserRepositoryImpl implements UserRepository {
         }
     }
     
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean updateOrderCount(int userId, int newOrderCount) throws SQLException {
         String sql = "UPDATE users SET order_count = ? WHERE id = ?";
@@ -202,9 +174,6 @@ public class UserRepositoryImpl implements UserRepository {
         }
     }
     
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean incrementOrderCount(int userId) throws SQLException {
         User user = findById(userId);
@@ -212,20 +181,12 @@ public class UserRepositoryImpl implements UserRepository {
             return false;
         }
         
-        int newOrderCount = user.getOrderCount() + 1;
-        return updateOrderCount(userId, newOrderCount);
+        int currentOrderCount = user.getOrderCount();
+        return updateOrderCount(userId, currentOrderCount + 1);
     }
     
-    /**
-     * Maps a ResultSet row to a User object.
-     * 
-     * @param rs The ResultSet
-     * @return The User object
-     * @throws SQLException If a database error occurs
-     */
     private User mapResultSetToUser(ResultSet rs) throws SQLException {
         User user = new User();
-        
         user.setId(rs.getInt("id"));
         user.setUsername(rs.getString("username"));
         user.setPasswordHash(rs.getString("password_hash"));
@@ -234,13 +195,7 @@ public class UserRepositoryImpl implements UserRepository {
         user.setAddress(rs.getString("address"));
         user.setPhoneNumber(rs.getString("phone_number"));
         user.setRole(rs.getString("role"));
-        
-        // This field might not exist in older database schemas
-        try {
-            user.setOrderCount(rs.getInt("order_count"));
-        } catch (SQLException e) {
-            user.setOrderCount(0);
-        }
+        user.setOrderCount(rs.getInt("order_count"));
         
         return user;
     }

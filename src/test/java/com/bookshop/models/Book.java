@@ -2,10 +2,6 @@ package com.bookshop.models;
 
 import java.math.BigDecimal;
 
-/**
- * Model class for books used in tests.
- * Simplified version of the real Book class.
- */
 public class Book {
     private int id;
     private String title;

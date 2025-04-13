@@ -9,9 +9,6 @@ import com.bookshop.models.User;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-/**
- * Unit tests for the DiscountService class.
- */
 public class DiscountServiceTest {
     
     private DiscountService discountService;
@@ -68,7 +65,7 @@ public class DiscountServiceTest {
     @DisplayName("Test no discount for admin users")
     void testNoDiscountForAdminUsers() {
         User user = new User();
-        user.setOrderCount(20); // Even with many orders
+        user.setOrderCount(20); 
         user.setRole(User.Role.ADMIN);
         
         BigDecimal originalAmount = new BigDecimal("100.00");
@@ -81,7 +78,7 @@ public class DiscountServiceTest {
     @DisplayName("Test best discount is applied when multiple apply")
     void testBestDiscountIsApplied() {
         User user = new User();
-        user.setOrderCount(15); // Qualifies for both regular and premium discount
+        user.setOrderCount(15); 
         user.setRole(User.Role.CUSTOMER);
         
         BigDecimal originalAmount = new BigDecimal("100.00");
@@ -95,5 +92,4 @@ public class DiscountServiceTest {
                        "The regular discount (10%) should not be applied when premium discount is available");
     }
     
-    // Add more test cases as needed
 }

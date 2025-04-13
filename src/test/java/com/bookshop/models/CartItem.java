@@ -2,10 +2,6 @@ package com.bookshop.models;
 
 import java.math.BigDecimal;
 
-/**
- * Model class for cart items used in tests.
- * Simplified version of the real CartItem class.
- */
 public class CartItem {
     private int id;
     private Book book;

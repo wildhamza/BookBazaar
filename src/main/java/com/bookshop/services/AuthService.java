@@ -1,7 +1,6 @@
 package com.bookshop.services;
 
-import com.bookshop.models.User;
-import com.bookshop.utils.PasswordHasher;
+import com.bookshop.models.User; 
 import com.bookshop.utils.SessionManager;
 
 import java.sql.SQLException;

@@ -3,12 +3,10 @@ package com.bookshop;
 import com.bookshop.services.BookService;
 import com.bookshop.services.UserService;
 import com.bookshop.services.CartService;
-import com.bookshop.services.ReviewService;
 import com.bookshop.services.DiscountService;
 import com.bookshop.models.Book;
 import com.bookshop.models.User;
 import com.bookshop.models.CartItem;
-import com.bookshop.models.Review;
 import com.bookshop.models.Order;
 import com.bookshop.models.OrderItem;
 import com.bookshop.services.OrderService;
@@ -19,24 +17,12 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 
-/**
- * HeadlessMain class for environments without GUI support.
- * This class provides basic tests and functionality verification 
- * without requiring JavaFX or any GUI components.
- */
 public class HeadlessMain {
-    
-    /**
-     * Main method for headless execution.
-     * 
-     * @param args Command line arguments
-     */
-    public static void main(String[] args) {
+        public static void main(String[] args) {
         if (args.length == 0) {
             System.out.println("Please provide a command. Available commands:");
             System.out.println("- check_db: Check database connection");
@@ -72,11 +58,6 @@ public class HeadlessMain {
         }
     }
     
-    /**
-     * Run a series of database tests to verify functionality
-     * 
-     * @throws Exception if any test fails
-     */
     private static void runDatabaseTests() throws Exception {
         System.out.println("Testing database connection...");
         testBookService();
@@ -86,11 +67,6 @@ public class HeadlessMain {
         checkOrdersTable();
     }
     
-    /**
-     * Test BookService functionality
-     * 
-     * @throws SQLException if a database error occurs
-     */
     private static void testBookService() throws SQLException {
         System.out.println("Testing BookService...");
         
@@ -112,11 +88,6 @@ public class HeadlessMain {
         }
     }
     
-    /**
-     * Test UserService functionality
-     * 
-     * @throws SQLException if a database error occurs
-     */
     private static void testUserService() throws SQLException {
         System.out.println("Testing UserService...");
         
@@ -140,45 +111,33 @@ public class HeadlessMain {
         }
     }
     
-    /**
-     * Test CartService functionality
-     *
-     * @throws SQLException if a database error occurs
-     */
     private static void testCartService() throws SQLException {
         System.out.println("Testing CartService...");
         
         CartService cartService = CartService.getInstance();
         
-        // For testing purposes, we'll use a known user ID (admin user typically has ID 1)
         int adminUserId = 1;
         
-        // Get cart item count
         int count = cartService.getCartItemCount(adminUserId);
         System.out.println("Admin user has " + count + " items in cart");
     }
     
-    /**
-     * Test DiscountService functionality
-     */
     private static void testDiscountService() {
         System.out.println("Testing DiscountService...");
         
         DiscountService discountService = new DiscountService();
         
-        // Create test users with different order counts
         User standardUser = new User();
-        standardUser.setOrderCount(2); // Not eligible for discount
+        standardUser.setOrderCount(2); 
         
         User regularUser = new User();
-        regularUser.setOrderCount(7); // Regular member (5+ orders)
+        regularUser.setOrderCount(7); 
         
         User premiumUser = new User();
-        premiumUser.setOrderCount(12); // Premium member (10+ orders)
+        premiumUser.setOrderCount(12); 
         
         BigDecimal originalPrice = new BigDecimal("100.00");
         
-        // Test discount calculations
         BigDecimal standardPrice = discountService.calculateDiscountedPrice(originalPrice, standardUser);
         BigDecimal regularPrice = discountService.calculateDiscountedPrice(originalPrice, regularUser);
         BigDecimal premiumPrice = discountService.calculateDiscountedPrice(originalPrice, premiumUser);
@@ -189,11 +148,6 @@ public class HeadlessMain {
         System.out.println("- Premium member price (15% discount): $" + premiumPrice);
     }
     
-    /**
-     * Check the structure of the orders table
-     * 
-     * @throws SQLException if database access fails
-     */
     private static void checkOrdersTable() throws SQLException {
         System.out.println("Checking orders table structure...");
         
@@ -209,7 +163,6 @@ public class HeadlessMain {
                 System.out.println("  - " + columnName + " (" + dataType + "(" + columnSize + "))");
             }
             
-            // Check if discount_amount column exists
             ResultSet discountColumn = metaData.getColumns(null, null, "orders", "discount_amount");
             if (!discountColumn.next()) {
                 System.out.println("Warning: discount_amount column is missing in the orders table!");
@@ -287,7 +240,6 @@ public class HeadlessMain {
         } else {
             System.out.println("No orders found. Checking order table structure...");
             
-            // Check if orders table exists
             boolean tableExists = false;
             try (Connection conn = DatabaseConnection.getInstance().getConnection();
                  PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'orders'");
@@ -303,7 +255,6 @@ public class HeadlessMain {
                 return;
             }
             
-            // Create a test order
             System.out.println("Creating a test order...");
             
             UserService userService = new UserService();
@@ -327,20 +278,17 @@ public class HeadlessMain {
             System.out.println("Using User: " + user.getUsername() + " (ID: " + user.getId() + ")");
             System.out.println("Using Book: " + book.getTitle() + " (ID: " + book.getId() + ")");
             
-            // Create cart items for the order
             List<CartItem> cartItems = new ArrayList<>();
             CartItem cartItem = new CartItem();
             cartItem.setBookId(book.getId());
             cartItem.setQuantity(1);
             cartItems.add(cartItem);
             
-            // Save order
             try {
                 int orderId = orderService.createOrder(user.getId(), cartItems, "Credit Card");
                 if (orderId > 0) {
                     System.out.println("Test order created successfully! Order ID: " + orderId);
                     
-                    // Verify the order was created
                     Order createdOrder = orderService.getOrderById(orderId);
                     if (createdOrder != null) {
                         System.out.println("Verified order: ID: " + createdOrder.getId() + ", Status: " + createdOrder.getStatus() + ", Total: $" + createdOrder.getTotalAmount());

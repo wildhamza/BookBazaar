@@ -4,9 +4,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import java.util.Optional;
 
-/**
- * Utility class for showing JavaFX alerts.
- */
 public class AlertHelper {
     
     public static void showError(String title, String header, String content) {

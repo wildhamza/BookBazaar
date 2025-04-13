@@ -19,65 +19,46 @@ import com.bookshop.utils.SceneManager;
 import java.sql.SQLException;
 import java.util.List;
 
-/**
- * Main application class with support for headless environments.
- */
 public class Main extends Application {
     
-    // Flag to detect if running in headless mode
     private static boolean isHeadless = false;
     
     @Override
     public void start(Stage primaryStage) throws Exception {
         if (isHeadless) {
-            // Running in headless mode, just use a simpler initialization
             System.out.println("Running in headless mode. JavaFX UI is not available.");
             
-            // Still need to keep JavaFX application thread alive
             Platform.setImplicitExit(false);
             
-            // Run some basic database tests to show the application is working
             try {
                 runHeadlessTests();
             } catch (Exception e) {
                 e.printStackTrace();
             }
             
-            // Exit the application once tests are done
             Platform.exit();
             return;
         }
         
-        // Set the primary stage in the ViewNavigator and SceneManager
         ViewNavigator.getInstance().setStage(primaryStage);
         SceneManager.getInstance().setStage(primaryStage);
         
-        // Load the login view for GUI mode
         Parent root = FXMLLoader.load(getClass().getResource("/views/login.fxml"));
-        // If for some reason the resource can't be found in /views/, try the /fxml/ directory
         if (root == null) {
             root = FXMLLoader.load(getClass().getResource("/fxml/login.fxml"));
         }
         
-        // Create scene
         Scene scene = new Scene(root, 800, 600);
         
-        // Configure stage
         primaryStage.setTitle("BookShop Application");
         primaryStage.setScene(scene);
         primaryStage.setResizable(true);
         primaryStage.show();
     }
     
-    /**
-     * Run basic database tests in headless mode
-     * 
-     * @throws Exception if an error occurs
-     */
     private void runHeadlessTests() throws Exception {
         System.out.println("Running basic database tests in headless mode...");
         
-        // Test book service
         try {
             BookService bookService = new BookService();
             List<Book> books = bookService.getAllBooks();
@@ -90,7 +71,6 @@ public class Main extends Application {
                 }
             }
             
-            // Test getting a book by ID
             if (!books.isEmpty()) {
                 Book firstBook = books.get(0);
                 Book bookById = bookService.getBookById(firstBook.getId());
@@ -103,7 +83,6 @@ public class Main extends Application {
             e.printStackTrace();
         }
         
-        // Test user service
         try {
             UserService userService = new UserService();
             User adminUser = userService.authenticateUser("admin", "admin123");
@@ -131,13 +110,7 @@ public class Main extends Application {
         System.out.println("Headless tests completed successfully.");
     }
     
-    /**
-     * Main method.
-     * 
-     * @param args Command line arguments
-     */
     public static void main(String[] args) {
-        // Check if we should run in headless mode
         if (GraphicsEnvironment.isHeadless() || 
             System.getenv("HEADLESS") != null || 
             Arrays.asList(args).contains("--headless")) {

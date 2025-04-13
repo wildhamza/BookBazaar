@@ -4,7 +4,6 @@ import com.bookshop.models.Book;
 import com.bookshop.utils.BookFactory;
 import com.bookshop.utils.DatabaseConnection;
 
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,14 +12,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Implementation of the BookRepository interface.
- */
 public class BookRepositoryImpl implements BookRepository {
     
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public List<Book> findAll() throws SQLException {
         List<Book> books = new ArrayList<>();
@@ -39,9 +32,6 @@ public class BookRepositoryImpl implements BookRepository {
         return books;
     }
     
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Book findById(Integer id) throws SQLException {
         String sql = "SELECT * FROM books WHERE id = ?";
@@ -61,9 +51,6 @@ public class BookRepositoryImpl implements BookRepository {
         return null;
     }
     
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Integer save(Book book) throws SQLException {
         String sql = "INSERT INTO books (title, author, isbn, publisher, price, category, description, image_url, stock_quantity) " +
@@ -100,9 +87,6 @@ public class BookRepositoryImpl implements BookRepository {
         }
     }
     
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean update(Book book) throws SQLException {
         String sql = "UPDATE books SET title = ?, author = ?, isbn = ?, publisher = ?, " +
@@ -128,9 +112,6 @@ public class BookRepositoryImpl implements BookRepository {
         }
     }
     
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean delete(Integer id) throws SQLException {
         String sql = "DELETE FROM books WHERE id = ?";
@@ -145,9 +126,6 @@ public class BookRepositoryImpl implements BookRepository {
         }
     }
     
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public List<Book> findByCategory(String category) throws SQLException {
         List<Book> books = new ArrayList<>();
@@ -169,9 +147,6 @@ public class BookRepositoryImpl implements BookRepository {
         return books;
     }
     
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public List<Book> search(String query) throws SQLException {
         List<Book> books = new ArrayList<>();
@@ -201,9 +176,6 @@ public class BookRepositoryImpl implements BookRepository {
         return books;
     }
     
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean updateStockQuantity(int bookId, int newQuantity) throws SQLException {
         String sql = "UPDATE books SET stock_quantity = ? WHERE id = ?";
@@ -219,26 +191,18 @@ public class BookRepositoryImpl implements BookRepository {
         }
     }
     
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean updateStockQuantityByDelta(int bookId, int quantityChange) throws SQLException {
-        // First get the current stock quantity
-        Book book = findById(bookId);
-        if (book == null) {
-            return false;
+        String sql = "UPDATE books SET stock_quantity = stock_quantity + ? WHERE id = ?";
+        
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, quantityChange);
+            pstmt.setInt(2, bookId);
+            
+            int affectedRows = pstmt.executeUpdate();
+            return affectedRows > 0;
         }
-        
-        int currentQuantity = book.getStockQuantity();
-        int newQuantity = currentQuantity + quantityChange;
-        
-        // Ensure quantity doesn't go below zero
-        if (newQuantity < 0) {
-            newQuantity = 0;
-        }
-        
-        // Update with the new quantity
-        return updateStockQuantity(bookId, newQuantity);
     }
 } 
