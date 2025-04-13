@@ -29,7 +29,7 @@ public class DiscountServiceTest {
         user.setRole(User.Role.CUSTOMER);
         
         BigDecimal originalAmount = new BigDecimal("100.00");
-        BigDecimal discountedAmount = discountService.applyBestDiscount(user, originalAmount);
+        BigDecimal discountedAmount = discountService.calculateDiscountedPrice(originalAmount, user);
         
         assertEquals(originalAmount, discountedAmount, "New customers should not receive a discount");
     }
@@ -43,7 +43,7 @@ public class DiscountServiceTest {
         
         BigDecimal originalAmount = new BigDecimal("100.00");
         BigDecimal expectedDiscountedAmount = new BigDecimal("90.00");
-        BigDecimal discountedAmount = discountService.applyBestDiscount(user, originalAmount);
+        BigDecimal discountedAmount = discountService.calculateDiscountedPrice(originalAmount, user);
         
         assertEquals(expectedDiscountedAmount, discountedAmount.setScale(2, RoundingMode.HALF_UP),
                     "Regular customers with 5+ orders should receive a 10% discount");
@@ -58,7 +58,7 @@ public class DiscountServiceTest {
         
         BigDecimal originalAmount = new BigDecimal("100.00");
         BigDecimal expectedDiscountedAmount = new BigDecimal("85.00");
-        BigDecimal discountedAmount = discountService.applyBestDiscount(user, originalAmount);
+        BigDecimal discountedAmount = discountService.calculateDiscountedPrice(originalAmount, user);
         
         assertEquals(expectedDiscountedAmount, discountedAmount.setScale(2, RoundingMode.HALF_UP),
                     "Premium members with 10+ orders should receive a 15% discount");
@@ -72,7 +72,7 @@ public class DiscountServiceTest {
         user.setRole(User.Role.ADMIN);
         
         BigDecimal originalAmount = new BigDecimal("100.00");
-        BigDecimal discountedAmount = discountService.applyBestDiscount(user, originalAmount);
+        BigDecimal discountedAmount = discountService.calculateDiscountedPrice(originalAmount, user);
         
         assertEquals(originalAmount, discountedAmount, "Admin users should not receive a discount");
     }
@@ -87,7 +87,7 @@ public class DiscountServiceTest {
         BigDecimal originalAmount = new BigDecimal("100.00");
         BigDecimal regularDiscountAmount = new BigDecimal("90.00");
         BigDecimal premiumDiscountAmount = new BigDecimal("85.00");
-        BigDecimal discountedAmount = discountService.applyBestDiscount(user, originalAmount);
+        BigDecimal discountedAmount = discountService.calculateDiscountedPrice(originalAmount, user);
         
         assertEquals(premiumDiscountAmount, discountedAmount.setScale(2, RoundingMode.HALF_UP),
                     "The best discount (premium 15%) should be applied when multiple discounts apply");

@@ -10,14 +10,24 @@ import com.bookshop.services.PurchaseService;
 import com.bookshop.utils.SessionManager;
 import com.bookshop.utils.ViewNavigator;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Controller for the customer dashboard view.
@@ -57,9 +67,44 @@ public class CustomerDashboardController implements CartUpdateListener {
     @FXML
     private Button refreshOrdersButton;
     
+    // New FXML fields for table view
+    @FXML
+    private TableView<Book> booksTableView;
+    
+    @FXML
+    private TableColumn<Book, String> titleColumn;
+    
+    @FXML
+    private TableColumn<Book, String> authorColumn;
+    
+    @FXML
+    private TableColumn<Book, String> publisherColumn;
+    
+    @FXML
+    private TableColumn<Book, Double> priceColumn;
+    
+    @FXML
+    private TableColumn<Book, String> categoryColumn;
+    
+    @FXML
+    private TableColumn<Book, Double> ratingColumn;
+    
+    // Search and filter fields
+    @FXML
+    private TextField searchField;
+    
+    @FXML
+    private ComboBox<String> categoryComboBox;
+    
+    @FXML
+    private ComboBox<String> sortByComboBox;
+    
     private BookService bookService;
     private CartService cartService;
     private User currentUser;
+    private ObservableList<Book> allBooks = FXCollections.observableArrayList();
+    private String currentCategory = "All Categories";
+    private String currentSortBy = "Title";
     
     /**
      * Initializes the controller.
@@ -88,31 +133,45 @@ public class CustomerDashboardController implements CartUpdateListener {
         // Update cart item count
         updateCartItemCount();
         
-        // Configure bookListView with a custom cell factory
-        bookListView.setCellFactory(lv -> new javafx.scene.control.ListCell<Book>() {
-            @Override
-            protected void updateItem(Book book, boolean empty) {
-                super.updateItem(book, empty);
-                if (empty || book == null) {
-                    setText(null);
-                } else {
-                    setText(book.getTitle() + " by " + book.getAuthor() + " - $" + book.getPrice());
+        // Configure bookListView with a custom cell factory if it exists
+        if (bookListView != null) {
+            bookListView.setCellFactory(lv -> new javafx.scene.control.ListCell<Book>() {
+                @Override
+                protected void updateItem(Book book, boolean empty) {
+                    super.updateItem(book, empty);
+                    if (empty || book == null) {
+                        setText(null);
+                    } else {
+                        setText(book.getTitle() + " by " + book.getAuthor() + " - $" + book.getPrice());
+                    }
                 }
-            }
-        });
+            });
+        }
         
-        // Configure orderListView with a custom cell factory
-        orderListView.setCellFactory(lv -> new javafx.scene.control.ListCell<Order>() {
-            @Override
-            protected void updateItem(Order order, boolean empty) {
-                super.updateItem(order, empty);
-                if (empty || order == null) {
-                    setText(null);
-                } else {
-                    setText("Order #" + order.getId() + " - $" + order.getTotalAmount() + " - " + order.getStatus());
+        // Configure orderListView with a custom cell factory if it exists
+        if (orderListView != null) {
+            orderListView.setCellFactory(lv -> new javafx.scene.control.ListCell<Order>() {
+                @Override
+                protected void updateItem(Order order, boolean empty) {
+                    super.updateItem(order, empty);
+                    if (empty || order == null) {
+                        setText(null);
+                    } else {
+                        setText("Order #" + order.getId() + " - $" + order.getTotalAmount() + " - " + order.getStatus());
+                    }
                 }
-            }
-        });
+            });
+        }
+        
+        // Set up the table columns if they exist
+        if (booksTableView != null) {
+            setupTableColumns();
+        }
+        
+        // Initialize combo boxes if they exist
+        if (categoryComboBox != null && sortByComboBox != null) {
+            initializeComboBoxes();
+        }
         
         // Load books
         loadBooks();
@@ -120,29 +179,94 @@ public class CustomerDashboardController implements CartUpdateListener {
         // Load orders
         loadOrders();
         
-        // Set up double-click handler for book list
-        bookListView.setOnMouseClicked(event -> {
-            if (event.getClickCount() == 2) {
-                Book selectedBook = bookListView.getSelectionModel().getSelectedItem();
-                if (selectedBook != null) {
-                    // Store the selected book in the session
-                    SessionManager.getInstance().setCurrentBook(selectedBook);
-                    // Navigate to book details view
-                    ViewNavigator.getInstance().navigateTo("book_details.fxml");
+        // Set up double-click handler for book list if it exists
+        if (bookListView != null) {
+            bookListView.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2) {
+                    Book selectedBook = bookListView.getSelectionModel().getSelectedItem();
+                    if (selectedBook != null) {
+                        // Store the selected book in the session
+                        SessionManager.getInstance().setCurrentBook(selectedBook);
+                        // Navigate to book details view
+                        ViewNavigator.getInstance().navigateTo("book_details.fxml");
+                    }
                 }
-            }
+            });
+        }
+        
+        // Set up double-click handler for orders list if it exists
+        if (orderListView != null) {
+            orderListView.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2) {
+                    Order selectedOrder = orderListView.getSelectionModel().getSelectedItem();
+                    if (selectedOrder != null) {
+                        // Navigate to order details view
+                        SessionManager.getInstance().setCurrentOrder(selectedOrder);
+                        ViewNavigator.getInstance().navigateTo("customer_orders.fxml");
+                    }
+                }
+            });
+        }
+    }
+    
+    /**
+     * Sets up the table columns by binding them to the Book properties.
+     */
+    private void setupTableColumns() {
+        titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
+        authorColumn.setCellValueFactory(new PropertyValueFactory<>("author"));
+        publisherColumn.setCellValueFactory(new PropertyValueFactory<>("publisher"));
+        priceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
+        categoryColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
+        ratingColumn.setCellValueFactory(new PropertyValueFactory<>("averageRating"));
+    }
+    
+    /**
+     * Initializes the combo boxes with options.
+     */
+    private void initializeComboBoxes() {
+        // Set up categoryComboBox
+        categoryComboBox.getItems().add("All Categories");
+        
+        try {
+            // Get all available categories from the books
+            List<String> categories = bookService.getAllBooks().stream()
+                .map(Book::getCategory)
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
+            
+            // Add each category to the combo box
+            categoryComboBox.getItems().addAll(categories);
+        } catch (SQLException e) {
+            statusLabel.setText("Error loading categories: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        categoryComboBox.setValue("All Categories");
+        
+        // Add listeners for category selection
+        categoryComboBox.setOnAction(e -> {
+            currentCategory = categoryComboBox.getValue();
+            applyFiltersAndSort();
         });
         
-        // Set up double-click handler for orders list
-        orderListView.setOnMouseClicked(event -> {
-            if (event.getClickCount() == 2) {
-                Order selectedOrder = orderListView.getSelectionModel().getSelectedItem();
-                if (selectedOrder != null) {
-                    // Navigate to order details view
-                    SessionManager.getInstance().setCurrentOrder(selectedOrder);
-                    ViewNavigator.getInstance().navigateTo("customer_orders.fxml");
-                }
-            }
+        // Set up sortByComboBox
+        sortByComboBox.getItems().addAll(
+            "Title", 
+            "Author", 
+            "Price (Low to High)", 
+            "Price (High to Low)",
+            "Rating (Low to High)",
+            "Rating (High to Low)"
+        );
+        
+        sortByComboBox.setValue("Title");
+        
+        // Add listeners for sort selection
+        sortByComboBox.setOnAction(e -> {
+            currentSortBy = sortByComboBox.getValue();
+            applyFiltersAndSort();
         });
     }
     
@@ -152,11 +276,110 @@ public class CustomerDashboardController implements CartUpdateListener {
     private void loadBooks() {
         try {
             List<Book> books = bookService.getAllBooks();
-            bookListView.getItems().clear();
-            bookListView.getItems().addAll(books);
+            
+            // Store all books for filtering
+            allBooks.clear();
+            allBooks.addAll(books);
+            
+            // Update the table view if it exists
+            if (booksTableView != null) {
+                booksTableView.getItems().clear();
+                booksTableView.getItems().addAll(books);
+            }
+            
+            // For backward compatibility with the older list view if it exists
+            if (bookListView != null) {
+                bookListView.getItems().clear();
+                bookListView.getItems().addAll(books);
+            }
+            
         } catch (SQLException e) {
             statusLabel.setText("Error loading books: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Handles the search button action.
+     * 
+     * @param event The action event
+     */
+    @FXML
+    public void handleSearchButton(ActionEvent event) {
+        applyFiltersAndSort();
+    }
+    
+    /**
+     * Applies the current filters (search query and category) and sorting to the books.
+     */
+    private void applyFiltersAndSort() {
+        // Get search query
+        String searchQuery = searchField.getText().trim().toLowerCase();
+        
+        // Apply filters
+        List<Book> filteredBooks = allBooks.stream()
+            .filter(book -> {
+                // Apply category filter if not "All Categories"
+                boolean categoryMatch = currentCategory.equals("All Categories") || 
+                                       book.getCategory().equals(currentCategory);
+                
+                // Apply search filter if query is not empty
+                boolean searchMatch = searchQuery.isEmpty() || 
+                                    book.getTitle().toLowerCase().contains(searchQuery) || 
+                                    book.getAuthor().toLowerCase().contains(searchQuery) ||
+                                    book.getDescription().toLowerCase().contains(searchQuery);
+                
+                return categoryMatch && searchMatch;
+            })
+            .collect(Collectors.toList());
+        
+        // Apply sorting
+        applySort(filteredBooks);
+        
+        // Update table view with filtered and sorted books if it exists
+        if (booksTableView != null) {
+            booksTableView.getItems().clear();
+            booksTableView.getItems().addAll(filteredBooks);
+        }
+        
+        // For backward compatibility with the older list view if it exists
+        if (bookListView != null) {
+            bookListView.getItems().clear();
+            bookListView.getItems().addAll(filteredBooks);
+        }
+        
+        // Update status label
+        statusLabel.setText("Found " + filteredBooks.size() + " books");
+    }
+    
+    /**
+     * Applies sorting to a list of books based on the current sort criteria.
+     * 
+     * @param books The list of books to sort
+     */
+    private void applySort(List<Book> books) {
+        switch (currentSortBy) {
+            case "Title":
+                books.sort(Comparator.comparing(Book::getTitle));
+                break;
+            case "Author":
+                books.sort(Comparator.comparing(Book::getAuthor));
+                break;
+            case "Price (Low to High)":
+                books.sort(Comparator.comparing(Book::getPrice));
+                break;
+            case "Price (High to Low)":
+                books.sort(Comparator.comparing(Book::getPrice).reversed());
+                break;
+            case "Rating (Low to High)":
+                books.sort(Comparator.comparing(Book::getAverageRating));
+                break;
+            case "Rating (High to Low)":
+                books.sort(Comparator.comparing(Book::getAverageRating).reversed());
+                break;
+            default:
+                books.sort(Comparator.comparing(Book::getTitle));
+                break;
         }
     }
     
@@ -234,14 +457,24 @@ public class CustomerDashboardController implements CartUpdateListener {
     }
     
     /**
+     * Handles the refresh orders button action.
+     * 
+     * @param event The action event
+     */
+    @FXML
+    public void handleRefreshOrders(ActionEvent event) {
+        loadOrders();
+    }
+    
+    /**
      * Handles the book table click action.
      * 
      * @param event The mouse event
      */
     @FXML
     public void handleBookTableClick(javafx.scene.input.MouseEvent event) {
-        if (event.getClickCount() == 2) {
-            Book selectedBook = bookListView.getSelectionModel().getSelectedItem();
+        if (booksTableView != null && event.getClickCount() == 2) {
+            Book selectedBook = booksTableView.getSelectionModel().getSelectedItem();
             if (selectedBook != null) {
                 // Store the selected book in the session
                 SessionManager.getInstance().setCurrentBook(selectedBook);
@@ -258,7 +491,17 @@ public class CustomerDashboardController implements CartUpdateListener {
      */
     @FXML
     public void handleAddToCartButton(ActionEvent event) {
-        Book selectedBook = bookListView.getSelectionModel().getSelectedItem();
+        Book selectedBook = null;
+        
+        // First check if a book is selected in the table view (preferred)
+        if (booksTableView != null && booksTableView.getSelectionModel().getSelectedItem() != null) {
+            selectedBook = booksTableView.getSelectionModel().getSelectedItem();
+        } 
+        // If no book is selected in the table view, check the list view (fallback)
+        else if (bookListView != null && bookListView.getSelectionModel().getSelectedItem() != null) {
+            selectedBook = bookListView.getSelectionModel().getSelectedItem();
+        }
+        
         if (selectedBook != null) {
             try {
                 boolean success = cartService.addToCart(currentUser.getId(), selectedBook.getId(), 1);
@@ -310,20 +553,8 @@ public class CustomerDashboardController implements CartUpdateListener {
      */
     @Override
     public void onCartUpdated(int userId) {
-        if (currentUser != null && currentUser.getId() == userId) {
-            // Update UI on JavaFX thread
-            javafx.application.Platform.runLater(this::updateCartItemCount);
+        if (userId == currentUser.getId()) {
+            updateCartItemCount();
         }
-    }
-    
-    /**
-     * Handles refreshing the orders list.
-     * 
-     * @param event The action event
-     */
-    @FXML
-    public void handleRefreshOrders(ActionEvent event) {
-        loadOrders();
-        statusLabel.setText("Orders refreshed");
     }
 }

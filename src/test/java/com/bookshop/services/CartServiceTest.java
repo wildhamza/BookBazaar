@@ -9,6 +9,7 @@ import org.junit.jupiter.api.AfterEach;
 import com.bookshop.models.Book;
 import com.bookshop.models.CartItem;
 import com.bookshop.observers.CartObserver;
+import com.bookshop.observers.CartEvent;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -146,7 +147,7 @@ public class CartServiceTest {
         boolean wasNotified = false;
         
         @Override
-        public void update() {
+        public void update(CartEvent event) {
             wasNotified = true;
         }
     }

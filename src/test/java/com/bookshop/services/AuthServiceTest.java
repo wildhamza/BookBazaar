@@ -27,7 +27,7 @@ public class AuthServiceTest {
     void testAuthenticateUserWithValidCredentials() throws SQLException {
         // Since this test depends on database state, we need to use known credentials
         // In a real application, you would mock the database or use an in-memory test database
-        User user = authService.authenticateUser("admin", "admin123");
+        User user = authService.login("admin", "admin123");
         
         assertNotNull(user, "User should not be null when credentials are valid");
         assertEquals("admin", user.getUsername());
@@ -37,7 +37,7 @@ public class AuthServiceTest {
     @Test
     @DisplayName("Test user authentication with invalid credentials")
     void testAuthenticateUserWithInvalidCredentials() throws SQLException {
-        User user = authService.authenticateUser("admin", "wrongpassword");
+        User user = authService.login("admin", "wrongpassword");
         
         assertNull(user, "User should be null when credentials are invalid");
     }
@@ -52,10 +52,10 @@ public class AuthServiceTest {
         assertNotEquals(password, hashedPassword);
         
         // Verification should work
-        assertTrue(PasswordHasher.checkPassword(password, hashedPassword));
+        assertTrue(PasswordHasher.verifyPassword(password, hashedPassword));
         
         // Wrong password should fail
-        assertFalse(PasswordHasher.checkPassword("wrongpassword", hashedPassword));
+        assertFalse(PasswordHasher.verifyPassword("wrongpassword", hashedPassword));
     }
     
     // Add more test cases as needed
