@@ -39,7 +39,6 @@
                         <Label fx:id="cartItemCountLabel" styleClass="cart-count" text="0 items" />
                         <Button fx:id="viewCartButton" mnemonicParsing="false" onAction="#handleViewCartButton" styleClass="secondary-button" text="View Cart" />
                         <Button fx:id="viewOrdersButton" mnemonicParsing="false" onAction="#handleViewOrdersButton" styleClass="secondary-button" text="My Orders" />
-                        <Button fx:id="refreshOrdersButton" mnemonicParsing="false" onAction="#handleRefreshOrders" styleClass="secondary-button" text="Refresh Orders" />
                         <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#handleLogoutButton" styleClass="warning-button" text="Logout" />
                      </children>
                   </HBox>
@@ -58,14 +57,36 @@
             <HBox alignment="CENTER_LEFT" spacing="10.0">
                <children>
                   <Label text="Search Books:" />
-                  <TextField fx:id="searchField" promptText="Search by title or author" HBox.hgrow="ALWAYS" />
+                  <TextField fx:id="searchField" promptText="Search by title, author, or publisher" HBox.hgrow="ALWAYS" />
                   <Button mnemonicParsing="false" onAction="#handleSearchButton" text="Search" />
                   <Separator orientation="VERTICAL" />
                   <Label text="Category:" />
-                  <ComboBox fx:id="categoryComboBox" prefWidth="150.0" promptText="Select Category" />
+                  <ComboBox fx:id="categoryComboBox" prefWidth="150.0" promptText="Select Category">
+                     <items>
+                        <FXCollections fx:factory="observableArrayList">
+                            <String fx:value="Fiction" />
+                            <String fx:value="Self-help" />
+                            <String fx:value="Reference" />
+                            <String fx:value="Biography" />
+                            <String fx:value="Education" />
+                        </FXCollections>
+                     </items>
+                  </ComboBox>
                   <Separator orientation="VERTICAL" />
                   <Label text="Sort by:" />
-                  <ComboBox fx:id="sortByComboBox" prefWidth="150.0" promptText="Sort by" />
+                  <ComboBox fx:id="sortByComboBox" prefWidth="150.0" promptText="Sort by">
+                     <items>
+                        <FXCollections fx:factory="observableArrayList">
+                            <String fx:value="Price: Low to High" />
+                            <String fx:value="Price: High to Low" />
+                            <String fx:value="Title: A to Z" />
+                            <String fx:value="Title: Z to A" />
+                            <String fx:value="Author: A to Z" />
+                            <String fx:value="Rating: High to Low" />
+                            <String fx:value="Newest First" />
+                        </FXCollections>
+                     </items>
+                  </ComboBox>
                </children>
             </HBox>
             <TableView fx:id="booksTableView" onMouseClicked="#handleBookTableClick" VBox.vgrow="ALWAYS">
@@ -73,7 +94,7 @@
                 <TableColumn fx:id="titleColumn" prefWidth="250.0" text="Title" />
                 <TableColumn fx:id="authorColumn" prefWidth="150.0" text="Author" />
                 <TableColumn fx:id="publisherColumn" prefWidth="150.0" text="Publisher" />
-                <TableColumn fx:id="priceColumn" prefWidth="100.0" text="Price" />
+                <TableColumn fx:id="priceColumn" prefWidth="100.0" text="Price (€)" />
                 <TableColumn fx:id="categoryColumn" prefWidth="150.0" text="Category" />
                 <TableColumn fx:id="ratingColumn" prefWidth="100.0" text="Rating" />
               </columns>

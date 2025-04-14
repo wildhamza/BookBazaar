@@ -6,25 +6,25 @@
 }
 
 .main-container {
-    -fx-background-color: white;
+    -fx-background-color: #f5f5f5;
 }
 
 /* Text Styles */
 .header-label {
     -fx-font-size: 24px;
     -fx-font-weight: bold;
-    -fx-text-fill: #333333;
+    -fx-text-fill: #2c3e50;
 }
 
 .section-title {
     -fx-font-size: 16px;
     -fx-font-weight: bold;
-    -fx-text-fill: #333333;
+    -fx-text-fill: #2c3e50;
 }
 
 .error-label {
-    -fx-text-fill: #d32f2f;
-    -fx-font-weight: bold;
+    -fx-text-fill: #e74c3c;
+    -fx-font-style: italic;
 }
 
 .total-label {
@@ -39,9 +39,11 @@
 }
 
 .cart-count {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-padding: 2 6;
+    -fx-background-radius: 10;
     -fx-font-weight: bold;
-    -fx-text-fill: #1976d2;
-    -fx-padding: 0 10 0 5;
 }
 
 /* Button Styles */
@@ -58,62 +60,86 @@
 }
 
 .primary-button {
-    -fx-background-color: #1976d2;
+    -fx-background-color: #3498db;
     -fx-text-fill: white;
     -fx-font-weight: bold;
+    -fx-padding: 8 16;
+    -fx-background-radius: 4;
 }
 
 .primary-button:hover {
-    -fx-background-color: #1565c0;
+    -fx-background-color: #2980b9;
 }
 
 .secondary-button {
-    -fx-background-color: #66bb6a;
+    -fx-background-color: #95a5a6;
     -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8 16;
+    -fx-background-radius: 4;
 }
 
 .secondary-button:hover {
-    -fx-background-color: #4caf50;
+    -fx-background-color: #7f8c8d;
 }
 
 .warning-button {
-    -fx-background-color: #ef5350;
+    -fx-background-color: #e74c3c;
     -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8 16;
+    -fx-background-radius: 4;
 }
 
 .warning-button:hover {
-    -fx-background-color: #d32f2f;
+    -fx-background-color: #c0392b;
+}
+
+.info-button {
+    -fx-background-color: #2ecc71;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8 16;
+    -fx-background-radius: 4;
+}
+
+.info-button:hover {
+    -fx-background-color: #27ae60;
 }
 
 /* Table Styles */
 .table-view {
     -fx-background-color: white;
-    -fx-border-color: #e0e0e0;
+    -fx-border-color: #bdc3c7;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
 }
 
 .table-view .column-header {
-    -fx-background-color: #f5f5f5;
+    -fx-background-color: #ecf0f1;
+    -fx-text-fill: #2c3e50;
     -fx-font-weight: bold;
 }
 
+.table-view .table-row-cell {
+    -fx-background-color: white;
+}
+
+.table-view .table-row-cell:odd {
+    -fx-background-color: #f9f9f9;
+}
+
 .table-view .table-row-cell:selected {
-    -fx-background-color: #bbdefb;
-}
-
-.table-view:focused .table-row-cell:selected {
-    -fx-background-color: #2196f3;
-}
-
-.table-view:focused .table-row-cell:selected .text {
-    -fx-fill: white;
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
 }
 
 /* Form Control Styles */
 .text-field, .password-field, .text-area, .combo-box {
     -fx-background-color: white;
-    -fx-border-color: #bdbdbd;
-    -fx-border-radius: 3;
-    -fx-padding: 5;
+    -fx-border-color: #bdc3c7;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
 }
 
 .text-field:focused, .password-field:focused, .text-area:focused, .combo-box:focused {
@@ -145,18 +171,73 @@
 
 /* Misc */
 .separator {
-    -fx-background-color: #e0e0e0;
+    -fx-background-color: #bdc3c7;
 }
 
 /* Slider styling for book rating */
+.slider {
+    -fx-padding: 0 10;
+}
+
 .slider .track {
-    -fx-background-color: #e0e0e0;
+    -fx-background-color: #bdc3c7;
 }
 
 .slider .thumb {
-    -fx-background-color: #ffc107;
+    -fx-background-color: #3498db;
 }
 
-.slider .axis {
-    -fx-tick-label-fill: #333333;
+/* Book image styles */
+.book-image {
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 0);
+    -fx-border-color: #bdc3c7;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+}
+
+/* Spinner styles */
+.spinner {
+    -fx-background-color: white;
+    -fx-border-color: #bdc3c7;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+}
+
+/* Text area styles */
+.text-area {
+    -fx-background-color: white;
+    -fx-border-color: #bdc3c7;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+}
+
+/* Combo box styles */
+.combo-box {
+    -fx-background-color: white;
+    -fx-border-color: #bdc3c7;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: #2c3e50;
+}
+
+.combo-box .arrow {
+    -fx-background-color: #2c3e50;
+}
+
+/* Text field styles */
+.text-field {
+    -fx-background-color: white;
+    -fx-border-color: #bdc3c7;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+    -fx-padding: 5;
+}
+
+/* Rating styles */
+.rating {
+    -fx-text-fill: #f1c40f;
+    -fx-font-weight: bold;
 }

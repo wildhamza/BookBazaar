@@ -635,24 +635,4 @@ public class AdminDashboardController {
         SessionManager.getInstance().logout();
         ViewNavigator.getInstance().navigateTo("login.fxml");
     }
-    
-    @FXML
-    public void handleViewOrders(ActionEvent event) {
-        // Simply switch to the Orders tab (tab index 1) and refresh orders
-        mainTabPane.getSelectionModel().select(1); // Index 1 is the View Orders tab
-        loadOrders();
-    }
-    
-    @FXML
-    public void handleViewCompletedOrders(ActionEvent event) {
-        // Switch to the Completed Orders tab (tab index 2) and refresh completed orders
-        mainTabPane.getSelectionModel().select(2); // Index 2 is the Completed Orders tab
-        loadCompletedOrders();
-    }
-    
-    @FXML
-    public void handleManageBooks(ActionEvent event) {
-        // Simply switch to the Books tab
-        mainTabPane.getSelectionModel().select(0); // Index 0 is the Books tab
-    }
 }

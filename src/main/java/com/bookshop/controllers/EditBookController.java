@@ -47,7 +47,6 @@ public class EditBookController implements Initializable {
         bookService = new BookService();
         
         initializeCategoryComboBox();
-        
         initializeStockSpinner();
         
         currentBook = SessionManager.getInstance().getSelectedBook();
@@ -66,10 +65,7 @@ public class EditBookController implements Initializable {
     
     private void initializeCategoryComboBox() {
         categoryComboBox.setItems(FXCollections.observableArrayList(
-            "Fiction", "Non-Fiction", "Science", "Technology", 
-            "History", "Biography", "Fantasy", "Mystery", 
-            "Thriller", "Romance", "Science Fiction", "Horror",
-            "Self-Help", "Business", "Computer Science", "Reference"
+            "Fiction", "Self-help", "Reference", "Biography", "Education"
         ));
     }
     
@@ -102,15 +98,17 @@ public class EditBookController implements Initializable {
     }
     
     private void populateForm() {
-        bookTitleField.setText(currentBook.getTitle());
-        authorField.setText(currentBook.getAuthor());
-        publisherField.setText(currentBook.getPublisher());
-        priceField.setText(currentBook.getPrice().toString());
-        categoryComboBox.setValue(currentBook.getCategory());
-        isbnField.setText(currentBook.getIsbn());
-        imageUrlField.setText(currentBook.getImageUrl());
-        descriptionArea.setText(currentBook.getDescription());
-        stockSpinner.getValueFactory().setValue(currentBook.getStockQuantity());
+        if (currentBook != null) {
+            bookTitleField.setText(currentBook.getTitle());
+            authorField.setText(currentBook.getAuthor());
+            publisherField.setText(currentBook.getPublisher());
+            priceField.setText(currentBook.getPrice().toString());
+            categoryComboBox.setValue(currentBook.getCategory());
+            isbnField.setText(currentBook.getIsbn());
+            imageUrlField.setText(currentBook.getImageUrl());
+            descriptionArea.setText(currentBook.getDescription());
+            stockSpinner.getValueFactory().setValue(currentBook.getStockQuantity());
+        }
     }
     
     @FXML
@@ -120,14 +118,23 @@ public class EditBookController implements Initializable {
         }
         
         try {
-            currentBook.setTitle(bookTitleField.getText().trim());
-            currentBook.setAuthor(authorField.getText().trim());
-            currentBook.setPublisher(publisherField.getText().trim());
-            currentBook.setPrice(new BigDecimal(priceField.getText().trim()));
-            currentBook.setCategory(categoryComboBox.getValue());
-            currentBook.setIsbn(isbnField.getText().trim());
-            currentBook.setImageUrl(imageUrlField.getText().trim());
-            currentBook.setDescription(descriptionArea.getText().trim());
+            String title = bookTitleField.getText() != null ? bookTitleField.getText().trim() : "";
+            String author = authorField.getText() != null ? authorField.getText().trim() : "";
+            String publisher = publisherField.getText() != null ? publisherField.getText().trim() : "";
+            String priceText = priceField.getText() != null ? priceField.getText().trim() : "0";
+            String category = categoryComboBox.getValue() != null ? categoryComboBox.getValue() : "";
+            String isbn = isbnField.getText() != null ? isbnField.getText().trim() : "";
+            String imageUrl = imageUrlField.getText() != null ? imageUrlField.getText().trim() : "";
+            String description = descriptionArea.getText() != null ? descriptionArea.getText().trim() : "";
+            
+            currentBook.setTitle(title);
+            currentBook.setAuthor(author);
+            currentBook.setPublisher(publisher);
+            currentBook.setPrice(new BigDecimal(priceText));
+            currentBook.setCategory(category);
+            currentBook.setIsbn(isbn);
+            currentBook.setImageUrl(imageUrl);
+            currentBook.setDescription(description);
             currentBook.setStockQuantity(stockSpinner.getValue());
             
             if (isNewBook) {
@@ -154,23 +161,24 @@ public class EditBookController implements Initializable {
     private boolean validateForm() {
         errorMessageLabel.setVisible(false);
         
-        if (bookTitleField.getText().trim().isEmpty()) {
+        if (bookTitleField.getText() == null || bookTitleField.getText().trim().isEmpty()) {
             showError("Title is required");
             return false;
         }
         
-        if (authorField.getText().trim().isEmpty()) {
+        if (authorField.getText() == null || authorField.getText().trim().isEmpty()) {
             showError("Author is required");
             return false;
         }
         
-        if (publisherField.getText().trim().isEmpty()) {
+        if (publisherField.getText() == null || publisherField.getText().trim().isEmpty()) {
             showError("Publisher is required");
             return false;
         }
         
         try {
-            BigDecimal price = new BigDecimal(priceField.getText().trim());
+            String priceText = priceField.getText() != null ? priceField.getText().trim() : "0";
+            BigDecimal price = new BigDecimal(priceText);
             if (price.compareTo(BigDecimal.ZERO) <= 0) {
                 showError("Price must be greater than zero");
                 return false;
@@ -185,7 +193,7 @@ public class EditBookController implements Initializable {
             return false;
         }
         
-        String isbn = isbnField.getText().trim();
+        String isbn = isbnField.getText() != null ? isbnField.getText().trim() : "";
         if (isbn.isEmpty()) {
             showError("ISBN is required");
             return false;

@@ -48,7 +48,12 @@
          <children>
             <HBox spacing="20.0">
                <children>
-                  <ImageView fx:id="bookImageView" fitHeight="200.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true" />
+                  <VBox spacing="10.0">
+                     <children>
+                        <ImageView fx:id="bookImageView" fitHeight="300.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" styleClass="book-image" />
+                        <Label fx:id="imageErrorLabel" styleClass="error-label" text="Image not available" visible="false" />
+                     </children>
+                  </VBox>
                   <VBox spacing="10.0" HBox.hgrow="ALWAYS">
                      <children>
                         <GridPane hgap="10.0" vgap="5.0">
@@ -60,9 +65,9 @@
                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                           </rowConstraints>
                            <children>
                               <Label text="Author:" />
@@ -75,7 +80,7 @@
                               <Label fx:id="publisherLabel" text="Publisher Name" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                               <Label fx:id="categoryLabel" text="Book Category" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                               <Label fx:id="isbnLabel" text="1234567890123" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                              <Label fx:id="priceLabel" text="$29.99" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                              <Label fx:id="priceLabel" text="€29.99" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                               <Label fx:id="ratingLabel" text="4.5 ★ (42 reviews)" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                            </children>
                         </GridPane>
@@ -96,7 +101,7 @@
                               <Label fx:id="stockLabel" text="In Stock: 42" />
                               <Separator orientation="VERTICAL" />
                               <Label text="Quantity:" />
-                              <Spinner fx:id="quantitySpinner" />
+                              <Spinner fx:id="quantitySpinner" min="1" max="100" initialValue="1" />
                               <Button fx:id="addToCartButton" mnemonicParsing="false" onAction="#handleAddToCart" styleClass="primary-button" text="Add to Cart" />
                            </children>
                         </HBox>
@@ -116,8 +121,8 @@
                     <columns>
                       <TableColumn fx:id="reviewUserColumn" prefWidth="100.0" text="User" />
                       <TableColumn fx:id="reviewRatingColumn" prefWidth="100.0" text="Rating" />
-                        <TableColumn fx:id="reviewDateColumn" prefWidth="150.0" text="Date" />
-                        <TableColumn fx:id="reviewCommentColumn" prefWidth="600.0" text="Comment" />
+                      <TableColumn fx:id="reviewDateColumn" prefWidth="150.0" text="Date" />
+                      <TableColumn fx:id="reviewCommentColumn" prefWidth="600.0" text="Comment" />
                     </columns>
                   </TableView>
                   <Separator />

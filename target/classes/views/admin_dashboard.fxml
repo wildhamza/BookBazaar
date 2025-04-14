@@ -139,9 +139,6 @@
    <bottom>
       <HBox alignment="CENTER_LEFT" prefHeight="40.0" spacing="10.0" style="-fx-background-color: #f0f0f0;" BorderPane.alignment="CENTER">
          <children>
-            <Button fx:id="viewBooksButton" mnemonicParsing="false" onAction="#handleManageBooks" text="Manage Books" />
-            <Button fx:id="viewOrdersButton" mnemonicParsing="false" onAction="#handleViewOrders" text="View Orders" />
-            <Button fx:id="viewCompletedOrdersButton" mnemonicParsing="false" onAction="#handleViewCompletedOrders" text="View Completed Orders" />
             <HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
                <children>
                   <Label fx:id="statusLabel" text="" />
