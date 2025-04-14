@@ -1,715 +1,679 @@
 # JavaFX Bookshop Application
 
+## Table of Contents
+1. [Introduction](#1-introduction)
+2. [Architecture](#2-architecture)
+3. [Design Patterns](#3-design-patterns)
+4. [Features](#4-features)
+5. [Database Design](#5-database-design)
+6. [Testing](#6-testing)
+7. [Security](#7-security)
+8. [UML Diagrams](#8-uml-diagrams)
+9. [Conclusion](#9-conclusion)
+
 ## 1. Introduction
 
-- **Purpose of the application**: A comprehensive desktop application for an online bookshop enabling book browsing, purchase, and management
-- **Target users**: 
+### Purpose and Overview
+A comprehensive desktop application for an online bookshop enabling book browsing, purchase, and management.
+
+### Target Users
   - **Customers**: Browse books, manage shopping carts, place orders, write reviews
   - **Administrators**: Manage inventory, view customer orders, moderate reviews
-- **Technologies used**: 
-  - Java 17
-  - JavaFX and FXML (for UI construction)
-  - PostgreSQL (for persistent data storage)
-  - BCrypt (for secure password hashing)
-  - Maven (for dependency management and build automation)
-  - JUnit 5 and Mockito (for testing)
 
-### 1.1 Theoretical Background
+### Technologies Used
+- **Java 17**: Core programming language
+- **JavaFX and FXML**: UI construction and design
+- **PostgreSQL**: Persistent data storage
+- **BCrypt**: Secure password hashing
+- **Maven**: Dependency management and build automation
+- **JUnit 5 and Mockito**: Testing framework and mocking library
 
-The application employs several key software engineering principles and paradigms:
+### Core Principles
 
 #### Object-Oriented Programming (OOP)
-The entire application is built on OOP principles, leveraging:
-- **Encapsulation**: Data and methods are encapsulated within classes with appropriate access modifiers.
-- **Inheritance**: Utilized for extending functionality in related classes.
-- **Polymorphism**: Employed through interfaces and method overriding, particularly in the discount and payment system.
-- **Abstraction**: Complex implementations are abstracted behind clean interfaces.
+The application is built on fundamental OOP principles:
+- **Encapsulation**: Data and methods are encapsulated within classes with appropriate access modifiers
+- **Inheritance**: Utilized for extending functionality in related classes
+- **Polymorphism**: Employed through interfaces and method overriding, particularly in the discount and payment system
+- **Abstraction**: Complex implementations are abstracted behind clean interfaces
 
 #### Model-View-Controller (MVC) Architecture
-MVC separates the application into three interconnected components:
-- **Model**: Represents the data and business logic (Book, User, Order classes).
-- **View**: The user interface that displays data (FXML files, JavaFX components).
-- **Controller**: Mediates between Model and View (Controller classes that respond to user input).
-
-This separation of concerns allows for better code organization, maintenance, and testing by decoupling the business logic from the presentation layer.
+The application separates concerns into three interconnected components:
+- **Model**: Represents data and business logic (Book, User, Order classes)
+- **View**: User interface that displays data (FXML files, JavaFX components)
+- **Controller**: Mediates between Model and View (Controller classes)
 
 ## 2. Architecture
 
-The application follows the Model-View-Controller (MVC) architectural pattern with additional layering to promote separation of concerns and maintainability.
-
-### Project Folder Layout
-
+### Project Structure
 ```
 src/main/java/com/bookshop/
 ├── models/          # Data models (Book, User, CartItem, etc.)
 ├── controllers/     # JavaFX controllers for FXML views
 ├── services/        # Business logic and operations
 ├── repositories/    # Data access layer
-├── utils/           # Utility classes (DatabaseConnection, etc.)
-├── factory/         # Factory classes for object creation
-├── views/           # FXML view files
-└── Main.java        # Application entry point
+├── utils/          # Utility classes
+├── factory/        # Factory classes for object creation
+├── views/          # FXML view files
+└── Main.java       # Application entry point
 ```
 
-### Design Pattern Layering
+### Architectural Layers
+1. **Model Layer**: Core business objects and logic
+2. **Repository Layer**: Data persistence and retrieval
+3. **Service Layer**: Business operations and rules
+4. **Controller Layer**: User input handling and view updates
+5. **View Layer**: User interface components
 
-- **Model Layer**: Represents the application's data objects and business logic
-- **Repository Layer**: Handles data storage and retrieval operations
-- **Service Layer**: Implements business logic and operations
-- **Controller Layer**: Processes user input and updates the view
-- **View Layer**: Displays data and receives user input
+## 3. Design Patterns
 
-## 3. Features
-
-### User Authentication
-- Login/registration with secure password hashing using BCrypt
-- Role-based access (admin and customer)
-- Session management for tracking current user
-
-### Book Management
-- Comprehensive listing with searching and filtering
-- Detailed view for book information
-- Role-based interactions:
-  - Customers: View details, add to cart, write reviews
-  - Administrators: Edit/delete books, manage inventory, moderate reviews
-
-### Shopping System
-- Shopping cart management
-- Checkout process with multiple payment options
-- Order history and tracking
-
-### Review System
-- Customers can add reviews with ratings (1-5 stars)
-- View aggregated ratings and reviews
-- Admin moderation capabilities for inappropriate content
-
-### Loyalty Program
-- Automatic discount based on order history:
-  - Regular member status (5+ orders)
-  - Premium member status (10+ orders)
-- Dynamic price calculation reflecting loyalty discounts
-
-### Admin Dashboard
-- Book inventory management
-- User account management
-- Sales data and reporting
-- Review moderation
-
-## 4. Design Patterns Used
+### Pattern Selection Rationale
+The application employs a combination of Gang of Four (GoF) and non-traditional patterns to address specific architectural and behavioral challenges. Each pattern was carefully selected based on the problem it solves and the benefits it provides to the application's maintainability, scalability, and performance. The patterns were chosen to solve real-world problems in the bookshop context, such as managing complex object creation, handling real-time updates, and implementing flexible business rules.
 
 ### GoF Patterns
 
-#### Singleton
-- **DatabaseConnection**: Ensures a single database connection throughout the application
-- **SessionManager**: Maintains global user session state
+#### Factory Pattern
+**Purpose**: The Factory Pattern was chosen to centralize and standardize object creation, particularly for complex objects like Books and Users. This pattern helps maintain consistency in object initialization, reduces code duplication, and makes it easier to modify object creation logic in one place. It's especially useful when creating objects that require multiple steps or have complex initialization requirements. In our bookshop application, we use it extensively for creating Book objects from various sources (database, user input, DTOs) while ensuring consistent initialization and validation.
 
-```java
-public class DatabaseConnection {
-    private static DatabaseConnection instance;
-    private Connection connection;
-    
-    private DatabaseConnection() { 
-    }
-    
-    public static synchronized DatabaseConnection getInstance() {
-        if (instance == null) {
-            instance = new DatabaseConnection();
-        }
-        return instance;
-    }
-     
-}
-```
-
-#### Factory
-- **BookFactory**: Creates Book objects from different data sources
-
+**Implementation**:
 ```java
 public class BookFactory {
-    public static Book createBook(ResultSet rs) throws SQLException {
+    // Creates a basic book with essential information
+    public static Book createBook(String title, String author, double price) {
         Book book = new Book();
-        book.setId(rs.getInt("id"));
-        book.setTitle(rs.getString("title")); 
+        book.setTitle(title);
+        book.setAuthor(author);
+        book.setPrice(price);
+        book.setStockQuantity(0); // Default stock
+        book.setCreatedAt(LocalDateTime.now());
         return book;
     }
     
-    public static Book createBookFromDTO(BookDTO dto) { 
+    // Creates a book from a DTO with full details
+    public static Book createFromDTO(BookDTO dto) {
+        Book book = new Book();
+        book.setTitle(dto.getTitle());
+        book.setAuthor(dto.getAuthor());
+        book.setIsbn(dto.getIsbn());
+        book.setPublisher(dto.getPublisher());
+        book.setCategory(dto.getCategory());
+        book.setDescription(dto.getDescription());
+        book.setPrice(dto.getPrice());
+        book.setStockQuantity(dto.getStockQuantity());
+        book.setImageUrl(dto.getImageUrl());
+        book.setCreatedAt(LocalDateTime.now());
+        return book;
+    }
+    
+    // Creates a book from database result set
+    public static Book createFromResultSet(ResultSet rs) throws SQLException {
+        Book book = new Book();
+        book.setId(rs.getInt("id"));
+        book.setTitle(rs.getString("title"));
+        book.setAuthor(rs.getString("author"));
+        // ... set other properties
+        return book;
     }
 }
 ```
 
-#### Strategy
-- **Payment Processing**: Different payment methods implemented as strategies
-- **Discount System**: Various discount calculations based on user loyalty
+**Roles**:
+- `BookFactory`: Creator class that handles object creation with multiple creation methods
+- `Book`: Product class being created with complex initialization requirements
+- `BookDTO`: Data transfer object used for creation from external sources
+- `ResultSet`: Database result set used for creation from database records
 
+**Usage Scenarios**:
+1. Creating new books from admin input
+2. Converting DTOs from API responses
+3. Loading books from database results
+4. Creating test books for unit testing
+
+#### Singleton Pattern
+**Purpose**: The Singleton Pattern was implemented for managing global resources like database connections and session state. This ensures that we have exactly one instance of these critical resources throughout the application's lifecycle, preventing resource conflicts and maintaining consistent state. It's particularly important for managing database connections to avoid connection pool exhaustion and for maintaining user session state across different parts of the application. The pattern helps us maintain a single source of truth for critical application-wide resources.
+
+**Implementation**:
 ```java
-public interface DiscountStrategy {
-    BigDecimal calculateDiscount(BigDecimal originalPrice);
-}
-
-public class RegularMemberDiscount implements DiscountStrategy {
-    @Override
-    public BigDecimal calculateDiscount(BigDecimal originalPrice) {
-        return originalPrice.multiply(new BigDecimal("0.10")); 
+public class DatabaseConnection {
+    private static volatile DatabaseConnection instance;
+    private Connection connection;
+    private static final String DB_URL = "jdbc:postgresql://localhost:5432/bookshop";
+    private static final String DB_USER = "bookshop_user";
+    private static final String DB_PASSWORD = "secure_password";
+    
+    private DatabaseConnection() {
+        try {
+            connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to create database connection", e);
+        }
     }
-}
-
-public class PremiumMemberDiscount implements DiscountStrategy {
-    @Override
-    public BigDecimal calculateDiscount(BigDecimal originalPrice) {
-        return originalPrice.multiply(new BigDecimal("0.15")); 
+    
+    public static DatabaseConnection getInstance() {
+        if (instance == null) {
+            synchronized (DatabaseConnection.class) {
+                if (instance == null) {
+                    instance = new DatabaseConnection();
+                }
+            }
+        }
+        return instance;
+    }
+    
+    public Connection getConnection() {
+        return connection;
+    }
+    
+    public void closeConnection() {
+        try {
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to close database connection", e);
+        }
     }
 }
 ```
 
-#### Observer
-- **CartObserver**: Components observe shopping cart changes
+**Roles**:
+- `DatabaseConnection`: Singleton class managing the single instance with thread-safe initialization
+- `Connection`: Resource being managed (database connection)
+- `getInstance()`: Static method providing global access with double-checked locking
+- `closeConnection()`: Method for proper resource cleanup
 
+**Usage Scenarios**:
+1. Database operations across the application
+2. Connection pooling management
+3. Transaction management
+4. Resource cleanup on application shutdown
+
+#### Observer Pattern
+**Purpose**: The Observer Pattern was chosen to implement real-time updates in the shopping cart and order processing systems. This pattern allows objects to subscribe to changes in other objects without tight coupling, making it perfect for scenarios where multiple UI components need to update when the cart changes or when order status updates occur. It promotes loose coupling and makes the system more maintainable and extensible. In our bookshop, this pattern is crucial for keeping the UI in sync with the underlying data model and providing real-time feedback to users.
+
+**Implementation**:
 ```java
+// Observer interface
 public interface CartObserver {
-    void update(CartEvent event);
+    void onCartUpdated(CartEvent event);
+    void onItemAdded(CartItem item);
+    void onItemRemoved(CartItem item);
+    void onQuantityChanged(CartItem item, int newQuantity);
 }
 
+// Subject class
 public class CartManager {
     private List<CartObserver> observers = new ArrayList<>();
+    private Map<Integer, CartItem> items = new HashMap<>();
     
     public void addObserver(CartObserver observer) {
         observers.add(observer);
     }
     
-    public void notifyObservers(CartEvent event) {
-        for (CartObserver observer : observers) {
-            observer.update(event);
+    public void removeObserver(CartObserver observer) {
+        observers.remove(observer);
+    }
+    
+    public void addItem(Book book, int quantity) {
+        CartItem item = new CartItem(book, quantity);
+        items.put(book.getId(), item);
+        notifyItemAdded(item);
+    }
+    
+    public void removeItem(int bookId) {
+        CartItem item = items.remove(bookId);
+        if (item != null) {
+            notifyItemRemoved(item);
         }
+    }
+    
+    public void updateQuantity(int bookId, int newQuantity) {
+        CartItem item = items.get(bookId);
+        if (item != null) {
+            item.setQuantity(newQuantity);
+            notifyQuantityChanged(item, newQuantity);
+        }
+    }
+    
+    private void notifyItemAdded(CartItem item) {
+        observers.forEach(observer -> observer.onItemAdded(item));
+    }
+    
+    private void notifyItemRemoved(CartItem item) {
+        observers.forEach(observer -> observer.onItemRemoved(item));
+    }
+    
+    private void notifyQuantityChanged(CartItem item, int newQuantity) {
+        observers.forEach(observer -> observer.onQuantityChanged(item, newQuantity));
+    }
+}
+
+// Concrete Observer
+public class CartViewController implements CartObserver {
+    private CartManager cartManager;
+    private Label totalLabel;
+    private ListView<CartItem> cartListView;
+    
+    public CartViewController(CartManager cartManager) {
+        this.cartManager = cartManager;
+        cartManager.addObserver(this);
+    }
+    
+    @Override
+    public void onCartUpdated(CartEvent event) {
+        updateTotal();
+        refreshCartList();
+    }
+    
+    @Override
+    public void onItemAdded(CartItem item) {
+        cartListView.getItems().add(item);
+        updateTotal();
+    }
+    
+    @Override
+    public void onItemRemoved(CartItem item) {
+        cartListView.getItems().remove(item);
+        updateTotal();
+    }
+    
+    @Override
+    public void onQuantityChanged(CartItem item, int newQuantity) {
+        updateTotal();
+        refreshCartList();
+    }
+    
+    private void updateTotal() {
+        BigDecimal total = cartManager.calculateTotal();
+        totalLabel.setText(total.toString());
+    }
+    
+    private void refreshCartList() {
+        cartListView.refresh();
     }
 }
 ```
+
+**Roles**:
+- `CartObserver`: Observer interface defining update contract with specific event types
+- `CartManager`: Subject class managing observers and cart state
+- `CartViewController`: Concrete observer implementing UI updates
+- `CartItem`: Data object representing cart items
+- `CartEvent`: Event object containing change information
+
+**Usage Scenarios**:
+1. Real-time cart total updates
+2. Cart item list synchronization
+3. Order status notifications
+4. Inventory update notifications
+
+#### Strategy Pattern
+**Purpose**: The Strategy Pattern was implemented to handle the different discount calculation strategies for various user types. This pattern allows us to encapsulate each discount algorithm in its own class and switch between them at runtime, making it easy to add new discount types or modify existing ones without changing the core checkout logic. It's particularly useful for the loyalty program where different user tiers get different discounts. The pattern helps us maintain clean separation between the discount calculation logic and the checkout process.
+
+**Implementation**:
+```java
+// Strategy interface
+public interface DiscountStrategy {
+    BigDecimal calculateDiscount(BigDecimal originalPrice);
+    String getDescription();
+}
+
+// Concrete strategies
+public class NoDiscount implements DiscountStrategy {
+    @Override
+    public BigDecimal calculateDiscount(BigDecimal originalPrice) {
+        return BigDecimal.ZERO;
+    }
+    
+    @Override
+    public String getDescription() {
+        return "No discount applied";
+    }
+}
+
+public class RegularMemberDiscount implements DiscountStrategy {
+    private static final BigDecimal DISCOUNT_RATE = new BigDecimal("0.10");
+    
+    @Override
+    public BigDecimal calculateDiscount(BigDecimal originalPrice) {
+        return originalPrice.multiply(DISCOUNT_RATE);
+    }
+    
+    @Override
+    public String getDescription() {
+        return "Regular member discount (10%)";
+    }
+}
+
+public class PremiumMemberDiscount implements DiscountStrategy {
+    private static final BigDecimal DISCOUNT_RATE = new BigDecimal("0.15");
+    
+    @Override
+    public BigDecimal calculateDiscount(BigDecimal originalPrice) {
+        return originalPrice.multiply(DISCOUNT_RATE);
+    }
+    
+    @Override
+    public String getDescription() {
+        return "Premium member discount (15%)";
+    }
+}
+
+// Context class
+public class DiscountService {
+    public DiscountStrategy getDiscountStrategy(User user) {
+        if (user == null) {
+            return new NoDiscount();
+        }
+        
+        if (user.getOrderCount() >= 10) {
+            return new PremiumMemberDiscount();
+        } else if (user.getOrderCount() >= 5) {
+            return new RegularMemberDiscount();
+        }
+        
+        return new NoDiscount();
+    }
+    
+    public BigDecimal calculateDiscountedPrice(BigDecimal originalPrice, User user) {
+        DiscountStrategy strategy = getDiscountStrategy(user);
+        BigDecimal discount = strategy.calculateDiscount(originalPrice);
+        return originalPrice.subtract(discount);
+    }
+}
+```
+
+**Roles**:
+- `DiscountStrategy`: Strategy interface defining discount calculation contract
+- `NoDiscount`, `RegularMemberDiscount`, `PremiumMemberDiscount`: Concrete strategy implementations
+- `DiscountService`: Context class selecting and applying strategies
+- `User`: Context object used for strategy selection
+
+**Usage Scenarios**:
+1. Checkout process discount calculation
+2. Order preview with estimated discounts
+3. Loyalty program status display
+4. Discount strategy testing and validation
 
 ### Non-Traditional Patterns
 
 #### Repository Pattern
-- Abstraction layer for data access operations
-- Isolation of database queries from business logic
+**Purpose**: The Repository Pattern was chosen to abstract the data access layer and provide a clean interface for database operations. This pattern helps separate the business logic from data access concerns, making the code more maintainable and testable. It also provides a consistent way to access data across the application, regardless of the underlying storage mechanism. In our bookshop, this pattern is essential for managing complex database operations while keeping the business logic clean and focused.
 
+**Implementation**:
 ```java
+// Repository interface
 public interface BookRepository {
-    List<Book> findAll() throws SQLException;
-    Book findById(int id) throws SQLException;
-    int save(Book book) throws SQLException;
-    boolean update(Book book) throws SQLException;
-    boolean delete(int id) throws SQLException;
+    List<Book> findAll();
+    Book findById(int id);
+    List<Book> findByAuthor(String author);
+    List<Book> findByCategory(String category);
+    List<Book> search(String query);
+    void save(Book book);
+    void update(Book book);
+    void delete(int id);
+    boolean existsById(int id);
 }
-```
 
-#### Service Layer
-- Encapsulates business logic
-- Coordinates repository calls and domain objects
-
-```java
-public class BookService {
-    private BookRepository repository;
+// Concrete implementation
+public class BookRepositoryImpl implements BookRepository {
+    private final DatabaseConnection dbConnection;
     
-    public BookService(BookRepository repository) {
-        this.repository = repository;
+    public BookRepositoryImpl() {
+        this.dbConnection = DatabaseConnection.getInstance();
     }
     
-    public boolean updateStockQuantity(int bookId, int quantityChange) throws SQLException {
-        Book book = repository.findById(bookId);
-        if (book == null) {
-            return false;
-        }
-        int newQuantity = book.getStockQuantity() + quantityChange;
-        if (newQuantity < 0) {
-            newQuantity = 0;
-        }
-        book.setStockQuantity(newQuantity);
-        return repository.update(book);
-    }
-}
-```
-
-#### Scene Manager
-- Handles navigation between different application views
-- Maintains scene history for back navigation
-
-```java
-public class SceneManager {
-    private static Map<String, Pane> screenMap = new HashMap<>();
-    private static Stack<String> navigationHistory = new Stack<>();
-    private static StackPane mainContainer;
-    
-    public static void setMainContainer(StackPane container) {
-        mainContainer = container;
-    }
-    
-    public static void addScreen(String name, Pane pane) {
-        screenMap.put(name, pane);
-    }
-    
-    public static void activate(String name) {
-        if (screenMap.containsKey(name)) {
-            if (!mainContainer.getChildren().isEmpty()) {
-                navigationHistory.push(
-                    mainContainer.getChildren().get(0).getId()
-                );
+    @Override
+    public List<Book> findAll() {
+        String sql = "SELECT * FROM books ORDER BY title";
+        try (Connection conn = dbConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            List<Book> books = new ArrayList<>();
+            while (rs.next()) {
+                books.add(BookFactory.createFromResultSet(rs));
             }
-            mainContainer.getChildren().clear();
-            mainContainer.getChildren().add(screenMap.get(name));
+            return books;
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to fetch books", e);
         }
     }
     
-    public static void goBack() {
-        if (!navigationHistory.isEmpty()) {
-            String previousScreen = navigationHistory.pop();
-            mainContainer.getChildren().clear();
-            mainContainer.getChildren().add(screenMap.get(previousScreen));
+    @Override
+    public Book findById(int id) {
+        String sql = "SELECT * FROM books WHERE id = ?";
+        try (Connection conn = dbConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return BookFactory.createFromResultSet(rs);
+                }
+                return null;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to fetch book", e);
         }
+    }
+    
+    // ... other method implementations
+}
+```
+
+**Roles**:
+- `BookRepository`: Repository interface defining data access methods
+- `BookRepositoryImpl`: Concrete implementation handling database operations
+- `Book`: Domain entity being managed
+- `DatabaseConnection`: Singleton providing database access
+
+**Usage Scenarios**:
+1. Book search and retrieval
+2. Inventory management
+3. Data persistence operations
+4. Transaction management
+
+#### Facade Pattern
+**Purpose**: The Facade Pattern was implemented to simplify complex operations like the checkout process. This pattern provides a unified interface to a set of interfaces in a subsystem, making it easier to use. In our case, it hides the complexity of payment processing, order creation, and inventory management behind a simple checkout interface, making the code more maintainable and the system easier to use. The pattern helps us manage complex business processes while keeping the client code simple and focused.
+
+**Implementation**:
+```java
+public class CheckoutFacade {
+    private final PaymentService paymentService;
+    private final OrderService orderService;
+    private final InventoryService inventoryService;
+    private final NotificationService notificationService;
+    
+    public CheckoutFacade() {
+        this.paymentService = new PaymentService();
+        this.orderService = new OrderService();
+        this.inventoryService = new InventoryService();
+        this.notificationService = new NotificationService();
+    }
+    
+    public Order processCheckout(ShoppingCart cart, PaymentInfo paymentInfo, User user) {
+        try {
+            // Validate cart and payment
+            validateCart(cart);
+            validatePayment(paymentInfo);
+            
+            // Process payment
+            PaymentResult paymentResult = paymentService.processPayment(paymentInfo, cart.getTotal());
+            if (!paymentResult.isSuccessful()) {
+                throw new PaymentException("Payment failed: " + paymentResult.getMessage());
+            }
+            
+            // Create order
+            Order order = orderService.createOrder(cart, user, paymentInfo);
+            
+            // Update inventory
+            inventoryService.updateStockForOrder(order);
+            
+            // Clear cart
+            cart.clear();
+            
+            // Send notifications
+            notificationService.sendOrderConfirmation(order, user);
+            notificationService.sendInventoryUpdate(order);
+            
+            return order;
+        } catch (Exception e) {
+            // Handle and log the error
+            logError(e);
+            throw new CheckoutException("Checkout failed: " + e.getMessage());
+        }
+    }
+    
+    private void validateCart(ShoppingCart cart) {
+        if (cart.isEmpty()) {
+            throw new ValidationException("Cart is empty");
+        }
+        // Additional validation logic
+    }
+    
+    private void validatePayment(PaymentInfo paymentInfo) {
+        // Payment validation logic
+    }
+    
+    private void logError(Exception e) {
+        // Error logging logic
     }
 }
 ```
 
-## 5. UML Diagrams
+**Roles**:
+- `CheckoutFacade`: Facade class providing simplified interface
+- `PaymentService`, `OrderService`, `InventoryService`, `NotificationService`: Subsystem classes
+- `ShoppingCart`, `PaymentInfo`, `User`: Data objects used in the process
+- `Order`: Result object returned from the process
 
-### Class Diagram
-```plantuml
-@startuml
-package "Models" {
-  class Book {
-    -id: int
-    -title: String
-    -author: String
-    -isbn: String
-    -publisher: String
-    -category: String
-    -description: String
-    -price: BigDecimal
-    -stockQuantity: int
-    -imageUrl: String
-    +getStockQuantity(): int
-    +setStockQuantity(quantity: int): void
-    +isInStock(): boolean
-    +reduceStock(amount: int): boolean
-  }
-  
-  class User {
-    -id: int
-    -username: String
-    -passwordHash: String
-    -fullName: String
-    -email: String
-    -address: String
-    -phoneNumber: String
-    -role: String
-    -orderCount: int
-    +isAdmin(): boolean
-    +isRegularMember(): boolean
-    +isPremiumMember(): boolean
-  }
-  
-  class CartItem {
-    -id: int
-    -userId: int
-    -bookId: int
-    -quantity: int
-    -book: Book
-    +getSubtotal(): BigDecimal
-  }
-  
-  class Review {
-    -id: int
-    -bookId: int
-    -userId: int
-    -rating: int
-    -comment: String
-    -dateCreated: LocalDateTime
-    -user: User
-  }
-  
-  class Order {
-    -id: int
-    -userId: int
-    -orderDate: LocalDateTime
-    -totalAmount: BigDecimal
-    -status: String
-    -paymentMethod: String
-    -items: List<OrderItem>
-  }
-  
-  class OrderItem {
-    -id: int
-    -orderId: int
-    -bookId: int
-    -quantity: int
-    -price: BigDecimal
-    -book: Book
-  }
-}
+**Usage Scenarios**:
+1. Complete checkout process
+2. Order creation and processing
+3. Inventory management
+4. Payment processing
+5. Notification handling
 
-package "Services" {
-  class BookService {
-    +getAllBooks(): List<Book>
-    +getBookById(id: int): Book
-    +addBook(book: Book): int
-    +updateBook(book: Book): boolean
-    +deleteBook(id: int): boolean
-    +updateStockQuantity(bookId: int, change: int): boolean
-    +searchBooks(query: String): List<Book>
-  }
-  
-  class UserService {
-    +authenticateUser(username: String, password: String): User
-    +registerUser(user: User, password: String): boolean
-    +getUserById(id: int): User
-    +getAllUsers(): List<User>
-    +updateUserProfile(user: User): boolean
-    +incrementOrderCount(userId: int): boolean
-  }
-  
-  class CartService {
-    +getCartItems(userId: int): List<CartItem>
-    +addToCart(userId: int, bookId: int, quantity: int): boolean
-    +updateCartItemQuantity(cartItemId: int, quantity: int): boolean
-    +removeFromCart(cartItemId: int): boolean
-    +clearCart(userId: int): boolean
-  }
-  
-  class OrderService {
-    +createOrder(userId: int, items: List<CartItem>, paymentMethod: String): Order
-    +getOrdersByUser(userId: int): List<Order>
-    +getOrderDetails(orderId: int): Order
-    +updateOrderStatus(orderId: int, status: String): boolean
-  }
-  
-  class ReviewService {
-    +getReviewsByBook(bookId: int): List<Review>
-    +addReview(review: Review): boolean
-    +deleteReview(reviewId: int): boolean
-    +getUserReviewForBook(userId: int, bookId: int): Review
-  }
-  
-  interface DiscountStrategy {
-    +calculateDiscount(originalPrice: BigDecimal): BigDecimal
-  }
-  
-  class NoDiscount {
-    +calculateDiscount(originalPrice: BigDecimal): BigDecimal
-  }
-  
-  class RegularMemberDiscount {
-    +calculateDiscount(originalPrice: BigDecimal): BigDecimal
-  }
-  
-  class PremiumMemberDiscount {
-    +calculateDiscount(originalPrice: BigDecimal): BigDecimal
-  }
-  
-  class DiscountService {
-    +getDiscountStrategy(user: User): DiscountStrategy
-    +calculateDiscountedPrice(price: BigDecimal, user: User): BigDecimal
-  }
-}
+### Pattern Integration
+The patterns work together to create a cohesive system:
+- Factory and Singleton patterns handle object creation and resource management
+- Observer pattern enables real-time updates and notifications
+- Strategy pattern provides flexible algorithm implementation
+- Repository pattern manages data access
+- Facade pattern simplifies complex operations
 
-package "Utils" {
-  class DatabaseConnection {
-    -instance: DatabaseConnection
-    -connection: Connection
-    +getInstance(): DatabaseConnection
-    +getConnection(): Connection
-    +initializeDatabase(): void
-  }
-  
-  class SessionManager {
-    -instance: SessionManager
-    -currentUser: User
-    -selectedBook: Book
-    +getInstance(): SessionManager
-    +setCurrentUser(user: User): void
-    +getCurrentUser(): User
-    +setSelectedBook(book: Book): void
-    +getSelectedBook(): Book
-  }
-  
-  class BCrypt {
-    +hashpw(password: String, salt: String): String
-    +checkpw(plaintext: String, hashed: String): boolean
-    +gensalt(): String
-  }
-}
+This combination of patterns results in a system that is:
+- Easy to maintain and extend
+- Flexible and adaptable to change
+- Efficient in resource management
+- Clear in its separation of concerns
 
-' Relationships
-Book "1" -- "many" Review
-Book "1" -- "many" CartItem
-Book "1" -- "many" OrderItem
-User "1" -- "many" Review
-User "1" -- "many" Order
-User "1" -- "many" CartItem
-Order "1" -- "many" OrderItem
+The patterns complement each other:
+1. Factory creates objects that Repository manages
+2. Singleton provides resources that other patterns use
+3. Observer notifies about changes that Strategy might affect
+4. Facade coordinates the interaction of all patterns
 
-BookService --> Book
-UserService --> User
-CartService --> CartItem
-CartService --> Book
-OrderService --> Order
-OrderService --> OrderItem
-OrderService --> Book
-ReviewService --> Review
+## 4. Features
 
-DiscountService --> DiscountStrategy
-NoDiscount ..|> DiscountStrategy
-RegularMemberDiscount ..|> DiscountStrategy
-PremiumMemberDiscount ..|> DiscountStrategy
+### User Authentication
+- **Secure Login/Registration**
+  - BCrypt password hashing
+  - Session management
+  - Password recovery system
+- **Role-Based Access Control**
+  - Admin privileges
+  - Customer privileges
+  - Guest access
 
-@enduml
-```
+### Book Management
+- **Book Operations**
+  - Comprehensive listing
+  - Advanced search functionality
+  - Detailed book information
+- **Role-Specific Actions**
+  - Customer features:
+    - View book details
+    - Purchase books
+    - Write reviews
+  - Admin features:
+    - Add new books
+    - Edit book details
+    - Delete books
+    - Manage inventory
 
-### Use Case Diagram
-```plantuml
-@startuml
-left to right direction
-skinparam packageStyle rectangle
+### Shopping System
+- **Cart Management**
+  - Add/remove items
+  - Update quantities
+  - Save for later
+- **Checkout Process**
+  - Secure payment processing
+  - Multiple payment options
+  - Order confirmation
+- **Order Tracking**
+  - Order history
+  - Status updates
+  - Shipping information
 
-actor Customer as c
-actor Admin as a
+### Review System
+- **Rating Features**
+  - Star ratings (1-5)
+  - Written reviews
+  - Review moderation
+- **Admin Controls**
+  - Review approval
+  - Content moderation
+  - User feedback management
 
-rectangle "Bookshop Application" {
-  usecase "Register" as UC1
-  usecase "Login" as UC2
-  usecase "Browse Books" as UC3
-  usecase "Search Books" as UC4
-  usecase "View Book Details" as UC5
-  usecase "Add to Cart" as UC6
-  usecase "Manage Cart" as UC7
-  usecase "Checkout" as UC8
-  usecase "Write Review" as UC9
-  usecase "View Order History" as UC10
-  usecase "Add New Book" as UC11
-  usecase "Edit Book Details" as UC12
-  usecase "Delete Book" as UC13
-  usecase "Manage User Accounts" as UC14
-  usecase "Moderate Reviews" as UC15
-  usecase "View Sales Reports" as UC16
-}
+### Loyalty Program
+- **Discount Tiers**
+  - Regular member (5+ orders): 10% discount
+  - Premium member (10+ orders): 15% discount
+- **Benefits**
+  - Automatic discount application
+  - Priority customer support
+  - Exclusive offers
 
-c --> UC1
-c --> UC2
-c --> UC3
-c --> UC4
-c --> UC5
-c --> UC6
-c --> UC7
-c --> UC8
-c --> UC9
-c --> UC10
+### Admin Dashboard
+- **Inventory Management**
+  - Stock tracking
+  - Low stock alerts
+  - Inventory reports
+- **Order Processing**
+  - Order status updates
+  - Shipping management
+  - Return processing
+- **User Management**
+  - User accounts
+  - Role assignment
+  - Account verification
+- **Sales Reporting**
+  - Revenue tracking
+  - Sales analytics
+  - Performance metrics
 
-a --> UC2
-a --> UC3
-a --> UC4
-a --> UC5
-a --> UC11
-a --> UC12
-a --> UC13
-a --> UC14
-a --> UC15
-a --> UC16
+## 5. Database Design
 
-@enduml
-```
-
-### Sequence Diagram – Purchase Flow
-```plantuml
-@startuml
-actor Customer
-participant "BookListView" as BLV
-participant "BookDetailsView" as BDV
-participant "CartView" as CV
-participant "CheckoutView" as CkV
-participant "CartService" as CS
-participant "BookService" as BS
-participant "OrderService" as OS
-participant "DiscountService" as DS
-database "Database" as DB
-
-Customer -> BLV: Browse books
-activate BLV
-
-BLV -> BS: getAllBooks()
-activate BS
-BS -> DB: SELECT * FROM books
-activate DB
-DB --> BS: Book data
-deactivate DB
-BS --> BLV: List<Book>
-deactivate BS
-
-BLV -> Customer: Display book list
-Customer -> BLV: Select book
-BLV -> BDV: Navigate with selected book
-deactivate BLV
-activate BDV
-
-BDV -> Customer: Display book details
-Customer -> BDV: Add to cart (quantity)
-BDV -> CS: addToCart(userId, bookId, quantity)
-activate CS
-CS -> DB: INSERT INTO cart_items
-activate DB
-DB --> CS: Success
-deactivate DB
-CS --> BDV: Success
-deactivate CS
-
-BDV -> Customer: Book added to cart
-Customer -> BDV: View cart
-BDV -> CV: Navigate to cart
-deactivate BDV
-activate CV
-
-CV -> CS: getCartItems(userId)
-activate CS
-CS -> DB: SELECT * FROM cart_items JOIN books
-activate DB
-DB --> CS: Cart data
-deactivate DB
-CS --> CV: List<CartItem>
-deactivate CS
-
-CV -> Customer: Display cart items
-Customer -> CV: Proceed to checkout
-CV -> CkV: Navigate to checkout
-deactivate CV
-activate CkV
-
-CkV -> CS: getCartItems(userId)
-activate CS
-CS -> DB: SELECT * FROM cart_items JOIN books
-activate DB
-DB --> CS: Cart data
-deactivate DB
-CS --> CkV: List<CartItem>
-deactivate CS
-
-CkV -> DS: calculateDiscountedPrice(price, user)
-activate DS
-DS -> DS: Apply appropriate discount strategy
-DS --> CkV: Discounted total
-deactivate DS
-
-CkV -> Customer: Display order summary with discount
-Customer -> CkV: Submit order (payment details)
-CkV -> OS: createOrder(userId, items, paymentMethod)
-activate OS
-
-OS -> DB: BEGIN TRANSACTION
-activate DB
-OS -> DB: INSERT INTO orders
-DB --> OS: orderId
-OS -> DB: INSERT INTO order_items
-OS -> BS: updateStockQuantity(bookId, -quantity)
-activate BS
-BS -> DB: UPDATE books SET stock_quantity
-DB --> BS: Success
-deactivate BS
-OS -> DB: COMMIT TRANSACTION
-DB --> OS: Success
-deactivate DB
-
-OS --> CkV: Order details
-deactivate OS
-CkV -> Customer: Display order confirmation
-deactivate CkV
-
-@enduml
-```
-
-### Activity Diagram – Role-Based Book Detail View
-```plantuml
-@startuml
-start
-:User selects book from list;
-:Load book details;
-
-if (User is logged in?) then (yes)
-  if (User role is?) then (admin)
-    :Show admin view;
-    fork
-      :Display Edit button;
-    fork again
-      :Display Delete button;
-    fork again
-      :Display Stock Management controls;
-    end fork
-  else (customer)
-    :Show customer view;
-    fork
-      :Display Add to Cart button;
-    fork again
-      if (User already reviewed book?) then (yes)
-        :Display Edit Review button;
-      else (no)
-        :Display Add Review button;
-      endif
-    end fork
-  endif
-else (no)
-  :Show guest view;
-  :Display Login prompt for purchase;
-endif
-
-:Display book details (title, author, price, etc.);
-:Display reviews and ratings;
-
-if (User clicks on action?) then (yes)
-  if (Action is?) then (Add to Cart)
-    :Prompt for quantity;
-    :Add book to cart;
-    :Update cart count;
-  else if (Action is?) then (Add/Edit Review)
-    :Show review form;
-    :Save review;
-    :Update book ratings;
-  else if (Action is?) then (Edit Book)
-    :Show book edit form;
-    :Update book details;
-    :Refresh view;
-  else if (Action is?) then (Delete Book)
-    :Show confirmation dialog;
-    if (Confirmed?) then (yes)
-      :Delete book;
-      :Navigate back to book list;
-    else (no)
-      :Cancel deletion;
-    endif
-  else (Stock Management)
-    :Show stock update form;
-    :Update inventory;
-    :Refresh view;
-  endif
-else (no)
-  :User continues browsing;
-endif
-
-stop
-@enduml
-```
-
-## 6. Database Design
-
-### Theoretical Foundation of the Database Schema
-
-The database design follows the **Entity-Relationship (ER) model**, a conceptual representation of data that visually illustrates the relationships between entities in a system. Our schema implements several database design principles:
-
-1. **Normalization** - The database schema is normalized (primarily to 3NF) to:
-   - Eliminate data redundancy
-   - Reduce data anomalies
-   - Ensure data integrity
-
-2. **Referential Integrity** - Enforced through foreign key constraints that ensure relationships between tables remain consistent. For example, the `book_id` in `reviews` must reference a valid id in the `books` table.
-
-3. **ACID Properties** - PostgreSQL's transaction system ensures our operations are:
-   - **Atomic**: Transactions are all-or-nothing operations
-   - **Consistent**: Data meets all validation rules
-   - **Isolated**: Transactions don't interfere with each other
-   - **Durable**: Completed transactions persist even during system failures
+### Theoretical Foundation
+- **Entity-Relationship (ER) Model**
+  - Visual representation of data relationships
+  - Clear entity definitions
+  - Relationship mapping
+- **Normalization (3NF)**
+  - Eliminates data redundancy
+  - Reduces data anomalies
+  - Ensures data integrity
+- **Referential Integrity**
+  - Foreign key constraints
+  - Relationship validation
+  - Data consistency
+- **ACID Properties**
+  - Atomic transactions
+  - Consistent data
+  - Isolated operations
+  - Durable storage
 
 ### Tables Schema
 
@@ -780,7 +744,6 @@ The database design follows the **Entity-Relationship (ER) model**, a conceptual
 | price | DECIMAL(10,2) | Price at time of order |
 
 ### Relationships
-
 - **users** 1:N **reviews** (one user can write many reviews)
 - **users** 1:N **orders** (one user can place many orders)
 - **users** 1:N **cart_items** (one user has one cart with many items)
@@ -789,37 +752,39 @@ The database design follows the **Entity-Relationship (ER) model**, a conceptual
 - **books** 1:N **order_items** (one book can be in many orders)
 - **orders** 1:N **order_items** (one order contains many items)
 
-## 7. Testing
+## 6. Testing
 
-### Theoretical Approach to Testing
+### Testing Strategy
+- **Test-Driven Development (TDD)**
+  - Write failing tests first
+  - Implement minimum code to pass
+  - Refactor while maintaining tests
+- **Testing Pyramid**
+  - Unit Tests: Class and method level
+  - Integration Tests: Component interaction
+  - System Tests: Full application testing
+- **Mocking with Mockito**
+  - Dependency simulation
+  - Component isolation
+  - Interaction verification
 
-The application employs a multi-layered testing strategy based on software testing principles:
-
-#### Test-Driven Development (TDD)
-Our development process follows TDD principles:
-1. **Write failing tests**: Create tests that define expected functionality
-2. **Write code to pass tests**: Implement the minimum code needed to pass tests
-3. **Refactor**: Improve code while maintaining test compliance
-
-#### Testing Pyramid
-The testing strategy follows the testing pyramid concept:
-- **Unit Tests**: Numerous small, fast tests at the lowest level (classes, methods)
-- **Integration Tests**: Testing interactions between components
-- **System Tests**: Testing the application as a whole
-
-#### Mocking
-The application uses Mockito to create mock objects that simulate dependencies, allowing for:
-- Isolation of the component under test
-- Testing of components with external dependencies
-- Verification of interaction between components
-
-### Areas Tested
-
-- **Model Classes**: Validating business logic within domain models (Book, User, Order)
-- **Service Layer**: Testing business logic with mocked repositories
-- **Data Access**: Verifying database operations with test database connections
-- **Discount Logic**: Confirming discount calculations across different user loyalty tiers
-- **Security Functions**: Testing password hashing and authorization logic
+### Test Coverage
+- **Model Classes**
+  - Business logic validation
+  - Data integrity checks
+  - State management
+- **Service Layer**
+  - Business rules
+  - Transaction handling
+  - Error management
+- **Data Access**
+  - CRUD operations
+  - Query optimization
+  - Connection management
+- **Security**
+  - Authentication
+  - Authorization
+  - Data protection
 
 ### Sample Test Code
 
@@ -879,76 +844,48 @@ public void testCalculateDiscountedPrice() {
     DiscountService discountService = new DiscountService();
     BigDecimal originalPrice = new BigDecimal("100.00");
     
-    
     BigDecimal regularDiscount = discountService.calculateDiscountedPrice(originalPrice, regularUser);
     assertEquals(new BigDecimal("90.00"), regularDiscount);
     
-    
     BigDecimal premiumDiscount = discountService.calculateDiscountedPrice(originalPrice, premiumUser);
     assertEquals(new BigDecimal("85.00"), premiumDiscount);
-    
     
     BigDecimal standardDiscount = discountService.calculateDiscountedPrice(originalPrice, standardUser);
     assertEquals(originalPrice, standardDiscount);
 }
 ```
 
-## 8. Security
+## 7. Security
 
-### Theoretical Security Principles
+### Security Principles
+- **CIA Triad**
+  - Confidentiality: Authorized access only
+  - Integrity: Data accuracy and reliability
+  - Availability: Access when needed
+- **Defense in Depth**
+  - Database layer security
+  - Service layer protection
+  - Presentation layer safeguards
+- **Least Privilege**
+  - Admin: Full system access
+  - Customer: Personal data access
+  - Guest: Read-only access
 
-The application implements several key information security principles and best practices:
+### Authentication & Authorization
+- **Password Security**
+  - BCrypt hashing
+  - Salt generation
+  - Key stretching
+- **Session Management**
+  - Secure session creation
+  - Timeout handling
+  - Session invalidation
+- **Access Control**
+  - Role-based permissions
+  - UI component visibility
+  - Server-side validation
 
-#### CIA Triad
-The fundamental principles of information security:
-- **Confidentiality**: Ensuring sensitive data is accessible only to authorized individuals
-- **Integrity**: Maintaining data accuracy and reliability throughout its lifecycle
-- **Availability**: Ensuring information is available when needed by authorized users
-
-#### Defense in Depth
-The application employs multiple layers of security controls:
-- **Database Layer**: Parameterized queries to prevent SQL injection
-- **Service Layer**: Authorization checks before performing sensitive operations
-- **Presentation Layer**: Input validation to prevent XSS and other injection attacks
-
-#### Principle of Least Privilege
-Users are granted the minimum levels of access needed to perform their functions:
-- Admin users: Full access to manage the system
-- Customer users: Limited access to personal data and purchasing functions
-- Guest users: Read-only access to public information
-
-### Password Security and Authentication
-
-#### Password Hashing with BCrypt
-The application uses BCrypt for secure credential management:
-
-```java
-String hashedPassword = BCrypt.hashpw(plainPassword, BCrypt.gensalt());
-
-boolean passwordMatches = BCrypt.checkpw(inputPassword, storedHashedPassword);
-```
-
-BCrypt implements multiple security features:
-- **Salting**: Automatically generates and stores unique salts with each hash
-- **Key Stretching**: Configurable work factor to slow down brute-force attacks
-- **Adaptive Complexity**: Can be adjusted as computing power increases
-
-#### Secure Session Management
-Sessions are managed securely through the SessionManager singleton:
-- Creation upon successful authentication
-- Timeout for inactive sessions
-- Immediate invalidation upon logout
-
-### Role-Based Access Control (RBAC)
-
-RBAC is implemented across multiple application layers:
-
-#### UI Layer Security
-Different interface components are displayed based on user role:
-- Admin users see inventory management and user administration controls
-- Customers see shopping cart and order history
-- All access control is enforced server-side to prevent manipulation
-
+### Code Implementation
 ```java
 @FXML
 private void initialize() {
@@ -974,15 +911,47 @@ public boolean deleteBook(int bookId) throws SQLException {
 }
 ```
 
+## 8. UML Diagrams
+
+### Class Diagram
+![Extended Class Diagram](Diagrams/Extended%20Class%20Diagram.png)
+
+### Use Case Diagram
+![Use Case Diagram](Diagrams/Use%20Case%20Diagram.png)
+
+### Sequence Diagrams
+#### Main Flow
+![Sequence Diagram](Diagrams/Sequence%20Diagram.png)
+
+#### Alternative Flow
+![Sequence Diagram 2](Diagrams/Sequence%20Diagram%202.png)
+
+### Activity Diagram
+![Activity Diagram](Diagrams/Activity%20Diagram.png)
+
+### System Architecture
+![System Architecture](Diagrams/System%20Architechure.png)
+
 ## 9. Conclusion
 
-### Summary
-
-The JavaFX Bookshop Application implements a comprehensive solution for online bookshop management. By leveraging the MVC architecture and various design patterns, the application achieves a balance between usability and maintainability.
-
-Key achievements include:
-- Well-structured code organization following design best practices
-- Secure user authentication and role-based access control
-- Comprehensive feature set for both customers and administrators
-- Efficient data management with proper database design
-- Application of GoF design patterns to solve specific challenges
+### Key Achievements
+- **Code Organization**
+  - Clean architecture
+  - Design pattern implementation
+  - Modular structure
+- **Security Implementation**
+  - Secure authentication
+  - Role-based access
+  - Data protection
+- **Feature Set**
+  - Comprehensive functionality
+  - User-friendly interface
+  - Efficient performance
+- **Data Management**
+  - Optimized database design
+  - Efficient queries
+  - Data integrity
+- **Design Patterns**
+  - Appropriate pattern selection
+  - Clean implementation
+  - Maintainable code
