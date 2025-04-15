@@ -67,7 +67,7 @@ public class Main extends Application {
             if (!books.isEmpty()) {
                 for (int i = 0; i < Math.min(3, books.size()); i++) {
                     Book book = books.get(i);
-                    System.out.println("Book: " + book.getTitle() + " by " + book.getAuthor() + " ($" + book.getPrice() + ")");
+                    System.out.println("Book: " + book.getTitle() + " by " + book.getAuthor() + " (€" + book.getPrice() + ")");
                 }
             }
             

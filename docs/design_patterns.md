@@ -1,4 +1,4 @@
-# Design Patterns in BookBazaar Application
+# Design Patterns in Online Book Shop Application
 
 ## 1. Model-View-Controller (MVC)
 **Purpose**: Separates the application into three interconnected components to manage the user interface, business logic, and data.
@@ -10,8 +10,8 @@
 
 **Relevant Code**:
 - Views: FXML files in `src/main/resources/fxml/`
-- Controllers: Java classes in `src/main/java/com/bookbazaar/controllers/`
-- Models: Java classes in `src/main/java/com/bookbazaar/models/`
+- Controllers: Java classes in `src/main/java/com/bookshop/controllers/`
+- Models: Java classes in `src/main/java/com/bookshop/models/`
 
 **Roles**:
 - Model: `Book`, `User`, `Order` classes

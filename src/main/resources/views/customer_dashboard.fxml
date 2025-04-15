@@ -20,7 +20,7 @@
          <children>
             <HBox alignment="CENTER_LEFT" spacing="20.0" style="-fx-background-color: #007bff; -fx-padding: 10px;">
                <children>
-                  <Label text="BookBazaar" textFill="WHITE">
+                  <Label text="Online Book Shop" textFill="WHITE">
                      <font>
                         <Font name="System Bold" size="24.0" />
                      </font>

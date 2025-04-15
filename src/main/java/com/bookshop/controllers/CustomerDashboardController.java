@@ -127,7 +127,9 @@ public class CustomerDashboardController implements CartUpdateListener {
                     if (empty || book == null) {
                         setText(null);
                     } else {
-                        setText(book.getTitle() + " by " + book.getAuthor() + " - $" + book.getPrice());
+                        String ratingText = book.getAverageRating() > 0 ? 
+                            String.format(" (%.1f★)", book.getAverageRating()) : "";
+                        setText(book.getTitle() + " by " + book.getAuthor() + " - €" + book.getPrice() + ratingText);
                     }
                 }
             });
@@ -141,7 +143,7 @@ public class CustomerDashboardController implements CartUpdateListener {
                     if (empty || order == null) {
                         setText(null);
                     } else {
-                        setText("Order #" + order.getId() + " - $" + order.getTotalAmount() + " - " + order.getStatus());
+                        setText("Order #" + order.getId() + " - €" + order.getTotalAmount() + " - " + order.getStatus());
                     }
                 }
             });
@@ -272,7 +274,8 @@ public class CustomerDashboardController implements CartUpdateListener {
                 boolean searchMatch = searchQuery.isEmpty() || 
                                     book.getTitle().toLowerCase().contains(searchQuery) || 
                                     book.getAuthor().toLowerCase().contains(searchQuery) ||
-                                    book.getDescription().toLowerCase().contains(searchQuery);
+                                    book.getPublisher().toLowerCase().contains(searchQuery) ||
+                                    book.getCategory().toLowerCase().contains(searchQuery);
                 
                 return categoryMatch && searchMatch;
             })
@@ -384,6 +387,21 @@ public class CustomerDashboardController implements CartUpdateListener {
             if (selectedBook != null) {
                 SessionManager.getInstance().setCurrentBook(selectedBook);
                 ViewNavigator.getInstance().navigateTo("book_details.fxml");
+                loadBooks();
+                applyFiltersAndSort();
+            }
+        }
+    }
+    
+    @FXML
+    public void handleBookListViewClick(javafx.scene.input.MouseEvent event) {
+        if (bookListView != null && event.getClickCount() == 2) {
+            Book selectedBook = bookListView.getSelectionModel().getSelectedItem();
+            if (selectedBook != null) {
+                SessionManager.getInstance().setCurrentBook(selectedBook);
+                ViewNavigator.getInstance().navigateTo("book_details.fxml");
+                loadBooks();
+                applyFiltersAndSort();
             }
         }
     }

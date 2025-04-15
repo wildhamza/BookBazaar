@@ -116,7 +116,9 @@ public class DatabaseConnection {
                 "isbn VARCHAR(20) NOT NULL, " +
                 "image_url TEXT, " +
                 "description TEXT, " +
-                "stock_quantity INT NOT NULL DEFAULT 0" +
+                "stock_quantity INT NOT NULL DEFAULT 0, " +
+                "average_rating DECIMAL(3, 2) DEFAULT 0.00, " +
+                "review_count INT DEFAULT 0" +
                 ")"
             );
             

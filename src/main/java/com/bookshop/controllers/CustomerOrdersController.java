@@ -177,6 +177,7 @@ public class CustomerOrdersController {
         orderItemsTableView.setItems(FXCollections.observableArrayList(order.getOrderItems()));
         
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
+        currencyFormat.setCurrency(java.util.Currency.getInstance("EUR"));
         
         StringBuilder detailsBuilder = new StringBuilder();
         detailsBuilder.append("Order #").append(order.getId()).append("\n");

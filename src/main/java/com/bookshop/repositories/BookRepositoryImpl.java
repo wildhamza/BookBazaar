@@ -53,8 +53,8 @@ public class BookRepositoryImpl implements BookRepository {
     
     @Override
     public Integer save(Book book) throws SQLException {
-        String sql = "INSERT INTO books (title, author, isbn, publisher, price, category, description, image_url, stock_quantity) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO books (title, author, isbn, publisher, price, category, description, image_url, stock_quantity, average_rating, review_count) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -68,6 +68,8 @@ public class BookRepositoryImpl implements BookRepository {
             pstmt.setString(7, book.getDescription());
             pstmt.setString(8, book.getImageUrl());
             pstmt.setInt(9, book.getStockQuantity());
+            pstmt.setDouble(10, book.getAverageRating());
+            pstmt.setInt(11, book.getReviewCount());
             
             int affectedRows = pstmt.executeUpdate();
             
@@ -90,7 +92,8 @@ public class BookRepositoryImpl implements BookRepository {
     @Override
     public boolean update(Book book) throws SQLException {
         String sql = "UPDATE books SET title = ?, author = ?, isbn = ?, publisher = ?, " +
-                     "price = ?, category = ?, description = ?, image_url = ?, stock_quantity = ? " +
+                     "price = ?, category = ?, description = ?, image_url = ?, stock_quantity = ?, " +
+                     "average_rating = ?, review_count = ? " +
                      "WHERE id = ?";
         
         try (Connection conn = DatabaseConnection.getInstance().getConnection();
@@ -105,7 +108,9 @@ public class BookRepositoryImpl implements BookRepository {
             pstmt.setString(7, book.getDescription());
             pstmt.setString(8, book.getImageUrl());
             pstmt.setInt(9, book.getStockQuantity());
-            pstmt.setInt(10, book.getId());
+            pstmt.setDouble(10, book.getAverageRating());
+            pstmt.setInt(11, book.getReviewCount());
+            pstmt.setInt(12, book.getId());
             
             int affectedRows = pstmt.executeUpdate();
             return affectedRows > 0;

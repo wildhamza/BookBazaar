@@ -23,7 +23,7 @@
         </TableView>
         
         <HBox spacing="10" alignment="CENTER_RIGHT">
-            <Label fx:id="totalLabel" text="Total: $0.00" style="-fx-font-weight: bold;"/>
+            <Label fx:id="totalLabel" text="Total: €0.00" style="-fx-font-weight: bold;"/>
         </HBox>
         
         <HBox spacing="10">

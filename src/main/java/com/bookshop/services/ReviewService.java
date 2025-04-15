@@ -170,17 +170,29 @@ public class ReviewService {
         String getStatsQuery = "SELECT AVG(rating) AS avg_rating, COUNT(*) AS review_count " +
                               "FROM reviews WHERE book_id = ?";
         
+        double avgRating = 0.0;
+        int reviewCount = 0;
+        
         try (Connection connection = DatabaseConnection.getInstance().getConnection();
              PreparedStatement stmt = connection.prepareStatement(getStatsQuery)) {
             stmt.setInt(1, bookId);
             ResultSet rs = stmt.executeQuery();
             
             if (rs.next()) {
-                double avgRating = rs.getDouble("avg_rating");
-                int reviewCount = rs.getInt("review_count");
-                System.out.println("Book ID " + bookId + " has average rating " + avgRating + 
-                                  " from " + reviewCount + " reviews");
+                avgRating = rs.getDouble("avg_rating");
+                reviewCount = rs.getInt("review_count");
             }
+        }
+        
+        // Update the book's average rating in the database
+        String updateQuery = "UPDATE books SET average_rating = ?, review_count = ? WHERE id = ?";
+        
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = connection.prepareStatement(updateQuery)) {
+            stmt.setDouble(1, avgRating);
+            stmt.setInt(2, reviewCount);
+            stmt.setInt(3, bookId);
+            stmt.executeUpdate();
         }
     }
 }

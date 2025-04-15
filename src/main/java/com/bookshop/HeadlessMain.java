@@ -77,7 +77,7 @@ public class HeadlessMain {
         if (!books.isEmpty()) {
             for (int i = 0; i < Math.min(3, books.size()); i++) {
                 Book book = books.get(i);
-                System.out.println("Book: " + book.getTitle() + " by " + book.getAuthor() + " ($" + book.getPrice() + ")");
+                System.out.println("Book: " + book.getTitle() + " by " + book.getAuthor() + " (€" + book.getPrice() + ")");
             }
             
             Book firstBook = books.get(0);
@@ -142,10 +142,10 @@ public class HeadlessMain {
         BigDecimal regularPrice = discountService.calculateDiscountedPrice(originalPrice, regularUser);
         BigDecimal premiumPrice = discountService.calculateDiscountedPrice(originalPrice, premiumUser);
         
-        System.out.println("Discount test for $100.00 book:");
-        System.out.println("- Standard user price (0% discount): $" + standardPrice);
-        System.out.println("- Regular member price (10% discount): $" + regularPrice);
-        System.out.println("- Premium member price (15% discount): $" + premiumPrice);
+        System.out.println("Discount test for €100.00 book:");
+        System.out.println("- Standard user price (0% discount): €" + standardPrice);
+        System.out.println("- Regular member price (10% discount): €" + regularPrice);
+        System.out.println("- Premium member price (15% discount): €" + premiumPrice);
     }
     
     private static void checkOrdersTable() throws SQLException {
@@ -213,7 +213,7 @@ public class HeadlessMain {
             System.out.println("Sample books:");
             for (int i = 0; i < Math.min(5, books.size()); i++) {
                 Book book = books.get(i);
-                System.out.println("- ID: " + book.getId() + ", Title: " + book.getTitle() + ", Author: " + book.getAuthor() + ", Price: $" + book.getPrice());
+                System.out.println("- ID: " + book.getId() + ", Title: " + book.getTitle() + ", Author: " + book.getAuthor() + ", Price: €" + book.getPrice());
             }
         }
     }
@@ -230,11 +230,11 @@ public class HeadlessMain {
             System.out.println("Sample orders:");
             for (int i = 0; i < Math.min(5, orders.size()); i++) {
                 Order order = orders.get(i);
-                System.out.println("- ID: " + order.getId() + ", User ID: " + order.getUserId() + ", Status: " + order.getStatus() + ", Total: $" + order.getTotalAmount());
+                System.out.println("- ID: " + order.getId() + ", User ID: " + order.getUserId() + ", Status: " + order.getStatus() + ", Total: €" + order.getTotalAmount());
                 List<OrderItem> items = orderService.getOrderItems(order.getId());
                 System.out.println("  Items: " + items.size());
                 for (OrderItem item : items) {
-                    System.out.println("  - Book ID: " + item.getBookId() + ", Quantity: " + item.getQuantity() + ", Price: $" + item.getPrice());
+                    System.out.println("  - Book ID: " + item.getBookId() + ", Quantity: " + item.getQuantity() + ", Price: €" + item.getPrice());
                 }
             }
         } else {
@@ -291,7 +291,7 @@ public class HeadlessMain {
                     
                     Order createdOrder = orderService.getOrderById(orderId);
                     if (createdOrder != null) {
-                        System.out.println("Verified order: ID: " + createdOrder.getId() + ", Status: " + createdOrder.getStatus() + ", Total: $" + createdOrder.getTotalAmount());
+                        System.out.println("Verified order: ID: " + createdOrder.getId() + ", Status: " + createdOrder.getStatus() + ", Total: €" + createdOrder.getTotalAmount());
                     } else {
                         System.out.println("Could not verify order creation. Something went wrong.");
                     }

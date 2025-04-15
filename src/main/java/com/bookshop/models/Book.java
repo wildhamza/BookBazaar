@@ -16,7 +16,6 @@ public class Book {
     private int stockQuantity;
     private LocalDate publicationDate;
     private double averageRating;
-    private int ratingCount;
     private int reviewCount;
     private String imageUrl;
     
@@ -131,19 +130,19 @@ public class Book {
     }
     
     public double getAverageRating() {
-        return 0;
+        return averageRating;
     }
     
     public void setAverageRating(double averageRating) {
         this.averageRating = averageRating;
     }
     
-    public int getRatingCount() {
-        return ratingCount;
+    public int getReviewCount() {
+        return reviewCount;
     }
     
-    public void setRatingCount(int ratingCount) {
-        this.ratingCount = ratingCount;
+    public void setReviewCount(int reviewCount) {
+        this.reviewCount = reviewCount;
     }
     
     public void addRating(int rating) {
@@ -151,9 +150,9 @@ public class Book {
             return;
         }
         
-        double currentTotal = averageRating * ratingCount;
-        ratingCount++;
-        averageRating = (currentTotal + rating) / ratingCount;
+        double currentTotal = averageRating * reviewCount;
+        reviewCount++;
+        averageRating = (currentTotal + rating) / reviewCount;
     }
     
     public boolean isInStock() {
@@ -207,14 +206,6 @@ public class Book {
     
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
-    }
-    
-    public int getReviewCount() {
-        return 0;
-    }
-    
-    public void setReviewCount(int reviewCount) {
-        this.reviewCount = reviewCount;
     }
     
     public void increaseQuantity(int amount) {

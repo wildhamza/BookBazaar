@@ -23,15 +23,21 @@ public class BookFactory {
         book.setDescription(rs.getString("description"));
         book.setStockQuantity(rs.getInt("stock_quantity"));
         
+        // Get average rating and review count
         try {
-            book.setAverageRating(rs.getDouble("average_rating"));
+            double avgRating = rs.getDouble("average_rating");
+            int reviewCount = rs.getInt("review_count");
+            
+            // If the rating is NaN (no reviews), set it to 0
+            if (Double.isNaN(avgRating)) {
+                avgRating = 0.0;
+            }
+            
+            book.setAverageRating(avgRating);
+            book.setReviewCount(reviewCount);
         } catch (SQLException e) {
+            // If columns don't exist, set default values
             book.setAverageRating(0.0);
-        }
-        
-        try {
-            book.setReviewCount(rs.getInt("review_count"));
-        } catch (SQLException e) {
             book.setReviewCount(0);
         }
         

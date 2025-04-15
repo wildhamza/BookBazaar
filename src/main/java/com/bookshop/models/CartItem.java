@@ -111,7 +111,7 @@ public class CartItem {
     }
     
     public String getSubtotalString() {
-        return "$" + getSubtotal().toString();
+        return "€" + getSubtotal().toString();
     }
     
     public String getBookTitle() {

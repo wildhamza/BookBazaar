@@ -61,7 +61,7 @@ public class ConsoleMain {
         if (!books.isEmpty()) {
             for (int i = 0; i < Math.min(3, books.size()); i++) {
                 Book book = books.get(i);
-                System.out.println("Book: " + book.getTitle() + " by " + book.getAuthor() + " ($" + book.getPrice() + ")");
+                System.out.println("Book: " + book.getTitle() + " by " + book.getAuthor() + " (€" + book.getPrice() + ")");
             }
             
             Book firstBook = books.get(0);
@@ -301,7 +301,7 @@ public class ConsoleMain {
             System.out.println("Title: " + book.getTitle());
             System.out.println("Author: " + book.getAuthor());
             System.out.println("Category: " + book.getCategory());
-            System.out.println("Price: $" + book.getPrice());
+            System.out.println("Price: €" + book.getPrice());
             System.out.println("Stock: " + book.getStockQuantity());
             System.out.println("--------------------");
         }
@@ -324,7 +324,7 @@ public class ConsoleMain {
         System.out.print("Description: ");
         book.setDescription(scanner.nextLine());
         
-        BigDecimal price = new BigDecimal(getStringInput("Price: $"));
+        BigDecimal price = new BigDecimal(getStringInput("Price: €"));
         book.setPrice(price);
         
         int stockQuantity = getIntInput("Stock Quantity: ");
@@ -362,7 +362,7 @@ public class ConsoleMain {
             book.setAuthor(author);
         }
         
-        System.out.println("Current Price: $" + book.getPrice());
+        System.out.println("Current Price: €" + book.getPrice());
         System.out.print("New Price (leave empty to keep current): ");
         String priceStr = scanner.nextLine();
         if (!priceStr.isEmpty()) {
@@ -436,7 +436,7 @@ public class ConsoleMain {
             System.out.println("User ID: " + order.getUserId());
             System.out.println("Date: " + order.getOrderDate());
             System.out.println("Status: " + order.getStatus());
-            System.out.println("Total Amount: $" + order.getTotalAmount());
+            System.out.println("Total Amount: €" + order.getTotalAmount());
             System.out.println("Payment Method: " + order.getPaymentMethod());
              
             List<OrderItem> items = orderService.getOrderItems(order.getId());
@@ -444,7 +444,7 @@ public class ConsoleMain {
             for (OrderItem item : items) {
                 Book book = bookService.getBookById(item.getBookId());
                 String bookTitle = book != null ? book.getTitle() : "Unknown Book";
-                System.out.println("  - " + bookTitle + " (Qty: " + item.getQuantity() + ", Price: $" + item.getPrice() + ")");
+                System.out.println("  - " + bookTitle + " (Qty: " + item.getQuantity() + ", Price: €" + item.getPrice() + ")");
             }
             System.out.println("--------------------");
         }
@@ -467,7 +467,7 @@ public class ConsoleMain {
             System.out.println("Title: " + book.getTitle());
             System.out.println("Author: " + book.getAuthor());
             System.out.println("Category: " + book.getCategory());
-            System.out.println("Price: $" + book.getPrice());
+            System.out.println("Price: €" + book.getPrice());
             System.out.println("--------------------");
         }
         
@@ -529,22 +529,22 @@ public class ConsoleMain {
             if (book != null) {
                 System.out.println("ID: " + item.getId());
                 System.out.println("Book: " + book.getTitle());
-                System.out.println("Price: $" + book.getPrice());
+                System.out.println("Price: €" + book.getPrice());
                 System.out.println("Quantity: " + item.getQuantity());
                 BigDecimal itemTotal = book.getPrice().multiply(new BigDecimal(item.getQuantity()));
-                System.out.println("Subtotal: $" + itemTotal);
+                System.out.println("Subtotal: €" + itemTotal);
                 System.out.println("--------------------");
                 total = total.add(itemTotal);
             }
         }
         
-        System.out.println("Total: $" + total);
+        System.out.println("Total: €" + total);
         
         BigDecimal discountedTotal = discountService.calculateDiscountedPrice(total, currentUser);
         if (!discountedTotal.equals(total)) {
             BigDecimal discountAmount = total.subtract(discountedTotal);
-            System.out.println("Discount: $" + discountAmount);
-            System.out.println("Total after discount: $" + discountedTotal);
+            System.out.println("Discount: €" + discountAmount);
+            System.out.println("Total after discount: €" + discountedTotal);
         }
         
         System.out.println("\nOptions:");
@@ -609,7 +609,7 @@ public class ConsoleMain {
         }
         
         System.out.println("\n=== Checkout ===");
-        System.out.println("Total Amount: $" + totalAmount);
+        System.out.println("Total Amount: €" + totalAmount);
         
         System.out.print("Shipping Address: ");
         String shippingAddress = scanner.nextLine();
@@ -666,7 +666,7 @@ public class ConsoleMain {
             System.out.println("Order ID: " + order.getId());
             System.out.println("Date: " + order.getOrderDate());
             System.out.println("Status: " + order.getStatus());
-            System.out.println("Total Amount: $" + order.getTotalAmount());
+            System.out.println("Total Amount: €" + order.getTotalAmount());
             System.out.println("Payment Method: " + order.getPaymentMethod());
             
             List<OrderItem> items = orderService.getOrderItems(order.getId());
@@ -674,7 +674,7 @@ public class ConsoleMain {
             for (OrderItem item : items) {
                 Book book = bookService.getBookById(item.getBookId());
                 String bookTitle = book != null ? book.getTitle() : "Unknown Book";
-                System.out.println("  - " + bookTitle + " (Qty: " + item.getQuantity() + ", Price: $" + item.getPrice() + ")");
+                System.out.println("  - " + bookTitle + " (Qty: " + item.getQuantity() + ", Price: €" + item.getPrice() + ")");
             }
             System.out.println("--------------------");
         }

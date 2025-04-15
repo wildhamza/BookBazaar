@@ -152,7 +152,7 @@ public class AdminDashboardController {
                     if (empty || book == null) {
                         setText(null);
                     } else {
-                        setText(book.getTitle() + " by " + book.getAuthor() + " - $" + book.getPrice());
+                        setText(book.getTitle() + " by " + book.getAuthor() + " - €" + book.getPrice());
                     }
                 }
             });
@@ -173,7 +173,7 @@ public class AdminDashboardController {
                     if (empty || order == null) {
                         setText(null);
                     } else {
-                        setText("Order #" + order.getId() + " - $" + order.getTotalAmount() + " - " + order.getStatus());
+                        setText("Order #" + order.getId() + " - €" + order.getTotalAmount() + " - " + order.getStatus());
                     }
                 }
             });
@@ -196,7 +196,7 @@ public class AdminDashboardController {
                     if (empty || order == null) {
                         setText(null);
                     } else {
-                        setText("Order #" + order.getId() + " - $" + order.getTotalAmount() + " - Completed on: " + order.getOrderDate());
+                        setText("Order #" + order.getId() + " - €" + order.getTotalAmount() + " - Completed on: " + order.getOrderDate());
                     }
                 }
             });
@@ -420,7 +420,7 @@ public class AdminDashboardController {
             details.append("Order #").append(order.getId()).append("\n");
             details.append("Date: ").append(order.getOrderDate()).append("\n");
             details.append("Customer ID: ").append(order.getUserId()).append("\n");
-            details.append("Total Amount: $").append(order.getTotalAmount()).append("\n");
+            details.append("Total Amount: €").append(order.getTotalAmount()).append("\n");
             details.append("Payment Method: ").append(order.getPaymentMethod()).append("\n\n");
             
             OrderService orderService = new OrderService();
@@ -431,13 +431,13 @@ public class AdminDashboardController {
                 Book book = bookService.getBookById(item.getBookId());
                 if (book != null) {
                     details.append(" - ").append(book.getTitle())
-                           .append(" (").append(item.getQuantity()).append(" x $")
-                           .append(item.getPrice()).append(") = $")
+                           .append(" (").append(item.getQuantity()).append(" x €")
+                           .append(item.getPrice()).append(") = €")
                            .append(item.getPrice().multiply(new BigDecimal(item.getQuantity())))
                            .append("\n");
                 } else {
                     details.append(" - Unknown Book (ID: ").append(item.getBookId())
-                           .append(") - ").append(item.getQuantity()).append(" x $")
+                           .append(") - ").append(item.getQuantity()).append(" x €")
                            .append(item.getPrice()).append("\n");
                 }
             }
@@ -460,7 +460,7 @@ public class AdminDashboardController {
             details.append("Date: ").append(order.getOrderDate()).append("\n");
             details.append("Customer ID: ").append(order.getUserId()).append("\n");
             details.append("Status: ").append(order.getStatus()).append("\n");
-            details.append("Total Amount: $").append(order.getTotalAmount()).append("\n");
+            details.append("Total Amount: €").append(order.getTotalAmount()).append("\n");
             details.append("Payment Method: ").append(order.getPaymentMethod()).append("\n\n");
             
             OrderService orderService = new OrderService();
@@ -471,13 +471,13 @@ public class AdminDashboardController {
                 Book book = bookService.getBookById(item.getBookId());
                 if (book != null) {
                     details.append(" - ").append(book.getTitle())
-                           .append(" (").append(item.getQuantity()).append(" x $")
-                           .append(item.getPrice()).append(") = $")
+                           .append(" (").append(item.getQuantity()).append(" x €")
+                           .append(item.getPrice()).append(") = €")
                            .append(item.getPrice().multiply(new BigDecimal(item.getQuantity())))
                            .append("\n");
                 } else {
                     details.append(" - Unknown Book (ID: ").append(item.getBookId())
-                           .append(") - ").append(item.getQuantity()).append(" x $")
+                           .append(") - ").append(item.getQuantity()).append(" x €")
                            .append(item.getPrice()).append("\n");
                 }
             }
