@@ -27,6 +27,8 @@ CREATE TABLE books (
     image_url TEXT,
     description TEXT,
     stock_quantity INTEGER NOT NULL DEFAULT 0,
+    average_rating DECIMAL(3, 2) DEFAULT 0.00,
+    review_count INTEGER DEFAULT 0,
     discount_percentage DECIMAL(5, 2) DEFAULT 0.00,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -81,28 +83,28 @@ VALUES ('admin', '$2a$12$M8OSI5ZMKpWRn3tCjbzh6eXwkXQJmQg9Hw66O9Z6U0RW9wLqCCL5W',
 INSERT INTO users (username, password_hash, full_name, email, address, phone_number, role, status)
 VALUES ('customer', '$2a$12$h.dl5J86rGH7I8bD9bZeZeci0pDt0.VwR.k5.5wcn4p/7ZpQzJCqO', 'Regular Customer', 'customer@example.com', '456 Reader Lane', '555-987-6543', 'CUSTOMER', 'BASIC');
 
-INSERT INTO books (title, author, publisher, price, category, isbn, image_url, description, stock_quantity, discount_percentage)
+INSERT INTO books (title, author, publisher, price, category, isbn, image_url, description, stock_quantity, average_rating, review_count, discount_percentage)
 VALUES 
-('The Great Gatsby', 'F. Scott Fitzgerald', 'Scribner', 12.99, 'Fiction', '9780743273565', 'https://covers.openlibrary.org/b/isbn/9780743273565-L.jpg', 'The story of eccentric millionaire Jay Gatsby and his passion for the beautiful Daisy Buchanan.', 50, 0.00),
-('To Kill a Mockingbird', 'Harper Lee', 'HarperCollins', 14.99, 'Fiction', '9780061120084', 'https://covers.openlibrary.org/b/isbn/9780061120084-L.jpg', 'The story of a young girl confronting racism in a small Southern town.', 45, 10.00),
-('1984', 'George Orwell', 'Signet Classics', 9.99, 'Fiction', '9780451524935', 'https://covers.openlibrary.org/b/isbn/9780451524935-L.jpg', 'A dystopian novel set in a totalitarian society ruled by Big Brother.', 30, 0.00),
-('The Hobbit', 'J.R.R. Tolkien', 'Houghton Mifflin Harcourt', 13.99, 'Fiction', '9780547928227', 'https://covers.openlibrary.org/b/isbn/9780547928227-L.jpg', 'Bilbo Baggins is a hobbit who enjoys a comfortable life until he joins a quest.', 25, 5.00),
-('Pride and Prejudice', 'Jane Austen', 'Penguin Classics', 8.99, 'Fiction', '9780141439518', 'https://covers.openlibrary.org/b/isbn/9780141439518-L.jpg', 'The story of Elizabeth Bennet and her complicated relationship with Mr. Darcy.', 40, 0.00),
-('The Catcher in the Rye', 'J.D. Salinger', 'Little, Brown and Company', 10.99, 'Fiction', '9780316769488', 'https://covers.openlibrary.org/b/isbn/9780316769488-L.jpg', 'The story of Holden Caulfield, a teenage boy who has been expelled from prep school.', 35, 0.00),
-('Harry Potter and the Sorcerer''s Stone', 'J.K. Rowling', 'Scholastic', 15.99, 'Fiction', '9780590353427', 'https://covers.openlibrary.org/b/isbn/9780590353427-L.jpg', 'The first book in the Harry Potter series.', 60, 15.00),
-('The Lord of the Rings', 'J.R.R. Tolkien', 'Houghton Mifflin Harcourt', 19.99, 'Fiction', '9780618640157', 'https://covers.openlibrary.org/b/isbn/9780618640157-L.jpg', 'The epic quest to destroy the One Ring.', 20, 0.00),
-('Brave New World', 'Aldous Huxley', 'Harper Perennial Modern Classics', 11.99, 'Fiction', '9780060850524', 'https://covers.openlibrary.org/b/isbn/9780060850524-L.jpg', 'A dystopian novel set in a genetically-engineered future.', 30, 0.00),
-('The Da Vinci Code', 'Dan Brown', 'Anchor', 9.99, 'Fiction', '9780307474278', 'https://covers.openlibrary.org/b/isbn/9780307474278-L.jpg', 'A mystery thriller novel that explores a conspiracy within the Catholic Church.', 40, 0.00),
-('Dune', 'Frank Herbert', 'Ace Books', 15.99, 'Fiction', '9780441172719', 'https://covers.openlibrary.org/b/isbn/9780441172719-L.jpg', 'Set on the desert planet Arrakis, Dune is the story of Paul Atreides, who would become the mysterious Muad''Dib.', 25, 0.00),
-('The Alchemist', 'Paulo Coelho', 'HarperOne', 9.99, 'Self-help', '9780062315007', 'https://covers.openlibrary.org/b/isbn/9780062315007-L.jpg', 'A magical story about following your dreams.', 35, 0.00),
-('Sapiens: A Brief History of Humankind', 'Yuval Noah Harari', 'Harper', 16.99, 'Reference', '9780062316097', 'https://covers.openlibrary.org/b/isbn/9780062316097-L.jpg', 'A groundbreaking narrative of humanity''s creation and evolution.', 30, 0.00),
-('The Hunger Games', 'Suzanne Collins', 'Scholastic Press', 12.99, 'Fiction', '9780439023481', 'https://covers.openlibrary.org/b/isbn/9780439023481-L.jpg', 'In a dystopian future, a young girl fights for survival in a televised competition.', 45, 0.00),
-('The Shining', 'Stephen King', 'Anchor', 11.99, 'Fiction', '9780307743657', 'https://covers.openlibrary.org/b/isbn/9780307743657-L.jpg', 'A family heads to an isolated hotel for the winter where an evil presence influences the father.', 20, 0.00),
-('The Girl with the Dragon Tattoo', 'Stieg Larsson', 'Vintage Crime', 10.99, 'Fiction', '9780307454546', 'https://covers.openlibrary.org/b/isbn/9780307454546-L.jpg', 'A journalist and a hacker investigate a wealthy family''s dark secrets.', 25, 0.00),
-('The Road', 'Cormac McCarthy', 'Vintage Books', 14.99, 'Fiction', '9780307387899', 'https://covers.openlibrary.org/b/isbn/9780307387899-L.jpg', 'A father and son walk alone through burned America, heading through the ravaged landscape to the coast.', 15, 0.00),
-('Educated', 'Tara Westover', 'Random House', 13.99, 'Biography', '9780399590504', 'https://covers.openlibrary.org/b/isbn/9780399590504-L.jpg', 'A memoir about a young girl who leaves her survivalist family and goes on to earn a PhD from Cambridge University.', 30, 0.00),
-('The Night Circus', 'Erin Morgenstern', 'Anchor Books', 12.99, 'Fiction', '9780307744432', 'https://covers.openlibrary.org/b/isbn/9780307744432-L.jpg', 'A competition between two young magicians set in a mysterious circus that only appears at night.', 25, 0.00),
-('Where the Crawdads Sing', 'Delia Owens', 'G.P. Putnam''s Sons', 14.99, 'Fiction', '9780735219090', 'https://covers.openlibrary.org/b/isbn/9780735219090-L.jpg', 'A coming-of-age story and a surprising tale of possible murder.', 40, 0.00);
+('The Great Gatsby', 'F. Scott Fitzgerald', 'Scribner', 12.99, 'Fiction', '9780743273565', 'https://covers.openlibrary.org/b/isbn/9780743273565-L.jpg', 'The story of eccentric millionaire Jay Gatsby and his passion for the beautiful Daisy Buchanan.', 50, 4.5, 2, 0.00),
+('To Kill a Mockingbird', 'Harper Lee', 'HarperCollins', 14.99, 'Fiction', '9780061120084', 'https://covers.openlibrary.org/b/isbn/9780061120084-L.jpg', 'The story of a young girl confronting racism in a small Southern town.', 45, 4.8, 3, 10.00),
+('1984', 'George Orwell', 'Signet Classics', 9.99, 'Fiction', '9780451524935', 'https://covers.openlibrary.org/b/isbn/9780451524935-L.jpg', 'A dystopian novel set in a totalitarian society ruled by Big Brother.', 30, 4.7, 1, 0.00),
+('The Hobbit', 'J.R.R. Tolkien', 'Houghton Mifflin Harcourt', 13.99, 'Fiction', '9780547928227', 'https://covers.openlibrary.org/b/isbn/9780547928227-L.jpg', 'Bilbo Baggins is a hobbit who enjoys a comfortable life until he joins a quest.', 25, 4.9, 2, 5.00),
+('Pride and Prejudice', 'Jane Austen', 'Penguin Classics', 8.99, 'Fiction', '9780141439518', 'https://covers.openlibrary.org/b/isbn/9780141439518-L.jpg', 'The story of Elizabeth Bennet and her complicated relationship with Mr. Darcy.', 40, 4.6, 1, 0.00),
+('The Catcher in the Rye', 'J.D. Salinger', 'Little, Brown and Company', 10.99, 'Fiction', '9780316769488', 'https://covers.openlibrary.org/b/isbn/9780316769488-L.jpg', 'The story of Holden Caulfield, a teenage boy who has been expelled from prep school.', 35, 4.3, 1, 0.00),
+('Harry Potter and the Sorcerer''s Stone', 'J.K. Rowling', 'Scholastic', 15.99, 'Fiction', '9780590353427', 'https://covers.openlibrary.org/b/isbn/9780590353427-L.jpg', 'The first book in the Harry Potter series.', 60, 4.9, 3, 15.00),
+('The Lord of the Rings', 'J.R.R. Tolkien', 'Houghton Mifflin Harcourt', 19.99, 'Fiction', '9780618640157', 'https://covers.openlibrary.org/b/isbn/9780618640157-L.jpg', 'The epic quest to destroy the One Ring.', 20, 4.8, 2, 0.00),
+('Brave New World', 'Aldous Huxley', 'Harper Perennial Modern Classics', 11.99, 'Fiction', '9780060850524', 'https://covers.openlibrary.org/b/isbn/9780060850524-L.jpg', 'A dystopian novel set in a genetically-engineered future.', 30, 4.4, 1, 0.00),
+('The Da Vinci Code', 'Dan Brown', 'Anchor', 9.99, 'Fiction', '9780307474278', 'https://covers.openlibrary.org/b/isbn/9780307474278-L.jpg', 'A mystery thriller novel that explores a conspiracy within the Catholic Church.', 40, 4.2, 1, 0.00),
+('Dune', 'Frank Herbert', 'Ace Books', 15.99, 'Fiction', '9780441172719', 'https://covers.openlibrary.org/b/isbn/9780441172719-L.jpg', 'Set on the desert planet Arrakis, Dune is the story of Paul Atreides, who would become the mysterious Muad''Dib.', 25, 4.7, 2, 0.00),
+('The Alchemist', 'Paulo Coelho', 'HarperOne', 9.99, 'Self-help', '9780062315007', 'https://covers.openlibrary.org/b/isbn/9780062315007-L.jpg', 'A magical story about following your dreams.', 35, 4.5, 1, 0.00),
+('Sapiens: A Brief History of Humankind', 'Yuval Noah Harari', 'Harper', 16.99, 'Reference', '9780062316097', 'https://covers.openlibrary.org/b/isbn/9780062316097-L.jpg', 'A groundbreaking narrative of humanity''s creation and evolution.', 30, 4.6, 1, 0.00),
+('The Hunger Games', 'Suzanne Collins', 'Scholastic Press', 12.99, 'Fiction', '9780439023481', 'https://covers.openlibrary.org/b/isbn/9780439023481-L.jpg', 'In a dystopian future, a young girl fights for survival in a televised competition.', 45, 4.8, 2, 0.00),
+('The Shining', 'Stephen King', 'Anchor', 11.99, 'Fiction', '9780307743657', 'https://covers.openlibrary.org/b/isbn/9780307743657-L.jpg', 'A family heads to an isolated hotel for the winter where an evil presence influences the father.', 20, 4.5, 1, 0.00),
+('The Girl with the Dragon Tattoo', 'Stieg Larsson', 'Vintage Crime', 10.99, 'Fiction', '9780307454546', 'https://covers.openlibrary.org/b/isbn/9780307454546-L.jpg', 'A journalist and a hacker investigate a wealthy family''s dark secrets.', 25, 4.4, 1, 0.00),
+('The Road', 'Cormac McCarthy', 'Vintage Books', 14.99, 'Fiction', '9780307387899', 'https://covers.openlibrary.org/b/isbn/9780307387899-L.jpg', 'A father and son walk alone through burned America, heading through the ravaged landscape to the coast.', 15, 4.3, 1, 0.00),
+('Educated', 'Tara Westover', 'Random House', 13.99, 'Biography', '9780399590504', 'https://covers.openlibrary.org/b/isbn/9780399590504-L.jpg', 'A memoir about a young girl who leaves her survivalist family and goes on to earn a PhD from Cambridge University.', 30, 4.7, 1, 0.00),
+('The Night Circus', 'Erin Morgenstern', 'Anchor Books', 12.99, 'Fiction', '9780307744432', 'https://covers.openlibrary.org/b/isbn/9780307744432-L.jpg', 'A competition between two young magicians set in a mysterious circus that only appears at night.', 25, 4.6, 1, 0.00),
+('Where the Crawdads Sing', 'Delia Owens', 'G.P. Putnam''s Sons', 14.99, 'Fiction', '9780735219090', 'https://covers.openlibrary.org/b/isbn/9780735219090-L.jpg', 'A coming-of-age story and a surprising tale of possible murder.', 40, 4.8, 2, 0.00);
 
 INSERT INTO reviews (book_id, user_id, rating, comment, created_at)
 VALUES 

@@ -22,6 +22,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.beans.property.SimpleStringProperty;
 
 import java.sql.SQLException;
 import java.util.Comparator;
@@ -76,13 +77,13 @@ public class CustomerDashboardController implements CartUpdateListener {
     private TableColumn<Book, String> publisherColumn;
     
     @FXML
-    private TableColumn<Book, Double> priceColumn;
+    private TableColumn<Book, String> priceColumn;
     
     @FXML
     private TableColumn<Book, String> categoryColumn;
     
     @FXML
-    private TableColumn<Book, Double> ratingColumn;
+    private TableColumn<Book, String> ratingColumn;
     
     @FXML
     private TextField searchField;
@@ -190,9 +191,15 @@ public class CustomerDashboardController implements CartUpdateListener {
         titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
         authorColumn.setCellValueFactory(new PropertyValueFactory<>("author"));
         publisherColumn.setCellValueFactory(new PropertyValueFactory<>("publisher"));
-        priceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
+        priceColumn.setCellValueFactory(cellData -> {
+            double price = cellData.getValue().getPrice().doubleValue();
+            return new SimpleStringProperty(String.format("€%.2f", price));
+        });
         categoryColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
-        ratingColumn.setCellValueFactory(new PropertyValueFactory<>("averageRating"));
+        ratingColumn.setCellValueFactory(cellData -> {
+            double rating = cellData.getValue().getAverageRating();
+            return new SimpleStringProperty(rating > 0 ? String.format("%.1f★", rating) : "No ratings");
+        });
     }
     
     private void initializeComboBoxes() {
