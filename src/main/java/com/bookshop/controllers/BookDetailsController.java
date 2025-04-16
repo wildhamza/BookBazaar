@@ -16,6 +16,8 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 
 import java.sql.Connection;
@@ -62,6 +64,9 @@ public class BookDetailsController {
     @FXML private TextField reviewTextField;
     @FXML private Spinner<Integer> ratingSpinner;
     @FXML private Button addReviewButton;
+    
+    @FXML private ImageView bookImageView;
+    @FXML private Label imageErrorLabel;
     
     private Book currentBook;
     private User currentUser;
@@ -184,10 +189,34 @@ public class BookDetailsController {
         
         descriptionTextArea.setText(currentBook.getDescription());
         
-        if (currentBook.getImageUrl() != null && !currentBook.getImageUrl().isEmpty()) {
-            bookImageLabel.setText("Image: " + currentBook.getImageUrl());
-        } else {
-            bookImageLabel.setText("No image available");
+        // Handle book image
+        try {
+            if (currentBook.getImageUrl() != null && !currentBook.getImageUrl().isEmpty()) {
+                // Load image from URL
+                Image bookImage = new Image(currentBook.getImageUrl(), 200, 200, true, true, true);
+                bookImageView.setImage(bookImage);
+                
+                // Add error handling in case the image fails to load
+                bookImage.errorProperty().addListener((observable, oldValue, newValue) -> {
+                    if (newValue) {
+                        // Load default image if the URL image fails
+                        Image defaultImage = new Image(getClass().getResourceAsStream("/images/default-book.jpg"));
+                        bookImageView.setImage(defaultImage);
+                        imageErrorLabel.setVisible(true);
+                    }
+                });
+            } else {
+                // Load default image if no URL is provided
+                Image defaultImage = new Image(getClass().getResourceAsStream("/images/default-book.jpg"));
+                bookImageView.setImage(defaultImage);
+                imageErrorLabel.setVisible(true);
+            }
+        } catch (Exception e) {
+            // Fallback to default image if any error occurs
+            Image defaultImage = new Image(getClass().getResourceAsStream("/images/default-book.jpg"));
+            bookImageView.setImage(defaultImage);
+            imageErrorLabel.setVisible(true);
+            e.printStackTrace();
         }
     }
     

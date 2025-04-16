@@ -37,24 +37,20 @@ public class ViewNavigator {
             }
              
             System.out.println("Navigating to: " + fxmlPath);
-             
-            String viewsPath = "/views/" + fxmlPath;
-            System.out.println("Attempting to load from: " + viewsPath);
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(viewsPath));
-             
-            if (loader.getLocation() == null) {
-                String fxmlDirPath = "/fxml/" + fxmlPath;
-                System.out.println("Views location was null, trying: " + fxmlDirPath);
-                loader = new FXMLLoader(getClass().getResource(fxmlDirPath));
-            }
-             
+            
+            // First try loading from /fxml/ directory
+            String fxmlDirPath = "/fxml/" + fxmlPath;
+            System.out.println("Attempting to load from: " + fxmlDirPath);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlDirPath));
+            
+            // If that fails, try the direct path
             if (loader.getLocation() == null) {
                 System.out.println("FXML directory was null, trying direct path: " + fxmlPath);
-                loader = new FXMLLoader(getClass().getResource(fxmlPath));
+                loader = new FXMLLoader(getClass().getResource("/" + fxmlPath));
             }
              
             if (loader.getLocation() == null) {
-                throw new IOException("FXML file not found in any location: " + fxmlPath);
+                throw new IOException("FXML file not found: " + fxmlPath);
             }
             
             System.out.println("Loading FXML from: " + loader.getLocation());

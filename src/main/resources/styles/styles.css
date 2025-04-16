@@ -23,7 +23,8 @@
 }
 
 .error-label {
-    -fx-text-fill: #e74c3c;
+    -fx-text-fill: #ff4444;
+    -fx-font-size: 12px;
     -fx-font-style: italic;
 }
 
@@ -189,10 +190,10 @@
 
 /* Book image styles */
 .book-image {
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 0);
-    -fx-border-color: #bdc3c7;
-    -fx-border-width: 1;
-    -fx-border-radius: 4;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0);
 }
 
 /* Spinner styles */
