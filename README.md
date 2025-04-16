@@ -141,7 +141,7 @@ public class DatabaseConnection {
     private static final String DB_USER = "bookshop_user";
     private static final String DB_PASSWORD = "secure_password";
     
-    private DatabaseConnection() {
+    private DatabaseConnection() { 
         try {
             connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
         } catch (SQLException e) {
@@ -152,9 +152,9 @@ public class DatabaseConnection {
     public static DatabaseConnection getInstance() {
         if (instance == null) {
             synchronized (DatabaseConnection.class) {
-                if (instance == null) {
-                    instance = new DatabaseConnection();
-                }
+        if (instance == null) {
+            instance = new DatabaseConnection();
+        }
             }
         }
         return instance;

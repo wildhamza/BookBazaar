@@ -338,6 +338,8 @@ public class AdminDashboardController {
                 boolean searchMatch = searchText.isEmpty() || 
                                     book.getTitle().toLowerCase().contains(searchText) || 
                                     book.getAuthor().toLowerCase().contains(searchText) ||
+                                    book.getPublisher().toLowerCase().contains(searchText) ||
+                                    book.getCategory().toLowerCase().contains(searchText) ||
                                     (book.getDescription() != null && book.getDescription().toLowerCase().contains(searchText));
                 
                 return categoryMatch && searchMatch;
