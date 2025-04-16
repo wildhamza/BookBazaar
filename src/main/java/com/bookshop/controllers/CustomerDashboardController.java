@@ -185,6 +185,17 @@ public class CustomerDashboardController implements CartUpdateListener {
                 }
             });
         }
+        
+        // Force layout and refresh when returning from other screens
+        if (booksTableView != null) {
+            booksTableView.refresh();
+            booksTableView.requestLayout();
+        }
+        
+        // Ensure application of filters and sort criteria
+        if (categoryComboBox != null && sortByComboBox != null) {
+            applyFiltersAndSort();
+        }
     }
     
     private void setupTableColumns() {
@@ -228,6 +239,8 @@ public class CustomerDashboardController implements CartUpdateListener {
         sortByComboBox.getItems().addAll(
             "Title", 
             "Author", 
+            "Publisher",
+            "Category",
             "Price (Low to High)", 
             "Price (High to Low)",
             "Rating (Low to High)",
@@ -310,6 +323,12 @@ public class CustomerDashboardController implements CartUpdateListener {
                 break;
             case "Author":
                 books.sort(Comparator.comparing(Book::getAuthor));
+                break;
+            case "Publisher":
+                books.sort(Comparator.comparing(Book::getPublisher));
+                break;
+            case "Category":
+                books.sort(Comparator.comparing(Book::getCategory));
                 break;
             case "Price (Low to High)":
                 books.sort(Comparator.comparing(Book::getPrice));

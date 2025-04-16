@@ -2,9 +2,6 @@ package com.bookshop;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.awt.GraphicsEnvironment;
@@ -43,17 +40,11 @@ public class Main extends Application {
         ViewNavigator.getInstance().setStage(primaryStage);
         SceneManager.getInstance().setStage(primaryStage);
         
-        Parent root = FXMLLoader.load(getClass().getResource("/views/login.fxml"));
-        if (root == null) {
-            root = FXMLLoader.load(getClass().getResource("/fxml/login.fxml"));
-        }
-        
-        Scene scene = new Scene(root, 800, 600);
+        // Use the ViewNavigator to navigate to the login screen
+        ViewNavigator.getInstance().navigateTo("login.fxml");
         
         primaryStage.setTitle("BookShop Application");
-        primaryStage.setScene(scene);
         primaryStage.setResizable(true);
-        primaryStage.show();
     }
     
     private void runHeadlessTests() throws Exception {

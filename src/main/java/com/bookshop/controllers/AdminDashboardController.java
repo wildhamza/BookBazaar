@@ -30,6 +30,9 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.TableCell;
+import javafx.scene.layout.HBox;
+import javafx.beans.property.SimpleStringProperty;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -99,6 +102,30 @@ public class AdminDashboardController {
     @FXML
     private ComboBox<String> sortByComboBox;
     
+    @FXML
+    private TextField orderSearchField;
+    
+    @FXML
+    private TableView<Order> ordersTableView;
+    
+    @FXML
+    private TableColumn<Order, Integer> orderIdColumn;
+    
+    @FXML
+    private TableColumn<Order, String> customerNameColumn;
+    
+    @FXML
+    private TableColumn<Order, String> orderDateColumn;
+    
+    @FXML
+    private TableColumn<Order, BigDecimal> totalAmountColumn;
+    
+    @FXML
+    private TableColumn<Order, Order.Status> statusColumn;
+    
+    @FXML
+    private TableColumn<Order, Void> orderActionColumn;
+    
     private BookService bookService;
     private User currentUser;
     private ObservableList<Book> allBooks = FXCollections.observableArrayList();
@@ -136,11 +163,28 @@ public class AdminDashboardController {
             initializeComboBoxes();
         }
         
+        if (ordersTableView != null) {
+            setupOrdersTableColumns();
+        }
+        
         loadBooks();
         
         loadOrders();
         
         loadCompletedOrders();
+        
+        // Force layout and refresh when returning from other screens
+        if (mainTabPane != null) {
+            mainTabPane.requestLayout();
+        }
+        
+        if (booksTableView != null) {
+            booksTableView.refresh();
+        }
+        
+        if (ordersTableView != null) {
+            ordersTableView.refresh();
+        }
     }
     
     private void configureListViews() {
@@ -250,7 +294,76 @@ public class AdminDashboardController {
         categoryColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
         stockColumn.setCellValueFactory(new PropertyValueFactory<>("stockQuantity"));
         ratingColumn.setCellValueFactory(new PropertyValueFactory<>("averageRating"));
+        
+        // Setup action column if it exists in the FXML
+        TableColumn<Book, Void> actionColumn = null;
+        for (TableColumn<Book, ?> column : booksTableView.getColumns()) {
+            if ("actionColumn".equals(column.getId())) {
+                @SuppressWarnings("unchecked")
+                TableColumn<Book, Void> typedColumn = (TableColumn<Book, Void>) column;
+                actionColumn = typedColumn;
+                break;
+            }
+        }
+            
+        if (actionColumn != null) {
+            actionColumn.setCellFactory(col -> {
+                return new TableCell<Book, Void>() {
+                    private final Button editButton = new Button("Edit");
+                    private final Button deleteButton = new Button("Delete");
+                    private final HBox actionBox = new HBox(5, editButton, deleteButton);
+                    
+                    {
+                        editButton.getStyleClass().add("small-button");
+                        deleteButton.getStyleClass().add("small-button");
+                        deleteButton.getStyleClass().add("warning-button");
+                        
+                        editButton.setOnAction(event -> {
+                            Book book = getTableView().getItems().get(getIndex());
+                            SessionManager.getInstance().setCurrentBook(book);
+                            ViewNavigator.getInstance().navigateTo("edit_book.fxml");
+                        });
+                        
+                        deleteButton.setOnAction(event -> {
+                            Book book = getTableView().getItems().get(getIndex());
+                            handleBookDeletion(book);
+                        });
+                    }
+                    
+                    @Override
+                    protected void updateItem(Void item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (empty) {
+                            setGraphic(null);
+                        } else {
+                            setGraphic(actionBox);
+                        }
+                    }
+                };
+            });
+        }
     }
+    
+    private void handleBookDeletion(Book book) {
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle("Confirm Deletion");
+        alert.setHeaderText("Delete Book");
+        alert.setContentText("Are you sure you want to delete the book: " + book.getTitle() + "?");
+        
+        alert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                try {
+                    bookService.deleteBook(book.getId());
+                    loadBooks();
+                    statusLabel.setText("Book deleted successfully.");
+                } catch (SQLException e) {
+                    statusLabel.setText("Error deleting book: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+    
     private void initializeComboBoxes() {
         categoryComboBox.getItems().add("All Categories");
         
@@ -277,6 +390,8 @@ public class AdminDashboardController {
         sortByComboBox.getItems().addAll(
             "Title", 
             "Author", 
+            "Publisher",
+            "Category",
             "Price (Low to High)", 
             "Price (High to Low)",
             "Stock (Low to High)",
@@ -361,6 +476,12 @@ public class AdminDashboardController {
             case "Author":
                 books.sort(Comparator.comparing(Book::getAuthor));
                 break;
+            case "Publisher":
+                books.sort(Comparator.comparing(Book::getPublisher));
+                break;
+            case "Category":
+                books.sort(Comparator.comparing(Book::getCategory));
+                break;
             case "Price (Low to High)":
                 books.sort(Comparator.comparing(Book::getPrice));
                 break;
@@ -389,8 +510,22 @@ public class AdminDashboardController {
         try {
             OrderService orderService = new OrderService();
             List<Order> orders = orderService.getAllOrders();
-            orderListView.getItems().clear();
-            orderListView.getItems().addAll(orders);
+            
+            // Filter out delivered orders
+            List<Order> pendingOrders = orders.stream()
+                .filter(order -> order.getStatus() != Order.Status.DELIVERED)
+                .collect(Collectors.toList());
+            
+            if (orderListView != null) {
+                orderListView.getItems().clear();
+                orderListView.getItems().addAll(pendingOrders);
+            }
+            
+            if (ordersTableView != null) {
+                ordersTableView.getItems().clear();
+                ordersTableView.getItems().addAll(orders);
+            }
+            
             System.out.println("Loaded " + orders.size() + " orders");
         } catch (SQLException e) {
             statusLabel.setText("Error loading orders: " + e.getMessage());
@@ -592,6 +727,12 @@ public class AdminDashboardController {
     }
     
     @FXML
+    public void handleLogout(ActionEvent event) {
+        SessionManager.getInstance().logout();
+        ViewNavigator.getInstance().navigateTo("login.fxml");
+    }
+    
+    @FXML
     public void handleDeleteBook(ActionEvent event) {
         Book selectedBook = null;
         
@@ -611,30 +752,128 @@ public class AdminDashboardController {
             return;
         }
         
-        Alert alert = new Alert(AlertType.CONFIRMATION);
-        alert.setTitle("Confirm Deletion");
-        alert.setHeaderText("Delete Book");
-        alert.setContentText("Are you sure you want to delete the book: " + selectedBook.getTitle() + "?");
-        
-        final Book bookToDelete = selectedBook;
-        
-        alert.showAndWait().ifPresent(response -> {
-            if (response == javafx.scene.control.ButtonType.OK) {
-                try {
-                    bookService.deleteBook(bookToDelete.getId());
-                    loadBooks();
-                    statusLabel.setText("Book deleted successfully.");
-                } catch (SQLException e) {
-                    statusLabel.setText("Error deleting book: " + e.getMessage());
-                    e.printStackTrace();
-                }
-            }
-        });
+        handleBookDeletion(selectedBook);
     }
     
     @FXML
-    public void handleLogout(ActionEvent event) {
-        SessionManager.getInstance().logout();
-        ViewNavigator.getInstance().navigateTo("login.fxml");
+    public void handleOrderSearch(ActionEvent event) {
+        String searchText = orderSearchField.getText().trim().toLowerCase();
+        try {
+            OrderService orderService = new OrderService();
+            List<Order> allOrders = orderService.getAllOrders();
+            
+            List<Order> filteredOrders = allOrders.stream()
+                .filter(order -> {
+                    // Check for matching order ID
+                    boolean idMatch = String.valueOf(order.getId()).contains(searchText);
+                    
+                    // Try to get customer name if we have searchText
+                    boolean customerMatch = false;
+                    if (!searchText.isEmpty()) {
+                        try {
+                            UserService userService = new UserService();
+                            User user = userService.getUserById(order.getUserId());
+                            if (user != null && user.getFullName() != null) {
+                                customerMatch = user.getFullName().toLowerCase().contains(searchText);
+                            }
+                        } catch (SQLException e) {
+                            // Ignore errors in getting user info for matching
+                            e.printStackTrace();
+                        }
+                    }
+                    
+                    return idMatch || customerMatch;
+                })
+                .collect(Collectors.toList());
+            
+            if (ordersTableView != null) {
+                ordersTableView.getItems().clear();
+                ordersTableView.getItems().addAll(filteredOrders);
+                statusLabel.setText("Found " + filteredOrders.size() + " matching orders");
+            }
+        } catch (SQLException e) {
+            statusLabel.setText("Error searching orders: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    private void setupOrdersTableColumns() {
+        if (orderIdColumn != null) {
+            orderIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        }
+        
+        if (customerNameColumn != null) {
+            customerNameColumn.setCellValueFactory(cellData -> {
+                try {
+                    UserService userService = new UserService();
+                    User user = userService.getUserById(cellData.getValue().getUserId());
+                    return new SimpleStringProperty(user != null ? user.getFullName() : "Unknown");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    return new SimpleStringProperty("Error");
+                }
+            });
+        }
+        
+        if (orderDateColumn != null) {
+            orderDateColumn.setCellValueFactory(new PropertyValueFactory<>("orderDate"));
+        }
+        
+        if (totalAmountColumn != null) {
+            totalAmountColumn.setCellValueFactory(new PropertyValueFactory<>("totalAmount"));
+        }
+        
+        if (statusColumn != null) {
+            statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+        }
+        
+        if (orderActionColumn != null) {
+            orderActionColumn.setCellFactory(col -> {
+                return new TableCell<Order, Void>() {
+                    private final Button viewButton = new Button("View");
+                    private final Button completeButton = new Button("Complete");
+                    private final HBox actionBox = new HBox(5, viewButton, completeButton);
+                    
+                    {
+                        viewButton.getStyleClass().add("small-button");
+                        completeButton.getStyleClass().add("small-button");
+                        completeButton.getStyleClass().add("primary-button");
+                        
+                        viewButton.setOnAction(event -> {
+                            Order order = getTableView().getItems().get(getIndex());
+                            showOrderDetailsDialog(order);
+                        });
+                        
+                        completeButton.setOnAction(event -> {
+                            Order order = getTableView().getItems().get(getIndex());
+                            if (order.getStatus() != Order.Status.DELIVERED) {
+                                try {
+                                    OrderService orderService = new OrderService();
+                                    orderService.updateOrderStatus(order.getId(), "DELIVERED");
+                                    loadOrders();
+                                    loadCompletedOrders();
+                                    statusLabel.setText("Order #" + order.getId() + " marked as completed");
+                                } catch (SQLException e) {
+                                    statusLabel.setText("Error updating order status: " + e.getMessage());
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                    }
+                    
+                    @Override
+                    protected void updateItem(Void item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (empty) {
+                            setGraphic(null);
+                        } else {
+                            Order order = getTableView().getItems().get(getIndex());
+                            completeButton.setDisable(order.getStatus() == Order.Status.DELIVERED);
+                            setGraphic(actionBox);
+                        }
+                    }
+                };
+            });
+        }
     }
 }

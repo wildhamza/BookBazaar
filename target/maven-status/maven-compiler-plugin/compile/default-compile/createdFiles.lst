@@ -2,6 +2,7 @@ com\bookshop\utils\AlertHelper.class
 com\bookshop\Main.class
 com\bookshop\models\OrderItem.class
 com\bookshop\utils\SceneManager.class
+com\bookshop\controllers\AdminDashboardController$4.class
 com\bookshop\observers\CartEvent$1.class
 com\bookshop\repositories\UserRepositoryImpl.class
 com\bookshop\observers\CartManager.class
@@ -61,6 +62,7 @@ com\bookshop\models\Review.class
 com\bookshop\services\UserService.class
 com\bookshop\models\Order$Status.class
 com\bookshop\utils\ImageLoader.class
+com\bookshop\controllers\AdminDashboardController$5.class
 com\bookshop\strategies\discount\RegularLoyaltyDiscount.class
 com\bookshop\repositories\Repository.class
 com\bookshop\services\CreditCardPayment.class
