@@ -134,6 +134,11 @@ public class BookDetailsController {
             adminActionBox.setVisible(false);
             customerActionBox.setVisible(true);
             
+            // Initialize the rating spinner for reviews
+            SpinnerValueFactory.IntegerSpinnerValueFactory ratingValueFactory = 
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 5, 5);
+            ratingSpinner.setValueFactory(ratingValueFactory);
+            
             try {
                 boolean hasReviewed = reviewService.hasUserReviewedBook(currentUser.getId(), currentBook.getId());
                 addReviewBox.setVisible(!hasReviewed);
@@ -322,7 +327,14 @@ public class BookDetailsController {
     @FXML
     public void handleAddReview(ActionEvent event) {
         String content = reviewTextField.getText().trim();
-        int rating = ratingSpinner.getValue();
+        
+        // Handle potential null value from spinner
+        Integer ratingValue = ratingSpinner.getValue();
+        if (ratingValue == null) {
+            statusLabel.setText("Please select a rating between 1-5");
+            return;
+        }
+        int rating = ratingValue;
         
         if (content.isEmpty()) {
             statusLabel.setText("Review content cannot be empty");
