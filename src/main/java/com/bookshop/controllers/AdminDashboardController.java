@@ -130,7 +130,7 @@ public class AdminDashboardController {
     private User currentUser;
     private ObservableList<Book> allBooks = FXCollections.observableArrayList();
     private String currentCategory = "All Categories";
-    private String currentSortBy = "Title";
+    private String currentSortBy = "Title (A-Z)";
     
     @SuppressWarnings("unused")
     @FXML
@@ -388,10 +388,14 @@ public class AdminDashboardController {
         });
         
         sortByComboBox.getItems().addAll(
-            "Title", 
-            "Author", 
-            "Publisher",
-            "Category",
+            "Title (A-Z)", 
+            "Title (Z-A)",
+            "Author (A-Z)", 
+            "Author (Z-A)",
+            "Publisher (A-Z)",
+            "Publisher (Z-A)",
+            "Category (A-Z)",
+            "Category (Z-A)",
             "Price (Low to High)", 
             "Price (High to Low)",
             "Stock (Low to High)",
@@ -400,7 +404,7 @@ public class AdminDashboardController {
             "Rating (High to Low)"
         );
         
-        sortByComboBox.setValue("Title");
+        sortByComboBox.setValue("Title (A-Z)");
         
         sortByComboBox.setOnAction(e -> {
             currentSortBy = sortByComboBox.getValue();
@@ -470,17 +474,29 @@ public class AdminDashboardController {
     
     private void applySort(List<Book> books) {
         switch (currentSortBy) {
-            case "Title":
+            case "Title (A-Z)":
                 books.sort(Comparator.comparing(Book::getTitle));
                 break;
-            case "Author":
+            case "Title (Z-A)":
+                books.sort(Comparator.comparing(Book::getTitle).reversed());
+                break;
+            case "Author (A-Z)":
                 books.sort(Comparator.comparing(Book::getAuthor));
                 break;
-            case "Publisher":
+            case "Author (Z-A)":
+                books.sort(Comparator.comparing(Book::getAuthor).reversed());
+                break;
+            case "Publisher (A-Z)":
                 books.sort(Comparator.comparing(Book::getPublisher));
                 break;
-            case "Category":
+            case "Publisher (Z-A)":
+                books.sort(Comparator.comparing(Book::getPublisher).reversed());
+                break;
+            case "Category (A-Z)":
                 books.sort(Comparator.comparing(Book::getCategory));
+                break;
+            case "Category (Z-A)":
+                books.sort(Comparator.comparing(Book::getCategory).reversed());
                 break;
             case "Price (Low to High)":
                 books.sort(Comparator.comparing(Book::getPrice));
