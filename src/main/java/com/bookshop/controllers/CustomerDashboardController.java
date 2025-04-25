@@ -114,7 +114,26 @@ public class CustomerDashboardController implements CartUpdateListener {
         
         cartService.addCartUpdateListener(this);
         
-        welcomeLabel.setText("Welcome, " + currentUser.getFullName());
+        String displayName;
+        try {
+            String firstName = currentUser.getFirstName();
+            String lastName = currentUser.getLastName();
+            
+            if (firstName != null && !firstName.trim().isEmpty() && 
+                lastName != null && !lastName.trim().isEmpty()) {
+                displayName = firstName + " " + lastName;
+            } else if (firstName != null && !firstName.trim().isEmpty()) {
+                displayName = firstName;
+            } else if (lastName != null && !lastName.trim().isEmpty()) {
+                displayName = lastName;
+            } else {
+                displayName = currentUser.getUsername();
+            }
+        } catch (Exception e) {
+            displayName = currentUser.getUsername();
+        }
+        
+        welcomeLabel.setText("Welcome, " + displayName);
         
         loyaltyStatusLabel.setText("Status: " + currentUser.getLoyaltyStatus());
         
