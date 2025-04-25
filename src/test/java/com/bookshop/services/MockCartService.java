@@ -30,9 +30,8 @@ public class MockCartService {
     }
     
     private void notifyObservers() {
-        CartEvent event = new CartEvent(0, CartEvent.EventType.QUANTITY_CHANGED, null, null, 0);
         for (CartObserver observer : observers) {
-            observer.update(event);
+            observer.update(null);
         }
     }
     

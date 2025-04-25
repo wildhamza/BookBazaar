@@ -173,6 +173,26 @@ public class DatabaseConnection {
                 "CONSTRAINT unique_user_book_review UNIQUE (user_id, book_id)" +
                 ")"
             );
+
+            stmt.execute(
+                "CREATE OR REPLACE FUNCTION update_book_stock() " +
+                "RETURNS TRIGGER AS $$ " +
+                "BEGIN " +
+                "    UPDATE books " +
+                "    SET stock_quantity = stock_quantity - NEW.quantity " +
+                "    WHERE id = NEW.book_id; " +
+                "    RETURN NEW; " +
+                "END; " +
+                "$$ LANGUAGE plpgsql;"
+            );
+            
+            stmt.execute(
+                "DROP TRIGGER IF EXISTS update_stock_after_order ON order_items; " +
+                "CREATE TRIGGER update_stock_after_order " +
+                "AFTER INSERT ON order_items " +
+                "FOR EACH ROW " +
+                "EXECUTE FUNCTION update_book_stock();"
+            );
             
             stmt.execute(
                 "INSERT INTO users (username, password_hash, full_name, email, role) " +

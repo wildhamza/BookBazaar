@@ -1,0 +1,44 @@
+-------------------------------------------------------------------------------
+Test set: com.bookshop.services.BookServiceTest
+-------------------------------------------------------------------------------
+Tests run: 4, Failures: 0, Errors: 4, Skipped: 0, Time elapsed: 0.235 s <<< FAILURE! -- in com.bookshop.services.BookServiceTest
+com.bookshop.services.BookServiceTest.testSearchBooks -- Time elapsed: 0.072 s <<< ERROR!
+java.lang.NoSuchMethodError: 'void com.bookshop.models.Book.setPublisher(java.lang.String)'
+	at com.bookshop.utils.BookFactory.createFromResultSet(BookFactory.java:18)
+	at com.bookshop.repositories.BookRepositoryImpl.search(BookRepositoryImpl.java:176)
+	at com.bookshop.services.BookService.searchBooks(BookService.java:86)
+	at com.bookshop.services.BookServiceTest.testSearchBooks(BookServiceTest.java:48)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+
+com.bookshop.services.BookServiceTest.testGetAllBooks -- Time elapsed: 0.052 s <<< ERROR!
+java.lang.NoSuchMethodError: 'void com.bookshop.models.Book.setPublisher(java.lang.String)'
+	at com.bookshop.utils.BookFactory.createFromResultSet(BookFactory.java:18)
+	at com.bookshop.repositories.BookRepositoryImpl.findAll(BookRepositoryImpl.java:28)
+	at com.bookshop.services.BookService.getAllBooks(BookService.java:29)
+	at com.bookshop.services.BookServiceTest.testGetAllBooks(BookServiceTest.java:25)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+
+com.bookshop.services.BookServiceTest.testUpdateStockQuantity -- Time elapsed: 0.056 s <<< ERROR!
+java.lang.NoSuchMethodError: 'void com.bookshop.models.Book.setPublisher(java.lang.String)'
+	at com.bookshop.utils.BookFactory.createFromResultSet(BookFactory.java:18)
+	at com.bookshop.repositories.BookRepositoryImpl.findAll(BookRepositoryImpl.java:28)
+	at com.bookshop.services.BookService.getAllBooks(BookService.java:29)
+	at com.bookshop.services.BookServiceTest.testUpdateStockQuantity(BookServiceTest.java:58)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+
+com.bookshop.services.BookServiceTest.testGetBooksByCategory -- Time elapsed: 0.049 s <<< ERROR!
+java.lang.NoSuchMethodError: 'void com.bookshop.models.Book.setPublisher(java.lang.String)'
+	at com.bookshop.utils.BookFactory.createFromResultSet(BookFactory.java:18)
+	at com.bookshop.repositories.BookRepositoryImpl.findByCategory(BookRepositoryImpl.java:147)
+	at com.bookshop.services.BookService.getBooksByCategory(BookService.java:44)
+	at com.bookshop.services.BookServiceTest.testGetBooksByCategory(BookServiceTest.java:35)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+
