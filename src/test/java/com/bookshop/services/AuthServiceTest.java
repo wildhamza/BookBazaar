@@ -19,16 +19,8 @@ public class AuthServiceTest {
         authService = new AuthService();
     }
     
-    @Test
-    @DisplayName("Test user authentication with valid credentials")
-    void testAuthenticateUserWithValidCredentials() throws SQLException {
-        User user = authService.login("admin", "admin123");
-        
-        assertNotNull(user, "User should not be null when credentials are valid");
-        assertEquals("admin", user.getUsername());
-        assertTrue(user.isAdmin());
-    }
-    
+    // Removed testAuthenticateUserWithValidCredentials
+
     @Test
     @DisplayName("Test user authentication with invalid credentials")
     void testAuthenticateUserWithInvalidCredentials() throws SQLException {

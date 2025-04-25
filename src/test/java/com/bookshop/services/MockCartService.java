@@ -4,13 +4,12 @@ import com.bookshop.models.Book;
 import com.bookshop.models.CartItem;
 import com.bookshop.observers.CartObserver;
 import com.bookshop.observers.CartEvent;
-
+import com.bookshop.observers.CartEvent.EventType;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MockCartService {
-    
     private List<CartItem> cartItems;
     private List<CartObserver> observers;
     
@@ -20,7 +19,7 @@ public class MockCartService {
     }
     
     public void addObserver(CartObserver observer) {
-        if (observer != null && !observers.contains(observer)) {
+        if (!observers.contains(observer)) {
             observers.add(observer);
         }
     }
@@ -29,59 +28,41 @@ public class MockCartService {
         observers.remove(observer);
     }
     
-    private void notifyObservers() {
-        for (CartObserver observer : observers) {
-            observer.update(null);
-        }
-    }
-    
     public boolean addToCart(Book book, int quantity) {
         if (book == null || quantity <= 0) {
             return false;
         }
-        
-        for (int i = 0; i < cartItems.size(); i++) {
-            CartItem item = cartItems.get(i);
-            if (item.getBook().getId() == book.getId()) {
-                int newQuantity = item.getQuantity() + quantity;
-                item.setQuantity(newQuantity);
-                notifyObservers();
-                return true;
-            }
-        }
-        
-        int id = cartItems.size(); 
         CartItem item = new CartItem();
-        item.setId(id);
+        item.setId(cartItems.size());
         item.setBook(book);
         item.setQuantity(quantity);
         cartItems.add(item);
-        
-        notifyObservers();
+        notifyObservers(new CartEvent(0, EventType.ITEM_ADDED, item, book, quantity));
         return true;
     }
     
-    public boolean updateCartItemQuantity(int itemIndex, int quantity) {
-        if (itemIndex < 0 || itemIndex >= cartItems.size()) {
+    public boolean updateCartItemQuantity(int index, int quantity) {
+        if (index < 0 || index >= cartItems.size()) {
             return false;
         }
-        
-        if (quantity <= 0) {
-            return removeFromCart(itemIndex);
-        }
-        
-        cartItems.get(itemIndex).setQuantity(quantity);
-        notifyObservers();
+        CartItem item = cartItems.get(index);
+        item.setQuantity(quantity);
+        notifyObservers(new CartEvent(0, EventType.QUANTITY_CHANGED, item, item.getBook(), quantity));
         return true;
     }
     
-    public boolean removeFromCart(int itemIndex) {
-        if (itemIndex < 0 || itemIndex >= cartItems.size()) {
+    public boolean removeFromCart(int index) {
+        if (index < 0 || index >= cartItems.size()) {
             return false;
         }
-        
-        cartItems.remove(itemIndex);
-        notifyObservers();
+        CartItem item = cartItems.remove(index);
+        notifyObservers(new CartEvent(0, EventType.ITEM_REMOVED, item, item.getBook(), 0));
+        return true;
+    }
+    
+    public boolean clearCart() {
+        cartItems.clear();
+        notifyObservers(new CartEvent(0));
         return true;
     }
     
@@ -89,21 +70,19 @@ public class MockCartService {
         return new ArrayList<>(cartItems);
     }
     
-    public boolean clearCart() {
-        cartItems.clear();
-        notifyObservers();
-        return true;
-    }
-    
     public BigDecimal calculateTotal() {
         BigDecimal total = BigDecimal.ZERO;
-        
         for (CartItem item : cartItems) {
             BigDecimal price = item.getBook().getPrice();
-            int quantity = item.getQuantity();
-            total = total.add(price.multiply(new BigDecimal(quantity)));
+            BigDecimal quantity = new BigDecimal(item.getQuantity());
+            total = total.add(price.multiply(quantity));
         }
-        
         return total;
+    }
+    
+    private void notifyObservers(CartEvent event) {
+        for (CartObserver observer : observers) {
+            observer.update(event);
+        }
     }
 }

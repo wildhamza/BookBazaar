@@ -26,13 +26,13 @@ public class CartServiceTest {
         
         testBook = new Book();
         testBook.setId(1);
-        testBook.setTitle("Test Book");
-        testBook.setAuthor("Test Author");
-        testBook.setPrice(new BigDecimal("19.99"));
-        testBook.setStockQuantity(10);
-        testBook.setCategory("Test Category");
-        testBook.setIsbn("1234567890");
-        testBook.setDescription("Test Description");
+        testBook.setTitle("The Great Gatsby");
+        testBook.setAuthor("F. Scott Fitzgerald");
+        testBook.setPrice(new BigDecimal("12.99"));
+        testBook.setStockQuantity(50);
+        testBook.setCategory("Fiction");
+        testBook.setIsbn("9780743273565");
+        testBook.setDescription("The story of eccentric millionaire Jay Gatsby and his passion for the beautiful Daisy Buchanan.");
         
         testObserver = new TestCartObserver();
         cartService.addObserver(testObserver);
@@ -88,18 +88,17 @@ public class CartServiceTest {
     void testCalculateTotal() {
         Book testBook2 = new Book();
         testBook2.setId(2);
-        testBook2.setTitle("Test Book 2");
-        testBook2.setAuthor("Test Author 2");
-        testBook2.setPrice(new BigDecimal("29.99"));
-        testBook2.setStockQuantity(5);
-        testBook2.setCategory("Test Category");
-        testBook2.setIsbn("0987654321");
-        testBook2.setDescription("Test Description 2");
+        testBook2.setTitle("To Kill a Mockingbird");
+        testBook2.setAuthor("Harper Lee");
+        testBook2.setPrice(new BigDecimal("14.99"));
+        testBook2.setStockQuantity(45);
+        testBook2.setCategory("Fiction");
+        testBook2.setIsbn("9780061120084");
         
-        cartService.addToCart(testBook, 2);
-        cartService.addToCart(testBook2, 1);
+        cartService.addToCart(testBook, 2);  // 2 x 12.99 = 25.98
+        cartService.addToCart(testBook2, 1); // 1 x 14.99 = 14.99
         
-        BigDecimal expected = new BigDecimal("69.97");
+        BigDecimal expected = new BigDecimal("40.97"); // 25.98 + 14.99
         BigDecimal actual = cartService.calculateTotal();
         
         assertEquals(0, expected.compareTo(actual), "Cart total should be calculated correctly");
@@ -119,13 +118,12 @@ public class CartServiceTest {
     }
     
     private static class TestCartObserver implements CartObserver {
-
         boolean wasNotified = false;
         
         @Override
         public void update(CartEvent event) {
             wasNotified = true;
-            throw new UnsupportedOperationException("Unimplemented method 'update'");
+            // Remove the throw statement
         }
     }
 }

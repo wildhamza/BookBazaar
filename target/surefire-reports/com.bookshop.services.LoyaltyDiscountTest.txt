@@ -1,17 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.bookshop.services.LoyaltyDiscountTest
 -------------------------------------------------------------------------------
-Tests run: 5, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.006 s <<< FAILURE! -- in com.bookshop.services.LoyaltyDiscountTest
-com.bookshop.services.LoyaltyDiscountTest.testDiscountStrategyCalculations -- Time elapsed: 0 s <<< FAILURE!
-org.opentest4j.AssertionFailedError: expected: <0> but was: <1>
-	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
-	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
-	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
-	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
-	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
-	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:531)
-	at com.bookshop.services.LoyaltyDiscountTest.testDiscountStrategyCalculations(LoyaltyDiscountTest.java:77)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
-	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
-	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
-
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in com.bookshop.services.LoyaltyDiscountTest

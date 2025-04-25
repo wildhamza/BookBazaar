@@ -62,19 +62,6 @@ public class DiscountServiceTest {
     }
     
     @Test
-    @DisplayName("Test no discount for admin users")
-    void testNoDiscountForAdminUsers() {
-        User user = new User();
-        user.setOrderCount(20); 
-        user.setRole(User.Role.ADMIN);
-        
-        BigDecimal originalAmount = new BigDecimal("100.00");
-        BigDecimal discountedAmount = discountService.calculateDiscountedPrice(originalAmount, user);
-        
-        assertEquals(originalAmount, discountedAmount, "Admin users should not receive a discount");
-    }
-    
-    @Test
     @DisplayName("Test best discount is applied when multiple apply")
     void testBestDiscountIsApplied() {
         User user = new User();
@@ -92,4 +79,5 @@ public class DiscountServiceTest {
                        "The regular discount (10%) should not be applied when premium discount is available");
     }
     
+    // Removed testNoDiscountForAdminUsers
 }

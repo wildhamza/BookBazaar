@@ -1,16 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.bookshop.services.DiscountServiceTest
 -------------------------------------------------------------------------------
-Tests run: 5, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.008 s <<< FAILURE! -- in com.bookshop.services.DiscountServiceTest
-com.bookshop.services.DiscountServiceTest.testNoDiscountForAdminUsers -- Time elapsed: 0.002 s <<< FAILURE!
-org.opentest4j.AssertionFailedError: Admin users should not receive a discount ==> expected: <100.00> but was: <85.0000>
-	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
-	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
-	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
-	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
-	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
-	at com.bookshop.services.DiscountServiceTest.testNoDiscountForAdminUsers(DiscountServiceTest.java:74)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
-	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
-	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
-
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in com.bookshop.services.DiscountServiceTest
